@@ -10,9 +10,10 @@ import (
 // Manager ...
 // Need a process to create alerts and other to close them
 type Manager struct {
-	AlertStore    smee.AlertStore
-	EventStreamer smee.EventStreamer
-	AlertConfigs  map[string]smee.AlertConfig
+	AlertStore       smee.AlertStore
+	EventStreamer    smee.EventStreamer
+	DeviceStateStore smee.DeviceStateStore
+	AlertConfigs     map[string]smee.AlertConfig
 }
 
 func (m *Manager) Run(ctx context.Context) error {
@@ -20,6 +21,10 @@ func (m *Manager) Run(ctx context.Context) error {
 
 	group.Go(func() error {
 		return m.generateEventAlerts(gctx)
+	})
+
+	group.Go(func() error {
+		return m.manageStateAlerts(gctx)
 	})
 
 	group.Go(func() error {

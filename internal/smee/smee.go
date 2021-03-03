@@ -7,14 +7,17 @@ import (
 )
 
 type AlertStore interface {
-	OpenAlerts(context.Context) []Alert
-	UpdateAlert(context.Context, Alert)
+	Create(context.Context, Alert) error
+	Update(context.Context, Alert) error
+	Open(context.Context) ([]Alert, error)
+	OpenByType(context.Context, string) ([]Alert, error)
 }
 
 type Event struct {
-	DeviceID string
-	Key      string
-	Value    string
+	Room   string
+	Device string
+	Key    string
+	Value  string
 }
 
 // EventStreamer ...
@@ -24,13 +27,14 @@ type EventStreamer interface {
 	Stream(ctx context.Context) (<-chan Event, error)
 }
 
-type IssueStore interface {
-}
-
-type DeviceStateCache interface {
+type DeviceStateStore interface {
+	// Query runs store-specific query and returns a list of
+	// DeviceID's that match the query
+	Query(ctx context.Context, query string) ([]string, error)
 }
 
 type AlertConfig struct {
+	// TODO Only have a a close for event alerts
 	Create AlertTransition
 	Close  AlertTransition
 }
@@ -52,14 +56,17 @@ type AlertTransitionStateQuery struct {
 
 type Alert struct {
 	ID       string
-	IssueID  string
-	DeviceID string
+	Room     string
+	Device   string
+	Type     string
 	Start    time.Time
 	End      time.Time
-	Type     string
+	Messages []AlertMessage
+}
 
-	// TODO this should live in alertmanager's version of alert
-	Close AlertTransition
+type AlertMessage struct {
+	Timestamp time.Time
+	Message   string
 }
 
 type AlertManager interface {
