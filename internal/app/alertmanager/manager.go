@@ -2,6 +2,7 @@ package alertmanager
 
 import (
 	"context"
+	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
 	"golang.org/x/sync/errgroup"
@@ -32,4 +33,22 @@ func (m *Manager) Run(ctx context.Context) error {
 	})
 
 	return group.Wait()
+}
+
+func (m *Manager) create(ctx context.Context, alert smee.Alert) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	if err := m.AlertStore.Create(ctx, alert); err != nil {
+		// TODO log err
+	}
+}
+
+func (m *Manager) update(ctx context.Context, alert smee.Alert) {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	if err := m.AlertStore.Update(ctx, alert); err != nil {
+		// TODO log err
+	}
 }

@@ -63,11 +63,7 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 						Message:   fmt.Sprintf("|%v| Alert ended on %v.", alert.Type, alert.Device),
 					})
 
-					// TODO do in another goroutine?
-					if err := m.AlertStore.Update(ctx, alert); err != nil {
-						// TODO handle error?
-					}
-
+					go m.update(ctx, alert)
 					continue
 				}
 
@@ -85,10 +81,7 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 					},
 				}
 
-				// TODO should i create in another goroutine?
-				if err := m.AlertStore.Create(ctx, alert); err != nil {
-					// TODO log err
-				}
+				go m.create(ctx, alert)
 			}
 		case <-ctx.Done():
 			return ctx.Err()

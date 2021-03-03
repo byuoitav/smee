@@ -44,10 +44,7 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 					},
 				}
 
-				// TODO should i create in another goroutine?
-				if err := m.AlertStore.Create(ctx, alert); err != nil {
-					// TODO log err
-				}
+				go m.create(ctx, alert)
 			}
 		case <-ctx.Done():
 			return ctx.Err()
@@ -102,10 +99,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 					Message:   fmt.Sprintf("|%v| Alert ended on %v. Value: %v", alert.Type, alert.Device, event.Value),
 				})
 
-				// TODO do in another goroutine?
-				if err := m.AlertStore.Update(ctx, alert); err != nil {
-					// TODO handle error?
-				}
+				go m.update(ctx, alert)
 			}
 		case <-ctx.Done():
 			return ctx.Err()
