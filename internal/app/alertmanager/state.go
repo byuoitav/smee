@@ -42,7 +42,7 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 				continue
 			}
 
-			alerts, err := m.AlertStore.OpenByType(ctx, typ)
+			alerts, err := m.AlertStore.ActiveAlertsByType(ctx, typ)
 			if err != nil {
 				// TODO log
 				continue

@@ -39,7 +39,7 @@ func (m *Manager) create(ctx context.Context, alert smee.Alert) {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	if err := m.AlertStore.Create(ctx, alert); err != nil {
+	if err := m.AlertStore.CreateAlert(ctx, alert); err != nil {
 		// TODO log err
 	}
 }
@@ -48,7 +48,7 @@ func (m *Manager) update(ctx context.Context, alert smee.Alert) {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
-	if err := m.AlertStore.Update(ctx, alert); err != nil {
+	if err := m.AlertStore.UpdateAlert(ctx, alert); err != nil {
 		// TODO log err
 	}
 }

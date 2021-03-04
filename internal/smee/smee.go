@@ -7,10 +7,22 @@ import (
 )
 
 type AlertStore interface {
-	Create(context.Context, Alert) error
-	Update(context.Context, Alert) error
-	Open(context.Context) ([]Alert, error)
-	OpenByType(context.Context, string) ([]Alert, error)
+	CreateAlert(context.Context, Alert) error
+	UpdateAlert(context.Context, Alert) error
+	ActiveAlerts(context.Context) ([]Alert, error)
+	ActiveAlertsByType(context.Context, string) ([]Alert, error)
+}
+
+type IssueStore interface {
+	CreateIssue(context.Context, Issue) error
+	UpdateIssue(context.Context, Issue) error
+	ActiveIssueForRoom(context.Context, string) (Issue, bool, error)
+	ActiveIssues(context.Context) (Issue, error)
+}
+
+type Issue struct {
+	ID     string
+	RoomID string
 }
 
 type Event struct {

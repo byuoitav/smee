@@ -61,7 +61,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 	for {
 		select {
 		case event := <-events:
-			alerts, err := m.AlertStore.Open(ctx)
+			alerts, err := m.AlertStore.ActiveAlerts(ctx)
 			if err != nil {
 				// TODO log
 			}
