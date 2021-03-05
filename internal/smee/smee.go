@@ -2,27 +2,40 @@ package smee
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"time"
 )
 
 type AlertStore interface {
-	CreateAlert(context.Context, Alert) error
-	UpdateAlert(context.Context, Alert) error
+	CreateAlert(context.Context, Alert) (Alert, error)
+	CloseAlert(context.Context, string) error
 	ActiveAlerts(context.Context) ([]Alert, error)
 	ActiveAlertsByType(context.Context, string) ([]Alert, error)
 }
 
 type IssueStore interface {
-	CreateIssue(context.Context, Issue) error
-	UpdateIssue(context.Context, Issue) error
+	CreateIssue(context.Context, Issue) (Issue, error)
+	CloseIssue(context.Context, string) error
 	ActiveIssueForRoom(context.Context, string) (Issue, bool, error)
 	ActiveIssues(context.Context) (Issue, error)
+	// AddEvent(ctx context.Context, issueID, comment string) error
 }
 
 type Issue struct {
-	ID     string
-	RoomID string
+	ID             string
+	Room           string
+	Start          time.Time
+	End            time.Time
+	ActiveAlerts   []Alert
+	InactiveAlerts []Alert
+	Events         []IssueEvent
+}
+
+type IssueEvent struct {
+	Timestamp time.Time
+	Type      string
+	Data      json.RawMessage
 }
 
 type Event struct {
@@ -40,8 +53,7 @@ type EventStreamer interface {
 }
 
 type DeviceStateStore interface {
-	// Query runs store-specific query and returns a list of
-	// DeviceID's that match the query
+	// Query runs store-specific query and returns a list of DeviceID's that match the query
 	Query(ctx context.Context, query string) ([]string, error)
 }
 
@@ -66,19 +78,15 @@ type AlertTransitionStateQuery struct {
 	Query    string
 }
 
+// change to room/device ID's
 type Alert struct {
-	ID       string
-	Room     string
-	Device   string
-	Type     string
-	Start    time.Time
-	End      time.Time
-	Messages []AlertMessage
-}
-
-type AlertMessage struct {
-	Timestamp time.Time
-	Message   string
+	ID      string
+	IssueID string
+	Room    string
+	Device  string
+	Type    string
+	Start   time.Time
+	End     time.Time
 }
 
 type AlertManager interface {

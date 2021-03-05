@@ -63,7 +63,7 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 						Message:   fmt.Sprintf("|%v| Alert ended on %v.", alert.Type, alert.Device),
 					})
 
-					go m.update(ctx, alert)
+					go m.close(ctx, alert)
 					continue
 				}
 

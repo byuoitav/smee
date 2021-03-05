@@ -99,7 +99,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 					Message:   fmt.Sprintf("|%v| Alert ended on %v. Value: %v", alert.Type, alert.Device, event.Value),
 				})
 
-				go m.update(ctx, alert)
+				go m.close(ctx, alert)
 			}
 		case <-ctx.Done():
 			return ctx.Err()

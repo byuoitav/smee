@@ -29,12 +29,7 @@ func (m *Manager) CreateAlert(ctx context.Context, alert smee.Alert) error {
 	return m.AlertStore.CreateAlert(ctx, alert)
 }
 
-func (m *Manager) UpdateAlert(ctx context.Context, alert smee.Alert) error {
-	// we only care about this if the alert is closing
-	if alert.End.IsZero() {
-		return m.AlertStore.UpdateAlert(ctx, alert)
-	}
-
+func (m *Manager) CloseAlert(ctx context.Context, alertID, msg string) error {
 	iss, ok, err := m.IssueStore.ActiveIssueForRoom(ctx, alert.Room)
 	if err != nil {
 		// TODO handle error
@@ -42,10 +37,10 @@ func (m *Manager) UpdateAlert(ctx context.Context, alert smee.Alert) error {
 
 	if ok {
 		// TODO update the issue
-		return m.AlertStore.UpdateAlert(ctx, alert)
+		return m.AlertStore.CloseAlert(ctx, alert)
 	}
 
 	// TODO create the issue
 
-	return m.AlertStore.UpdateAlert(ctx, alert)
+	return m.AlertStore.CloseAlert(ctx, alert)
 }
