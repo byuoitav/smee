@@ -19,7 +19,7 @@ type IssueStore interface {
 	CloseIssue(context.Context, string) error
 	ActiveIssueForRoom(context.Context, string) (Issue, bool, error)
 	ActiveIssues(context.Context) (Issue, error)
-	// AddEvent(ctx context.Context, issueID, comment string) error
+	AddIssueEvent(context.Context, string, IssueEvent) error
 }
 
 type Issue struct {

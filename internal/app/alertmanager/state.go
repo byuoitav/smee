@@ -2,6 +2,7 @@ package alertmanager
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
@@ -56,40 +57,39 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 			for _, device := range devices {
 				if alert, ok := alerting[device]; ok {
 					// close the alert
-					alert.End = time.Now()
-					/*
-						alert.Messages = append(alert.Messages, smee.AlertMessage{
-							Timestamp: time.Now(),
-							Message:   fmt.Sprintf("|%v| Alert ended on %v.", alert.Type, alert.Device),
-						})
-					*/
-
 					m.queue <- alertAction{
 						action: "close",
 						alert:  alert,
+						events: []smee.IssueEvent{
+							{
+								Type:      "system-message",
+								Timestamp: time.Now(),
+								Data:      []byte(fmt.Sprintf(`{"msg": "|%v| %v alert ended."}`, device, typ)),
+							},
+						},
 					}
 					continue
 				}
 
 				// create the alert
 				alert := smee.Alert{
+					// TODO get the room!!!
 					// Room:   event.Room
 					Device: device,
 					Type:   typ,
 					Start:  time.Now(),
-					/*
-						Messages: []smee.AlertMessage{
-							{
-								Timestamp: time.Now(),
-								Message:   fmt.Sprintf("|%v| Alert started on %v.", typ, device),
-							},
-						},
-					*/
 				}
 
 				m.queue <- alertAction{
 					action: "create",
 					alert:  alert,
+					events: []smee.IssueEvent{
+						{
+							Type:      "system-message",
+							Timestamp: time.Now(),
+							Data:      []byte(fmt.Sprintf(`{"msg": "|%v| %v alert started."}`, device, typ)),
+						},
+					},
 				}
 			}
 		case <-ctx.Done():

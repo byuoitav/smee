@@ -23,6 +23,7 @@ type Manager struct {
 type alertAction struct {
 	action string
 	alert  smee.Alert
+	events []smee.IssueEvent
 }
 
 func (m *Manager) Run(ctx context.Context) error {
@@ -57,9 +58,9 @@ func (m *Manager) runAlertActions(ctx context.Context) error {
 		case action := <-m.queue:
 			switch action.action {
 			case "create":
-				m.createAlert(ctx, action.alert)
+				m.createAlert(ctx, action.alert, action.events)
 			case "close":
-				m.closeAlert(ctx, action.alert)
+				m.closeAlert(ctx, action.alert, action.events)
 			default:
 			}
 		case <-ctx.Done():
@@ -68,7 +69,7 @@ func (m *Manager) runAlertActions(ctx context.Context) error {
 	}
 }
 
-func (m *Manager) createAlert(ctx context.Context, alert smee.Alert) {
+func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []smee.IssueEvent) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -91,15 +92,19 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert) {
 	// tie this alert to the active issue for this room
 	alert.IssueID = issue.ID
 
-	// TODO events
-
 	// create the alert
 	_, err = m.AlertStore.CreateAlert(ctx, alert)
 	if err != nil {
 	}
+
+	// add all of the events
+	for _, event := range events {
+		if err := m.IssueStore.AddIssueEvent(ctx, issue.ID, event); err != nil {
+		}
+	}
 }
 
-func (m *Manager) closeAlert(ctx context.Context, alert smee.Alert) {
+func (m *Manager) closeAlert(ctx context.Context, alert smee.Alert, events []smee.IssueEvent) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -108,6 +113,12 @@ func (m *Manager) closeAlert(ctx context.Context, alert smee.Alert) {
 	switch {
 	case err != nil:
 	case ok:
+		// add all of the events
+		for _, event := range events {
+			if err := m.IssueStore.AddIssueEvent(ctx, issue.ID, event); err != nil {
+			}
+		}
+
 		// close this issue if no more alerts are open
 		// and if closing this one should close the issue
 		// TODO does it not close if a SN incident is attached to it?

@@ -2,6 +2,7 @@ package alertmanager
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
@@ -38,8 +39,6 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 					/*
 						Messages: []smee.AlertMessage{
 							{
-								Timestamp: time.Now(),
-								Message:   fmt.Sprintf("|%v| Alert started on %v. Value: %v", typ, event.Device, event.Value),
 							},
 						},
 					*/
@@ -48,6 +47,13 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 				m.queue <- alertAction{
 					action: "create",
 					alert:  alert,
+					events: []smee.IssueEvent{
+						{
+							Type:      "system-message",
+							Timestamp: time.Now(),
+							Data:      []byte(fmt.Sprintf(`{"msg": "|%v| %v alert started. Value: %v"}`, event.Device, typ, event.Value)),
+						},
+					},
 				}
 			}
 		case <-ctx.Done():
@@ -97,17 +103,16 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 				}
 
 				// close the alert
-				alert.End = time.Now()
-				/*
-					alert.Messages = append(alert.Messages, smee.AlertMessage{
-						Timestamp: time.Now(),
-						Message:   fmt.Sprintf("|%v| Alert ended on %v. Value: %v", alert.Type, alert.Device, event.Value),
-					})
-				*/
-
 				m.queue <- alertAction{
 					action: "close",
 					alert:  alert,
+					events: []smee.IssueEvent{
+						{
+							Type:      "system-message",
+							Timestamp: time.Now(),
+							Data:      []byte(fmt.Sprintf(`{"msg": "|%v| %v alert ended. Value: %v"}`, event.Device, alert.Type, event.Value)),
+						},
+					},
 				}
 			}
 		case <-ctx.Done():
