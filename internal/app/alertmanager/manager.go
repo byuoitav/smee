@@ -26,11 +26,11 @@ type alertAction struct {
 }
 
 func (m *Manager) Run(ctx context.Context) error {
-
+	m.queue = make(chan alertAction, 1024)
 	group, gctx := errgroup.WithContext(ctx)
 
 	group.Go(func() error {
-		return m.generateEventAlerts(gctx)
+		return m.runAlertActions(gctx)
 	})
 
 	group.Go(func() error {
@@ -38,11 +38,11 @@ func (m *Manager) Run(ctx context.Context) error {
 	})
 
 	group.Go(func() error {
-		return m.closeEventAlerts(gctx)
+		return m.generateEventAlerts(gctx)
 	})
 
 	group.Go(func() error {
-		return m.runAlertActions(gctx)
+		return m.closeEventAlerts(gctx)
 	})
 
 	return group.Wait()
@@ -52,8 +52,6 @@ func (m *Manager) Run(ctx context.Context) error {
 // are run in order of their placement in the queue. this makes handling
 // issue creation/closure much simpler
 func (m *Manager) runAlertActions(ctx context.Context) error {
-	m.queue = make(chan alertAction, 1024)
-
 	for {
 		select {
 		case action := <-m.queue:
@@ -81,7 +79,7 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert) {
 	case !ok:
 		// create a new issue
 		issue = smee.Issue{
-			Start: time.Now(),
+			Start: alert.Start,
 			Room:  alert.Room,
 		}
 

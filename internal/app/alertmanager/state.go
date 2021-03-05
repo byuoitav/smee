@@ -2,7 +2,6 @@ package alertmanager
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
@@ -58,12 +57,17 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 				if alert, ok := alerting[device]; ok {
 					// close the alert
 					alert.End = time.Now()
-					alert.Messages = append(alert.Messages, smee.AlertMessage{
-						Timestamp: time.Now(),
-						Message:   fmt.Sprintf("|%v| Alert ended on %v.", alert.Type, alert.Device),
-					})
+					/*
+						alert.Messages = append(alert.Messages, smee.AlertMessage{
+							Timestamp: time.Now(),
+							Message:   fmt.Sprintf("|%v| Alert ended on %v.", alert.Type, alert.Device),
+						})
+					*/
 
-					go m.close(ctx, alert)
+					m.queue <- alertAction{
+						action: "close",
+						alert:  alert,
+					}
 					continue
 				}
 
@@ -73,15 +77,20 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 					Device: device,
 					Type:   typ,
 					Start:  time.Now(),
-					Messages: []smee.AlertMessage{
-						{
-							Timestamp: time.Now(),
-							Message:   fmt.Sprintf("|%v| Alert started on %v.", typ, device),
+					/*
+						Messages: []smee.AlertMessage{
+							{
+								Timestamp: time.Now(),
+								Message:   fmt.Sprintf("|%v| Alert started on %v.", typ, device),
+							},
 						},
-					},
+					*/
 				}
 
-				go m.create(ctx, alert)
+				m.queue <- alertAction{
+					action: "create",
+					alert:  alert,
+				}
 			}
 		case <-ctx.Done():
 			return ctx.Err()
