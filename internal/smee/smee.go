@@ -39,8 +39,12 @@ type Event struct {
 // EventStreamer ...
 // TODO Probably need some wrapper for this so only one connection is created
 type EventStreamer interface {
-	// Stream streams until ctx is cancelled
-	Stream(ctx context.Context) (<-chan Event, error)
+	Stream(ctx context.Context) (EventStream, error)
+}
+
+type EventStream interface {
+	Next(ctx context.Context) (Event, error)
+	Close() error
 }
 
 type DeviceStateStore interface {
