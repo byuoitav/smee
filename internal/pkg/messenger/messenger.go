@@ -20,7 +20,7 @@ type stream struct {
 	done chan struct{}
 }
 
-func (m *Messenger) Stream(ctx context.Context) (*stream, error) {
+func (m *Messenger) Stream(ctx context.Context) (smee.EventStream, error) {
 	mess, err := messenger.BuildMessenger(m.HubURL, base.Messenger, 512)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build messenger: %w", err)

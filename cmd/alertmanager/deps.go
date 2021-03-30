@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/byuoitav/smee/internal/app/alertmanager/alertcache"
+	"github.com/byuoitav/smee/internal/pkg/messenger"
+	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -16,6 +18,7 @@ func (d *Deps) build() {
 
 	d.buildLog()
 	d.buildAlertStore(ctx)
+	d.buildEventStreamer()
 }
 
 func (d *Deps) cleanup() {
@@ -29,6 +32,18 @@ func (d *Deps) buildAlertStore(ctx context.Context) {
 	}
 
 	d.alertStore = store
+}
+
+func (d *Deps) buildEventStreamer() {
+	if d.HubURL == "" {
+		d.log.Fatal("invalid hub url")
+	}
+
+	d.eventStreamer = &streamwrapper.StreamWrapper{
+		EventStreamer: &messenger.Messenger{
+			HubURL: d.HubURL,
+		},
+	}
 }
 
 func (d *Deps) buildLog() {
