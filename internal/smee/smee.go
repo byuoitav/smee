@@ -2,6 +2,7 @@ package smee
 
 import (
 	"context"
+	"encoding/json"
 	"regexp"
 	"time"
 )
@@ -18,6 +19,7 @@ type IssueStore interface {
 	CloseIssue(context.Context, string) error
 	ActiveIssueForRoom(context.Context, string) (Issue, bool, error)
 	ActiveIssues(context.Context) (Issue, error)
+	AddIssueEvent(context.Context, string, IssueEvent) error
 }
 
 type Issue struct {
@@ -27,6 +29,13 @@ type Issue struct {
 	End            time.Time
 	ActiveAlerts   []Alert
 	InactiveAlerts []Alert
+	Events         []IssueEvent
+}
+
+type IssueEvent struct {
+	Timestamp time.Time
+	Type      string
+	Data      json.RawMessage
 }
 
 type Event struct {
@@ -86,5 +95,5 @@ type Alert struct {
 
 type AlertManager interface {
 	Run(context.Context) error
-	Manage(Alert)
+	// Manage(Alert) what was this for?
 }

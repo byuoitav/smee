@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/byuoitav/smee/internal/app/alertmanager"
 	"github.com/byuoitav/smee/internal/app/alertmanager/alertcache"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
 	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
+	"github.com/byuoitav/smee/internal/smee"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -19,6 +21,7 @@ func (d *Deps) build() {
 	d.buildLog()
 	d.buildAlertStore(ctx)
 	d.buildEventStreamer()
+	d.buildAlertManager()
 }
 
 func (d *Deps) cleanup() {
@@ -43,6 +46,14 @@ func (d *Deps) buildEventStreamer() {
 		EventStreamer: &messenger.Messenger{
 			HubURL: d.HubURL,
 		},
+	}
+}
+
+func (d *Deps) buildAlertManager() {
+	d.alertManager = &alertmanager.Manager{
+		EventStreamer: d.eventStreamer,
+		AlertConfigs:  map[string]smee.AlertConfig{},
+		Log:           d.log.Named("alert-manager"),
 	}
 }
 

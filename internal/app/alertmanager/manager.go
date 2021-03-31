@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -16,6 +17,7 @@ type Manager struct {
 	EventStreamer    smee.EventStreamer
 	DeviceStateStore smee.DeviceStateStore
 	AlertConfigs     map[string]smee.AlertConfig
+	Log              *zap.Logger
 
 	queue chan alertAction
 }
@@ -46,6 +48,7 @@ func (m *Manager) Run(ctx context.Context) error {
 		return m.closeEventAlerts(gctx)
 	})
 
+	m.Log.Info("Alert manager running")
 	return group.Wait()
 }
 

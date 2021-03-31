@@ -9,14 +9,22 @@ import (
 )
 
 func (m *Manager) generateEventAlerts(ctx context.Context) error {
-	events, err := m.EventStreamer.Stream(ctx)
+	// stream setup timeout?
+	stream, err := m.EventStreamer.Stream(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to start event stream: %w", err)
 	}
 
 	for {
 		select {
-		case event := <-events:
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			event, err := stream.Next(ctx)
+			if err != nil {
+				return fmt.Errorf("unable to get next event: %w", err)
+			}
+
 			for typ, config := range m.AlertConfigs {
 				trans := config.Create.Event
 				if trans == nil {
@@ -36,12 +44,6 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 					Device: event.Device,
 					Type:   typ,
 					Start:  time.Now(),
-					/*
-						Messages: []smee.AlertMessage{
-							{
-							},
-						},
-					*/
 				}
 
 				m.queue <- alertAction{
@@ -56,24 +58,31 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 					},
 				}
 			}
-		case <-ctx.Done():
-			return ctx.Err()
 		}
 	}
 }
 
 func (m *Manager) closeEventAlerts(ctx context.Context) error {
-	events, err := m.EventStreamer.Stream(ctx)
+	// stream setup timeout?
+	stream, err := m.EventStreamer.Stream(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to start event stream: %w", err)
 	}
 
 	for {
 		select {
-		case event := <-events:
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			event, err := stream.Next(ctx)
+			if err != nil {
+				return fmt.Errorf("unable to get next event: %w", err)
+			}
+
 			alerts, err := m.AlertStore.ActiveAlerts(ctx)
 			if err != nil {
-				// TODO log
+				// TODO log instead of fail?
+				return fmt.Errorf("unable to get active alerts: %w", err)
 			}
 
 			for i := range alerts {
@@ -115,8 +124,6 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 					},
 				}
 			}
-		case <-ctx.Done():
-			return ctx.Err()
 		}
 	}
 }
