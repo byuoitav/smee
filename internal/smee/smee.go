@@ -17,8 +17,8 @@ type AlertStore interface {
 type IssueStore interface {
 	CreateIssue(context.Context, Issue) (Issue, error)
 	CloseIssue(context.Context, string) error
+	ActiveIssues(context.Context) ([]Issue, error)
 	ActiveIssueForRoom(context.Context, string) (Issue, bool, error)
-	ActiveIssues(context.Context) (Issue, error)
 	AddIssueEvent(context.Context, string, IssueEvent) error
 }
 

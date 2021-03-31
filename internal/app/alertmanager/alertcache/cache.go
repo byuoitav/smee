@@ -18,7 +18,6 @@ type cache struct {
 	sync.RWMutex
 }
 
-// TODO pull initial list of alerts and put into cache?
 func New(ctx context.Context, persistent smee.AlertStore, log *zap.Logger) (*cache, error) {
 	c := &cache{
 		persistent: persistent,
@@ -42,6 +41,8 @@ func New(ctx context.Context, persistent smee.AlertStore, log *zap.Logger) (*cac
 
 func (c *cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Alert, error) {
 	c.log.Info("Creating alert", zap.String("type", alert.Type), zap.String("room", alert.Room), zap.String("device", alert.Device))
+	c.Lock()
+	defer c.Unlock()
 
 	switch {
 	case alert.ID != "":
@@ -55,21 +56,20 @@ func (c *cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Alert, 
 		alert.ID = ksuid.New().String()
 	}
 
-	c.Lock()
-	defer c.Unlock()
 	c.cache[alert.ID] = alert
 	return alert, nil
 }
 
 func (c *cache) CloseAlert(ctx context.Context, id string) error {
+	c.Lock()
+	defer c.Unlock()
+
 	if c.persistent != nil {
 		if err := c.persistent.CloseAlert(ctx, id); err != nil {
 			return fmt.Errorf("unable to close persistent alert: %w", err)
 		}
 	}
 
-	c.Lock()
-	defer c.Unlock()
 	delete(c.cache, id)
 	return nil
 }
