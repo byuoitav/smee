@@ -7,20 +7,23 @@ import (
 
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/segmentio/ksuid"
+	"go.uber.org/zap"
 )
 
 type cache struct {
 	persistent smee.AlertStore
+	log        *zap.Logger
 
 	cache map[string]smee.Alert
 	sync.RWMutex
 }
 
 // TODO pull initial list of alerts and put into cache?
-func New(ctx context.Context, persistent smee.AlertStore) (*cache, error) {
+func New(ctx context.Context, persistent smee.AlertStore, log *zap.Logger) (*cache, error) {
 	c := &cache{
 		persistent: persistent,
 		cache:      make(map[string]smee.Alert),
+		log:        log,
 	}
 
 	if persistent != nil {
@@ -38,6 +41,8 @@ func New(ctx context.Context, persistent smee.AlertStore) (*cache, error) {
 }
 
 func (c *cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Alert, error) {
+	c.log.Info("Creating alert", zap.String("type", alert.Type), zap.String("room", alert.Room), zap.String("device", alert.Device))
+
 	switch {
 	case alert.ID != "":
 	case c.persistent != nil:

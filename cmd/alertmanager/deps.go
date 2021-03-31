@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/byuoitav/smee/internal/app/alertmanager"
@@ -29,7 +30,7 @@ func (d *Deps) cleanup() {
 }
 
 func (d *Deps) buildAlertStore(ctx context.Context) {
-	store, err := alertcache.New(ctx, nil)
+	store, err := alertcache.New(ctx, nil, d.log.Named("alert-cache"))
 	if err != nil {
 		d.log.Fatal("unable to build alert cache", zap.Error(err))
 	}
@@ -51,9 +52,19 @@ func (d *Deps) buildEventStreamer() {
 
 func (d *Deps) buildAlertManager() {
 	d.alertManager = &alertmanager.Manager{
+		AlertStore:    d.alertStore,
 		EventStreamer: d.eventStreamer,
-		AlertConfigs:  map[string]smee.AlertConfig{},
-		Log:           d.log.Named("alert-manager"),
+		AlertConfigs: map[string]smee.AlertConfig{
+			"websocket": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						Key:   regexp.MustCompile("websocket-count"),
+						Value: regexp.MustCompile("0"),
+					},
+				},
+			},
+		},
+		Log: d.log.Named("alert-manager"),
 	}
 }
 

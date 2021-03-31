@@ -14,6 +14,10 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 	group, gctx := errgroup.WithContext(ctx)
 
 	for t, c := range m.AlertConfigs {
+		if c.Create.StateQuery == nil {
+			continue
+		}
+
 		// create copies of loop variables so
 		// we don't get the wrong value in the closure below
 		typ := t
