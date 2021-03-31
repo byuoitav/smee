@@ -8,6 +8,7 @@ import (
 
 	"github.com/byuoitav/smee/internal/app/alertmanager"
 	"github.com/byuoitav/smee/internal/app/alertmanager/alertcache"
+	"github.com/byuoitav/smee/internal/app/alertmanager/issuecache"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
 	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
 	"github.com/byuoitav/smee/internal/smee"
@@ -21,6 +22,7 @@ func (d *Deps) build() {
 
 	d.buildLog()
 	d.buildAlertStore(ctx)
+	d.buildIssueStore(ctx)
 	d.buildEventStreamer()
 	d.buildAlertManager()
 }
@@ -30,12 +32,21 @@ func (d *Deps) cleanup() {
 }
 
 func (d *Deps) buildAlertStore(ctx context.Context) {
-	store, err := alertcache.New(ctx, nil, d.log.Named("alert-cache"))
+	cache, err := alertcache.New(ctx, nil, d.log.Named("alert-cache"))
 	if err != nil {
 		d.log.Fatal("unable to build alert cache", zap.Error(err))
 	}
 
-	d.alertStore = store
+	d.alertStore = cache
+}
+
+func (d *Deps) buildIssueStore(ctx context.Context) {
+	cache, err := issuecache.New(ctx, nil, d.log.Named("issue-cache"))
+	if err != nil {
+		d.log.Fatal("unable to build issue cache", zap.Error(err))
+	}
+
+	d.issueStore = cache
 }
 
 func (d *Deps) buildEventStreamer() {
@@ -53,6 +64,7 @@ func (d *Deps) buildEventStreamer() {
 func (d *Deps) buildAlertManager() {
 	d.alertManager = &alertmanager.Manager{
 		AlertStore:    d.alertStore,
+		IssueStore:    d.issueStore,
 		EventStreamer: d.eventStreamer,
 		AlertConfigs: map[string]smee.AlertConfig{
 			"websocket": {

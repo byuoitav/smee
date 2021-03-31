@@ -40,7 +40,7 @@ func New(ctx context.Context, persistent smee.AlertStore, log *zap.Logger) (*cac
 }
 
 func (c *cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Alert, error) {
-	c.log.Info("Creating alert", zap.String("type", alert.Type), zap.String("room", alert.Room), zap.String("device", alert.Device))
+	c.log.Info("Creating alert", zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
 	c.Lock()
 	defer c.Unlock()
 

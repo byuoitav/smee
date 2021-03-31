@@ -2,6 +2,7 @@ package alertmanager
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
@@ -31,6 +32,13 @@ type alertAction struct {
 func (m *Manager) Run(ctx context.Context) error {
 	m.queue = make(chan alertAction, 1024)
 	group, gctx := errgroup.WithContext(ctx)
+
+	switch {
+	case m.AlertStore == nil:
+		return errors.New("alert store required")
+	case m.IssueStore == nil:
+		return errors.New("issue store required")
+	}
 
 	group.Go(func() error {
 		return m.runAlertActions(gctx)
