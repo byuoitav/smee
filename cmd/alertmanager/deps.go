@@ -70,8 +70,14 @@ func (d *Deps) buildAlertManager() {
 			"websocket": {
 				Create: smee.AlertTransition{
 					Event: &smee.AlertTransitionEvent{
-						Key:   regexp.MustCompile("websocket-count"),
-						Value: regexp.MustCompile("0"),
+						KeyMatches:        regexp.MustCompile("websocket-count"),
+						ValueDoesNotMatch: regexp.MustCompile("^[1-9]{1}[0-9]{0,3}$"),
+					},
+				},
+				Close: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("websocket-count"),
+						ValueMatches: regexp.MustCompile("^[1-9]{1}[0-9]{0,3}$"),
 					},
 				},
 			},

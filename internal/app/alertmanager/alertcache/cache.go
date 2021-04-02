@@ -64,6 +64,9 @@ func (c *cache) CloseAlert(ctx context.Context, id string) error {
 	c.Lock()
 	defer c.Unlock()
 
+	alert := c.cache[id]
+	c.log.Info("Closing alert", zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
+
 	if c.persistent != nil {
 		if err := c.persistent.CloseAlert(ctx, id); err != nil {
 			return fmt.Errorf("unable to close persistent alert: %w", err)
@@ -74,7 +77,7 @@ func (c *cache) CloseAlert(ctx context.Context, id string) error {
 	return nil
 }
 
-func (c *cache) ActiveAlerts(ctx context.Context) ([]smee.Alert, error) {
+func (c *cache) ActiveAlerts(_ context.Context) ([]smee.Alert, error) {
 	var res []smee.Alert
 
 	c.RLock()
@@ -87,7 +90,20 @@ func (c *cache) ActiveAlerts(ctx context.Context) ([]smee.Alert, error) {
 	return res, nil
 }
 
-func (c *cache) ActiveAlertsByType(ctx context.Context, typ string) ([]smee.Alert, error) {
+func (c *cache) ActiveAlert(_ context.Context, room, device, typ string) (smee.Alert, bool, error) {
+	c.RLock()
+	defer c.RUnlock()
+
+	for _, alert := range c.cache {
+		if alert.Room == room && alert.Device == device && alert.Type == typ {
+			return alert, true, nil
+		}
+	}
+
+	return smee.Alert{}, false, nil
+}
+
+func (c *cache) ActiveAlertsByType(_ context.Context, typ string) ([]smee.Alert, error) {
 	var res []smee.Alert
 
 	c.RLock()

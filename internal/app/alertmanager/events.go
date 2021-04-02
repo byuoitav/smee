@@ -27,15 +27,16 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 
 			for typ, config := range m.AlertConfigs {
 				trans := config.Create.Event
-				if trans == nil {
+				switch {
+				case trans == nil:
 					continue
-				}
-
-				if trans.Key != nil && !trans.Key.MatchString(event.Key) {
+				case trans.KeyMatches != nil && !trans.KeyMatches.MatchString(event.Key):
 					continue
-				}
-
-				if trans.Value != nil && !trans.Value.MatchString(event.Value) {
+				case trans.KeyDoesNotMatch != nil && trans.KeyDoesNotMatch.MatchString(event.Key):
+					continue
+				case trans.ValueMatches != nil && !trans.ValueMatches.MatchString(event.Value):
+					continue
+				case trans.ValueDoesNotMatch != nil && trans.ValueDoesNotMatch.MatchString(event.Value):
 					continue
 				}
 
@@ -93,21 +94,19 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 					continue
 				}
 
-				// make sure it's an event alert
 				trans := config.Close.Event
-				if trans == nil {
+				switch {
+				case trans == nil:
 					continue
-				}
-
-				if event.Device != alert.Device {
+				case event.Room != alert.Room && event.Device != alert.Device:
 					continue
-				}
-
-				if trans.Key != nil && !trans.Key.MatchString(event.Key) {
+				case trans.KeyMatches != nil && !trans.KeyMatches.MatchString(event.Key):
 					continue
-				}
-
-				if trans.Value != nil && !trans.Value.MatchString(event.Value) {
+				case trans.KeyDoesNotMatch != nil && trans.KeyDoesNotMatch.MatchString(event.Key):
+					continue
+				case trans.ValueMatches != nil && !trans.ValueMatches.MatchString(event.Value):
+					continue
+				case trans.ValueDoesNotMatch != nil && trans.ValueDoesNotMatch.MatchString(event.Value):
 					continue
 				}
 

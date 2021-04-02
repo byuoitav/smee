@@ -84,6 +84,17 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	// see if this alert already exists
+	_, exists, err := m.AlertStore.ActiveAlert(ctx, alert.Room, alert.Device, alert.Type)
+	switch {
+	case err != nil:
+	case exists:
+		// don't need to do anything, this alert already exists
+		// TODO maybe add the event to the issue?
+		m.Log.Info("NOT creating duplicate alert", zap.String("room", alert.Room))
+		return
+	}
+
 	// see if an issue already exists for this room
 	issue, ok, err := m.IssueStore.ActiveIssueForRoom(ctx, alert.Room)
 	switch {

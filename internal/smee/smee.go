@@ -11,6 +11,7 @@ type AlertStore interface {
 	CreateAlert(context.Context, Alert) (Alert, error)
 	CloseAlert(context.Context, string) error
 	ActiveAlerts(context.Context) ([]Alert, error)
+	ActiveAlert(ctx context.Context, room, device, typ string) (Alert, bool, error)
 	ActiveAlertsByType(context.Context, string) ([]Alert, error)
 }
 
@@ -73,8 +74,10 @@ type AlertTransition struct {
 }
 
 type AlertTransitionEvent struct {
-	Key   *regexp.Regexp
-	Value *regexp.Regexp
+	KeyMatches        *regexp.Regexp
+	KeyDoesNotMatch   *regexp.Regexp
+	ValueMatches      *regexp.Regexp
+	ValueDoesNotMatch *regexp.Regexp
 }
 
 type AlertTransitionStateQuery struct {

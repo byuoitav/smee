@@ -64,6 +64,8 @@ func (c *cache) CloseIssue(ctx context.Context, id string) error {
 	c.Lock()
 	defer c.Unlock()
 
+	c.log.Info("Closing issue", zap.String("room", c.cache[id].Room))
+
 	if c.persistent != nil {
 		if err := c.persistent.CloseIssue(ctx, id); err != nil {
 			return fmt.Errorf("unable to close persistent issue: %w", err)
