@@ -23,7 +23,9 @@ type Deps struct {
 	issueStore    smee.IssueStore
 	alertManager  smee.AlertManager
 	eventStreamer smee.EventStreamer
-	httpServer    *gin.Engine
+
+	httpServer   *gin.Engine
+	httpListener net.Listener
 }
 
 func main() {
@@ -48,17 +50,20 @@ func main() {
 	})
 
 	g.Go(func() error {
-		// TODO ctx?
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", deps.Port))
-		if err != nil {
-			return fmt.Errorf("unable to bind listener: %w", err)
-		}
-
-		if err := deps.httpServer.RunListener(lis); err != nil {
+		if err := deps.httpServer.RunListener(deps.httpListener); err != nil {
 			return fmt.Errorf("unable to run http server: %w", err)
 		}
 
 		return fmt.Errorf("http server stopped running")
+	})
+
+	g.Go(func() error {
+		<-ctx.Done()
+		if err := deps.httpListener.Close(); err != nil {
+			return fmt.Errorf("unable to close http listener: %w", err)
+		}
+
+		return fmt.Errorf("closed http listener: %w", ctx.Err())
 	})
 
 	if err := g.Wait(); err != nil {

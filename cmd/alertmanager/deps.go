@@ -23,7 +23,7 @@ func (d *Deps) build() {
 	d.buildIssueStore(ctx)
 	d.buildEventStreamer()
 	d.buildAlertManager()
-	d.buildHTTPServer()
+	d.buildHTTPServer(ctx)
 }
 
 func (d *Deps) cleanup() {
