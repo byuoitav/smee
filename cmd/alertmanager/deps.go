@@ -23,6 +23,7 @@ func (d *Deps) build() {
 	d.buildIssueStore(ctx)
 	d.buildEventStreamer()
 	d.buildAlertManager()
+	d.buildHTTPServer()
 }
 
 func (d *Deps) cleanup() {
@@ -34,8 +35,8 @@ func (d *Deps) buildIssueStore(ctx context.Context) {
 		Log: d.log.Named("issue-cache"),
 	}
 
-	if err := cache.Populate(ctx); err != nil {
-		d.log.Fatal("unable to populate issue cache", zap.Error(err))
+	if err := cache.Sync(ctx); err != nil {
+		d.log.Fatal("unable to sync issue cache", zap.Error(err))
 	}
 
 	d.issueStore = cache

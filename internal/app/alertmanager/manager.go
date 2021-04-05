@@ -77,41 +77,46 @@ func (m *Manager) runAlertActions(ctx context.Context) error {
 }
 
 func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []smee.IssueEvent) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	// see if this alert already exists
 	exists, err := m.IssueStore.ActiveAlertExists(ctx, alert.Room, alert.Device, alert.Type)
 	switch {
 	case err != nil:
-		// TODO handle err
+		m.Log.Error("unable to check if active alert exists", zap.Error(err), zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
+		return
 	case exists:
 		// don't need to do anything, this alert already exists
-		// TODO maybe add the event to the issue?
 		m.Log.Info("NOT creating duplicate alert", zap.String("room", alert.Room))
+		// TODO maybe add the event to the issue?
 		return
 	}
 
 	issue, err := m.IssueStore.CreateAlert(ctx, alert)
 	if err != nil {
-		// TODO handle err
+		m.Log.Error("unable to create alert", zap.Error(err), zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
+		return
 	}
 
 	if err := m.IssueStore.AddIssueEvents(ctx, issue.ID, events...); err != nil {
-		// TODO handle err
+		m.Log.Error("unable to add issue events", zap.Error(err), zap.String("issueID", issue.ID), zap.String("room", issue.Room))
+		return
 	}
 }
 
 func (m *Manager) closeAlert(ctx context.Context, alert smee.Alert, events []smee.IssueEvent) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	issue, err := m.IssueStore.CloseAlert(ctx, alert.IssueID, alert.ID)
 	if err != nil {
-		// TODO handle err
+		m.Log.Error("unable to close alert", zap.Error(err), zap.String("issueID", alert.IssueID), zap.String("alertID", alert.ID))
+		return
 	}
 
 	if err := m.IssueStore.AddIssueEvents(ctx, issue.ID, events...); err != nil {
-		// TODO handle err
+		m.Log.Error("unable to close alert", zap.Error(err), zap.String("issueID", alert.IssueID), zap.String("alertID", alert.ID))
+		return
 	}
 }

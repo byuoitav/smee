@@ -6,6 +6,7 @@ require (
 	github.com/byuoitav/central-event-system v0.0.0-20201020053146-aee08228b14a
 	github.com/byuoitav/common v0.0.0-20191210190714-e9b411b3cc0d
 	github.com/fatih/color v1.9.0 // indirect
+	github.com/gin-gonic/gin v1.6.3
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/labstack/echo v3.3.10+incompatible // indirect
 	github.com/labstack/gommon v0.3.0 // indirect

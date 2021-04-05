@@ -22,7 +22,7 @@ type Cache struct {
 	issuesMu sync.RWMutex
 }
 
-func (c *Cache) Populate(ctx context.Context) error {
+func (c *Cache) Sync(ctx context.Context) error {
 	c.issuesMu.Lock()
 	defer c.issuesMu.Unlock()
 
@@ -39,7 +39,7 @@ func (c *Cache) Populate(ctx context.Context) error {
 		}
 	}
 
-	c.Log.Info("Populated cache", zap.Int("issueCount", len(c.issues)))
+	c.Log.Info("Synced cache", zap.Int("issueCount", len(c.issues)))
 	return nil
 }
 

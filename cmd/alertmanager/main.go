@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
+	"net"
 
 	"github.com/byuoitav/smee/internal/smee"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 type Deps struct {
@@ -21,6 +23,7 @@ type Deps struct {
 	issueStore    smee.IssueStore
 	alertManager  smee.AlertManager
 	eventStreamer smee.EventStreamer
+	httpServer    *gin.Engine
 }
 
 func main() {
@@ -34,8 +37,31 @@ func main() {
 	deps.build()
 	defer deps.cleanup()
 
-	if err := deps.alertManager.Run(context.Background()); err != nil {
-		fmt.Printf("unable to run alert manager: %s\n", err)
-		os.Exit(1)
+	g, ctx := errgroup.WithContext(context.Background())
+
+	g.Go(func() error {
+		if err := deps.alertManager.Run(ctx); err != nil {
+			return fmt.Errorf("unable to run alert manager: %w", err)
+		}
+
+		return fmt.Errorf("alert manager stopped running")
+	})
+
+	g.Go(func() error {
+		// TODO ctx?
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", deps.Port))
+		if err != nil {
+			return fmt.Errorf("unable to bind listener: %w", err)
+		}
+
+		if err := deps.httpServer.RunListener(lis); err != nil {
+			return fmt.Errorf("unable to run http server: %w", err)
+		}
+
+		return fmt.Errorf("http server stopped running")
+	})
+
+	if err := g.Wait(); err != nil {
+		deps.log.Fatal(err.Error())
 	}
 }
