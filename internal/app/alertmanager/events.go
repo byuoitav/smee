@@ -80,7 +80,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 				return fmt.Errorf("unable to get next event: %w", err)
 			}
 
-			alerts, err := m.AlertStore.ActiveAlerts(ctx)
+			alerts, err := m.IssueStore.ActiveAlerts(ctx)
 			if err != nil {
 				// TODO log instead of fail?
 				return fmt.Errorf("unable to get active alerts: %w", err)

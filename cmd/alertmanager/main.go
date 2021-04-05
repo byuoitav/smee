@@ -18,7 +18,6 @@ type Deps struct {
 
 	// created by functions
 	log           *zap.Logger
-	alertStore    smee.AlertStore
 	issueStore    smee.IssueStore
 	alertManager  smee.AlertManager
 	eventStreamer smee.EventStreamer

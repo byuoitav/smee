@@ -2,122 +2,144 @@ package issuecache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/segmentio/ksuid"
 	"go.uber.org/zap"
 )
 
-type cache struct {
-	persistent smee.IssueStore
-	log        *zap.Logger
+type Cache struct {
+	IssueStore smee.IssueStore
+	Log        *zap.Logger
 
-	cache map[string]smee.Issue
-	sync.RWMutex
+	// issues is a map of issueID to the currently active issue for that room
+	issues map[string]smee.Issue
+	// issuesMu protects issues
+	issuesMu sync.RWMutex
 }
 
-func New(ctx context.Context, persistent smee.IssueStore, log *zap.Logger) (*cache, error) {
-	c := &cache{
-		persistent: persistent,
-		cache:      make(map[string]smee.Issue),
-		log:        log,
-	}
+func (c *Cache) Populate(ctx context.Context) error {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
 
-	if persistent != nil {
-		issues, err := persistent.ActiveIssues(ctx)
+	c.issues = make(map[string]smee.Issue)
+
+	if c.IssueStore != nil {
+		issues, err := c.IssueStore.ActiveIssues(ctx)
 		if err != nil {
-			return nil, fmt.Errorf("unable to get persistent active issues: %w", err)
+			return fmt.Errorf("unable to get active issues: %w", err)
 		}
 
 		for i := range issues {
-			c.cache[issues[i].ID] = issues[i]
+			c.issues[issues[i].ID] = issues[i]
 		}
 	}
 
-	return c, nil
-}
-
-func (c *cache) CreateIssue(ctx context.Context, issue smee.Issue) (smee.Issue, error) {
-	c.log.Info("Creating issue", zap.String("room", issue.Room))
-	c.Lock()
-	defer c.Unlock()
-
-	switch {
-	case issue.ID != "":
-	case c.persistent != nil:
-		var err error
-		issue, err = c.persistent.CreateIssue(ctx, issue)
-		if err != nil {
-			return issue, fmt.Errorf("unable to create persistent issue: %w", err)
-		}
-	default:
-		issue.ID = ksuid.New().String()
-	}
-
-	c.cache[issue.ID] = issue
-	return issue, nil
-}
-
-func (c *cache) CloseIssue(ctx context.Context, id string) error {
-	c.Lock()
-	defer c.Unlock()
-
-	c.log.Info("Closing issue", zap.String("room", c.cache[id].Room))
-
-	if c.persistent != nil {
-		if err := c.persistent.CloseIssue(ctx, id); err != nil {
-			return fmt.Errorf("unable to close persistent issue: %w", err)
-		}
-	}
-
-	delete(c.cache, id)
+	c.Log.Info("Populated cache", zap.Int("issueCount", len(c.issues)))
 	return nil
 }
 
-func (c *cache) ActiveIssues(ctx context.Context) ([]smee.Issue, error) {
-	var res []smee.Issue
+func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
 
-	c.RLock()
-	defer c.RUnlock()
-
-	for _, issue := range c.cache {
-		res = append(res, issue)
-	}
-
-	return res, nil
-}
-
-func (c *cache) ActiveIssueForRoom(ctx context.Context, room string) (smee.Issue, bool, error) {
-	c.RLock()
-	defer c.RUnlock()
-
-	for _, issue := range c.cache {
-		if issue.Room == room {
-			return issue, true, nil
+	if c.IssueStore != nil {
+		issue, err := c.IssueStore.CreateAlert(ctx, alert)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to create alert on substore: %w", err)
 		}
+
+		c.issues[issue.Room] = issue
+		return issue, nil
 	}
 
-	return smee.Issue{}, false, nil
-}
+	alert.ID = ksuid.New().String()
+	c.Log.Info("Creating alert", zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
 
-func (c *cache) AddIssueEvent(ctx context.Context, id string, event smee.IssueEvent) error {
-	c.Lock()
-	defer c.Unlock()
-
-	issue, ok := c.cache[id]
+	issue, ok := c.activeRoomIssue(alert.Room)
 	if !ok {
-		return fmt.Errorf("invalid issue id")
-	}
-
-	if c.persistent != nil {
-		if err := c.persistent.AddIssueEvent(ctx, id, event); err != nil {
-			return fmt.Errorf("unable to add persistent issue event: %w", err)
+		// create an issue if needed
+		issue = smee.Issue{
+			ID:     ksuid.New().String(),
+			Room:   alert.Room,
+			Start:  alert.Start,
+			Alerts: make(map[string]smee.Alert),
 		}
 	}
 
-	issue.Events = append(issue.Events, event)
-	c.cache[id] = issue
+	alert.IssueID = issue.ID
+	issue.Alerts[alert.ID] = alert
+	c.issues[issue.ID] = issue
+	return issue, nil
+}
+
+func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		issue, err := c.IssueStore.CloseAlert(ctx, issueID, alertID)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to close alert on substore: %w", err)
+		}
+
+		if issue.Active() {
+			c.issues[issue.ID] = issue
+		} else {
+			delete(c.issues, issue.ID)
+		}
+
+		return issue, nil
+	}
+
+	c.Log.Info("Closing alert", zap.String("alertID", alertID))
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+
+	alert, ok := issue.Alerts[alertID]
+	if !ok {
+		return smee.Issue{}, errors.New("alert does not exist on issue")
+	}
+
+	alert.End = time.Now()
+	issue.Alerts[alert.ID] = alert
+
+	// close the issue if there are no more active alerts
+	if hasActiveAlerts(issue) {
+		c.issues[issue.ID] = issue
+	} else {
+		issue.End = time.Now()
+		delete(c.issues, issue.ID)
+	}
+
+	return issue, nil
+}
+
+func (c *Cache) AddIssueEvents(ctx context.Context, issueID string, events ...smee.IssueEvent) error {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		if err := c.IssueStore.AddIssueEvents(ctx, issueID, events...); err != nil {
+			return fmt.Errorf("unable to add issue event  on substore: %w", err)
+		}
+
+		return nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return errors.New("issue does not exist")
+	}
+
+	issue.Events = append(issue.Events, events...)
+	c.issues[issue.ID] = issue
 	return nil
 }

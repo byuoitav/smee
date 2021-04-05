@@ -13,7 +13,6 @@ import (
 // Manager ...
 // Need a process to create alerts and other to close them
 type Manager struct {
-	AlertStore       smee.AlertStore
 	IssueStore       smee.IssueStore
 	EventStreamer    smee.EventStreamer
 	DeviceStateStore smee.DeviceStateStore
@@ -33,10 +32,7 @@ func (m *Manager) Run(ctx context.Context) error {
 	m.queue = make(chan alertAction, 1024)
 	group, gctx := errgroup.WithContext(ctx)
 
-	switch {
-	case m.AlertStore == nil:
-		return errors.New("alert store required")
-	case m.IssueStore == nil:
+	if m.IssueStore == nil {
 		return errors.New("issue store required")
 	}
 
@@ -85,9 +81,10 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 	defer cancel()
 
 	// see if this alert already exists
-	_, exists, err := m.AlertStore.ActiveAlert(ctx, alert.Room, alert.Device, alert.Type)
+	exists, err := m.IssueStore.ActiveAlertExists(ctx, alert.Room, alert.Device, alert.Type)
 	switch {
 	case err != nil:
+		// TODO handle err
 	case exists:
 		// don't need to do anything, this alert already exists
 		// TODO maybe add the event to the issue?
@@ -95,34 +92,13 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 		return
 	}
 
-	// see if an issue already exists for this room
-	issue, ok, err := m.IssueStore.ActiveIssueForRoom(ctx, alert.Room)
-	switch {
-	case err != nil:
-	case !ok:
-		// create a new issue
-		issue = smee.Issue{
-			Start: alert.Start,
-			Room:  alert.Room,
-		}
-
-		issue, err = m.IssueStore.CreateIssue(ctx, issue)
-		if err != nil {
-		}
-	}
-
-	// tie this alert to the active issue for this room
-	alert.IssueID = issue.ID
-
-	// create the alert
-	_, err = m.AlertStore.CreateAlert(ctx, alert)
+	issue, err := m.IssueStore.CreateAlert(ctx, alert)
 	if err != nil {
+		// TODO handle err
 	}
 
-	// add all of the events
-	for _, event := range events {
-		if err := m.IssueStore.AddIssueEvent(ctx, issue.ID, event); err != nil {
-		}
+	if err := m.IssueStore.AddIssueEvents(ctx, issue.ID, events...); err != nil {
+		// TODO handle err
 	}
 }
 
@@ -130,27 +106,12 @@ func (m *Manager) closeAlert(ctx context.Context, alert smee.Alert, events []sme
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	// get the issue for this room
-	issue, ok, err := m.IssueStore.ActiveIssueForRoom(ctx, alert.Room)
-	switch {
-	case err != nil:
-	case ok:
-		// add all of the events
-		for _, event := range events {
-			if err := m.IssueStore.AddIssueEvent(ctx, issue.ID, event); err != nil {
-			}
-		}
-
-		// close this issue if no more alerts are open
-		// and if closing this one should close the issue
-		// TODO does it not close if a SN incident is attached to it?
-		if len(issue.ActiveAlerts) == 1 && issue.ActiveAlerts[0].ID == alert.ID {
-			if err := m.IssueStore.CloseIssue(ctx, issue.ID); err != nil {
-			}
-		}
+	issue, err := m.IssueStore.CloseAlert(ctx, alert.IssueID, alert.ID)
+	if err != nil {
+		// TODO handle err
 	}
 
-	// close the alert
-	if err := m.AlertStore.CloseAlert(ctx, alert.ID); err != nil {
+	if err := m.IssueStore.AddIssueEvents(ctx, issue.ID, events...); err != nil {
+		// TODO handle err
 	}
 }

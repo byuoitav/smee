@@ -7,30 +7,30 @@ import (
 	"time"
 )
 
-type AlertStore interface {
-	CreateAlert(context.Context, Alert) (Alert, error)
-	CloseAlert(context.Context, string) error
-	ActiveAlerts(context.Context) ([]Alert, error)
-	ActiveAlert(ctx context.Context, room, device, typ string) (Alert, bool, error)
-	ActiveAlertsByType(context.Context, string) ([]Alert, error)
-}
-
 type IssueStore interface {
-	CreateIssue(context.Context, Issue) (Issue, error)
-	CloseIssue(context.Context, string) error
+	CreateAlert(context.Context, Alert) (Issue, error)
+	CloseAlert(ctx context.Context, issueID, alertID string) (Issue, error)
+	AddIssueEvents(ctx context.Context, issueID string, event ...IssueEvent) error
+
+	ActiveAlertExists(ctx context.Context, room, device, typ string) (bool, error)
+	ActiveAlerts(context.Context) ([]Alert, error)
+	ActiveAlertsByType(context.Context, string) ([]Alert, error)
 	ActiveIssues(context.Context) ([]Issue, error)
-	ActiveIssueForRoom(context.Context, string) (Issue, bool, error)
-	AddIssueEvent(context.Context, string, IssueEvent) error
 }
 
 type Issue struct {
-	ID             string
-	Room           string
-	Start          time.Time
-	End            time.Time
-	ActiveAlerts   []Alert
-	InactiveAlerts []Alert
-	Events         []IssueEvent
+	ID    string
+	Room  string
+	Start time.Time
+	End   time.Time
+
+	// Alerts is a map of an alertID to an alert
+	Alerts map[string]Alert
+	Events []IssueEvent
+}
+
+func (i *Issue) Active() bool {
+	return !i.End.IsZero()
 }
 
 type IssueEvent struct {
@@ -94,6 +94,10 @@ type Alert struct {
 	Type    string
 	Start   time.Time
 	End     time.Time
+}
+
+func (a *Alert) Active() bool {
+	return !a.End.IsZero()
 }
 
 type AlertManager interface {
