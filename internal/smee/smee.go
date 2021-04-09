@@ -30,7 +30,7 @@ type Issue struct {
 }
 
 func (i *Issue) Active() bool {
-	return !i.End.IsZero()
+	return i.End.IsZero()
 }
 
 type IssueEvent struct {
@@ -97,7 +97,7 @@ type Alert struct {
 }
 
 func (a *Alert) Active() bool {
-	return !a.End.IsZero()
+	return a.End.IsZero()
 }
 
 type AlertManager interface {

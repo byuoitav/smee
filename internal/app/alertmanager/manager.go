@@ -116,7 +116,7 @@ func (m *Manager) closeAlert(ctx context.Context, alert smee.Alert, events []sme
 	}
 
 	if err := m.IssueStore.AddIssueEvents(ctx, issue.ID, events...); err != nil {
-		m.Log.Error("unable to close alert", zap.Error(err), zap.String("issueID", alert.IssueID), zap.String("alertID", alert.ID))
+		m.Log.Error("unable to add issue events", zap.Error(err), zap.String("issueID", alert.IssueID), zap.String("alertID", alert.ID))
 		return
 	}
 }

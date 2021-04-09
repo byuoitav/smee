@@ -58,7 +58,6 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	}
 
 	alert.ID = ksuid.New().String()
-	c.Log.Info("Creating alert", zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
 
 	issue, ok := c.activeRoomIssue(alert.Room)
 	if !ok {
@@ -69,7 +68,11 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 			Start:  alert.Start,
 			Alerts: make(map[string]smee.Alert),
 		}
+
+		c.Log.Info("Creating issue", zap.String("room", issue.Room), zap.String("issueID", issue.ID))
 	}
+
+	c.Log.Info("Creating alert", zap.String("room", alert.Room), zap.String("issueID", issue.ID), zap.String("alertID", alert.ID), zap.String("device", alert.Device), zap.String("type", alert.Type))
 
 	alert.IssueID = issue.ID
 	issue.Alerts[alert.ID] = alert
@@ -96,8 +99,6 @@ func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.I
 		return issue, nil
 	}
 
-	c.Log.Info("Closing alert", zap.String("alertID", alertID))
-
 	issue, ok := c.issues[issueID]
 	if !ok {
 		return smee.Issue{}, errors.New("issue does not exist")
@@ -108,6 +109,8 @@ func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.I
 		return smee.Issue{}, errors.New("alert does not exist on issue")
 	}
 
+	c.Log.Info("Closing alert", zap.String("room", alert.Room), zap.String("issueID", issue.ID), zap.String("alertID", alert.ID), zap.String("device", alert.Device), zap.String("type", alert.Type))
+
 	alert.End = time.Now()
 	issue.Alerts[alert.ID] = alert
 
@@ -115,6 +118,8 @@ func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.I
 	if hasActiveAlerts(issue) {
 		c.issues[issue.ID] = issue
 	} else {
+		c.Log.Info("Closing issue", zap.String("room", issue.Room), zap.String("issueID", issueID))
+
 		issue.End = time.Now()
 		delete(c.issues, issue.ID)
 	}
@@ -136,7 +141,8 @@ func (c *Cache) AddIssueEvents(ctx context.Context, issueID string, events ...sm
 
 	issue, ok := c.issues[issueID]
 	if !ok {
-		return errors.New("issue does not exist")
+		// for the cache, we're just going to assume this issue has been closed
+		return nil
 	}
 
 	issue.Events = append(issue.Events, events...)

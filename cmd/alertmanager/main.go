@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
@@ -25,6 +26,7 @@ type Deps struct {
 	eventStreamer smee.EventStreamer
 
 	httpServer   *gin.Engine
+	handlers     *handlers.Handlers
 	httpListener net.Listener
 }
 

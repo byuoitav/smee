@@ -51,6 +51,10 @@ func (c *Cache) ActiveAlerts(ctx context.Context) ([]smee.Alert, error) {
 
 	var res []smee.Alert
 	for _, issue := range c.issues {
+		if !issue.Active() {
+			continue
+		}
+
 		for _, alert := range issue.Alerts {
 			if alert.Active() {
 				res = append(res, alert)
@@ -67,6 +71,10 @@ func (c *Cache) ActiveAlertsByType(ctx context.Context, typ string) ([]smee.Aler
 
 	var res []smee.Alert
 	for _, issue := range c.issues {
+		if !issue.Active() {
+			continue
+		}
+
 		for _, alert := range issue.Alerts {
 			if alert.Active() && alert.Type == typ {
 				res = append(res, alert)

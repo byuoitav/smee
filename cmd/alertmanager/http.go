@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 
+	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -20,6 +21,10 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 		d.log.Fatal("unable to bind listener", zap.Error(err))
 	}
 
+	d.handlers = &handlers.Handlers{
+		IssueStore: d.issueStore,
+	}
+
 	// build engine
 	r := gin.New()
 	r.Use(gin.Recovery())
@@ -28,6 +33,9 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	debug.GET("/healthz", func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	})
+
+	api := r.Group("api/v1")
+	api.GET("/issues", d.handlers.ActiveIssues)
 
 	d.httpServer = r
 }
