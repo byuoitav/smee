@@ -102,5 +102,4 @@ func (a *Alert) Active() bool {
 
 type AlertManager interface {
 	Run(context.Context) error
-	// Manage(Alert) what was this for?
 }
