@@ -2,6 +2,7 @@ package servicenow
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -23,7 +24,15 @@ func TestIncident(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	inc, err := client.Incident(ctx, "")
+	inc, err := client.IncidentByNumber(ctx, "INC0481325")
 	is.NoErr(err)
-	is.True(inc.ID == "")
+
+	fmt.Printf("inc: %+v\n", inc)
+
+	cmp, err := client.Incident(ctx, inc.ID)
+	is.NoErr(err)
+	is.Equal(inc, cmp)
+
+	// add a note
+	is.NoErr(client.AddInternalNote(ctx, inc.ID, "this is a test note from go test"))
 }
