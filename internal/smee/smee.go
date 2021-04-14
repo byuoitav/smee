@@ -9,7 +9,7 @@ import (
 type IncidentStore interface {
 	Incident(context.Context, string) (Incident, error)
 	IncidentByName(context.Context, string) (Incident, error)
-	AddIssueEvents(context.Context, string, ...IssueEvent)
+	AddIssueEvents(context.Context, string, ...IssueEvent) error
 }
 
 type Incident struct {

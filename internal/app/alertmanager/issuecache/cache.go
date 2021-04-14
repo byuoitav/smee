@@ -13,8 +13,9 @@ import (
 )
 
 type Cache struct {
-	IssueStore smee.IssueStore
-	Log        *zap.Logger
+	IssueStore    smee.IssueStore
+	IncidentStore smee.IncidentStore
+	Log           *zap.Logger
 
 	// issues is a map of issueID to the currently active issue for that room
 	issues map[string]smee.Issue
@@ -63,10 +64,11 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	if !ok {
 		// create an issue if needed
 		issue = smee.Issue{
-			ID:     ksuid.New().String(),
-			Room:   alert.Room,
-			Start:  alert.Start,
-			Alerts: make(map[string]smee.Alert),
+			ID:        ksuid.New().String(),
+			Room:      alert.Room,
+			Start:     alert.Start,
+			Alerts:    make(map[string]smee.Alert),
+			Incidents: make(map[string]smee.Incident),
 		}
 
 		c.Log.Info("Creating issue", zap.String("room", issue.Room), zap.String("issueID", issue.ID))
@@ -133,7 +135,7 @@ func (c *Cache) AddIssueEvents(ctx context.Context, issueID string, events ...sm
 
 	if c.IssueStore != nil {
 		if err := c.IssueStore.AddIssueEvents(ctx, issueID, events...); err != nil {
-			return fmt.Errorf("unable to add issue event  on substore: %w", err)
+			return fmt.Errorf("unable to add issue event on substore: %w", err)
 		}
 
 		return nil
@@ -146,6 +148,38 @@ func (c *Cache) AddIssueEvents(ctx context.Context, issueID string, events ...sm
 	}
 
 	issue.Events = append(issue.Events, events...)
+	c.issues[issue.ID] = issue
+
+	if c.IncidentStore != nil {
+		for incID := range issue.Incidents {
+			if err := c.IncidentStore.AddIssueEvents(ctx, incID, events...); err != nil {
+				return fmt.Errorf("unable to add issue events to incident %q", incID)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (c *Cache) LinkIncident(ctx context.Context, issueID string, inc smee.Incident) error {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		if err := c.IssueStore.LinkIncident(ctx, issueID, inc); err != nil {
+			return fmt.Errorf("unable to link incident on substore: %w", err)
+		}
+
+		return nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		// for the cache, we're just going to assume this issue has been closed
+		return nil
+	}
+
+	issue.Incidents[inc.ID] = inc
 	c.issues[issue.ID] = issue
 	return nil
 }

@@ -68,7 +68,7 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 							{
 								Type:      smee.TypeSystemMessage,
 								Timestamp: time.Now(),
-								Data:      smee.NewSystemMessage(fmt.Sprintf("|%v| %v alert ended", device, typ)),
+								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert ended", device, typ)),
 							},
 						},
 					}
@@ -91,7 +91,7 @@ func (m *Manager) manageStateAlert(ctx context.Context, typ string, config smee.
 						{
 							Type:      smee.TypeSystemMessage,
 							Timestamp: time.Now(),
-							Data:      smee.NewSystemMessage(fmt.Sprintf("|%v| %v alert started", device, typ)),
+							Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started", device, typ)),
 						},
 					},
 				}

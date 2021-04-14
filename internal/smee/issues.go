@@ -12,6 +12,7 @@ type IssueStore interface {
 	CreateAlert(context.Context, Alert) (Issue, error)
 	CloseAlert(ctx context.Context, issueID, alertID string) (Issue, error)
 	AddIssueEvents(ctx context.Context, issueID string, event ...IssueEvent) error
+	LinkIncident(ctx context.Context, issueID string, inc Incident) error
 
 	ActiveAlertExists(ctx context.Context, room, device, typ string) (bool, error)
 	ActiveAlerts(context.Context) ([]Alert, error)

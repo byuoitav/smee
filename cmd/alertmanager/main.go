@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/byuoitav/auth/wso2"
 	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/gin-gonic/gin"
@@ -15,13 +16,18 @@ import (
 
 type Deps struct {
 	// set by command line flags
-	Port     int
-	HubURL   string
-	LogLevel string
+	Port         int
+	HubURL       string
+	LogLevel     string
+	ClientID     string
+	ClientSecret string
+	GatewayURL   string
 
 	// created by functions
 	log           *zap.Logger
+	wso2          *wso2.Client
 	issueStore    smee.IssueStore
+	incidentStore smee.IncidentStore
 	alertManager  smee.AlertManager
 	eventStreamer smee.EventStreamer
 
@@ -36,6 +42,9 @@ func main() {
 	pflag.IntVarP(&deps.Port, "port", "P", 8080, "port to run the server on")
 	pflag.StringVarP(&deps.LogLevel, "log-level", "L", "", "level to log at. refer to https://godoc.org/go.uber.org/zap/zapcore#Level for options")
 	pflag.StringVar(&deps.HubURL, "hub-url", "", "url of the event hub")
+	pflag.StringVar(&deps.ClientID, "client-id", "", "wso2 key")
+	pflag.StringVar(&deps.ClientSecret, "client-secret", "", "wso2 secret")
+	pflag.StringVar(&deps.GatewayURL, "gateway-url", "https://api.byu.edu", "wso2 gateway address")
 	pflag.Parse()
 
 	deps.build()

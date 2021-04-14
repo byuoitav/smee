@@ -6,9 +6,12 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/byuoitav/auth/wso2"
 	"github.com/byuoitav/smee/internal/app/alertmanager"
+	"github.com/byuoitav/smee/internal/app/alertmanager/incidents"
 	"github.com/byuoitav/smee/internal/app/alertmanager/issuecache"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
+	"github.com/byuoitav/smee/internal/pkg/servicenow"
 	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
 	"github.com/byuoitav/smee/internal/smee"
 	"go.uber.org/zap"
@@ -20,6 +23,8 @@ func (d *Deps) build() {
 	defer cancel()
 
 	d.buildLog()
+	d.buildWSO2()
+	d.buildIncidentStore()
 	d.buildIssueStore(ctx)
 	d.buildEventStreamer()
 	d.buildAlertManager()
@@ -32,7 +37,8 @@ func (d *Deps) cleanup() {
 
 func (d *Deps) buildIssueStore(ctx context.Context) {
 	cache := &issuecache.Cache{
-		Log: d.log.Named("issue-cache"),
+		Log:           d.log.Named("issue-cache"),
+		IncidentStore: d.incidentStore,
 	}
 
 	if err := cache.Sync(ctx); err != nil {
@@ -40,6 +46,14 @@ func (d *Deps) buildIssueStore(ctx context.Context) {
 	}
 
 	d.issueStore = cache
+}
+
+func (d *Deps) buildIncidentStore() {
+	d.incidentStore = &incidents.Store{
+		Client: &servicenow.Client{
+			Client: d.wso2,
+		},
+	}
 }
 
 func (d *Deps) buildEventStreamer() {
@@ -76,6 +90,10 @@ func (d *Deps) buildAlertManager() {
 		},
 		Log: d.log.Named("alert-manager"),
 	}
+}
+
+func (d *Deps) buildWSO2() {
+	d.wso2 = wso2.New(d.ClientID, d.ClientSecret, d.GatewayURL, "")
 }
 
 func (d *Deps) buildLog() {
