@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/byuoitav/auth/wso2"
 )
@@ -52,6 +53,10 @@ func (c *Client) Incident(ctx context.Context, id string) (Incident, error) {
 }
 
 func (c *Client) IncidentByNumber(ctx context.Context, number string) (Incident, error) {
+	if !strings.HasPrefix(number, "INC") {
+		return Incident{}, errors.New("only INC tickets are supported")
+	}
+
 	url := "https://api.byu.edu:443/domains/servicenow/incident/v1.1/incident"
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -60,8 +65,8 @@ func (c *Client) IncidentByNumber(ctx context.Context, number string) (Incident,
 	}
 
 	query := req.URL.Query()
-	query.Add("sysparm_limit", "1")
-	query.Add("sysparm_query", fmt.Sprintf("number>=%s", number))
+	query.Add("sysparm_limit", "2")
+	query.Add("sysparm_query", fmt.Sprintf("number=%s", number))
 	req.URL.RawQuery = query.Encode()
 
 	resp, err := c.Client.Do(req)
@@ -82,11 +87,15 @@ func (c *Client) IncidentByNumber(ctx context.Context, number string) (Incident,
 		return Incident{}, fmt.Errorf("unable to decode response: %w", err)
 	}
 
-	if len(wrapper.Result) == 0 {
+	switch len(wrapper.Result) {
+	case 0:
 		return Incident{}, errors.New("incident does not exist")
+	case 1:
+		return wrapper.Result[0], nil
+	default:
+		fmt.Printf("wrapper: %+v", wrapper)
+		return Incident{}, errors.New("number matches multiple incidents")
 	}
-
-	return wrapper.Result[0], nil
 }
 
 func (c *Client) AddInternalNote(ctx context.Context, id, note string) error {
