@@ -2,41 +2,19 @@ package smee
 
 import (
 	"context"
-	"encoding/json"
 	"regexp"
 	"time"
 )
 
-type IssueStore interface {
-	CreateAlert(context.Context, Alert) (Issue, error)
-	CloseAlert(ctx context.Context, issueID, alertID string) (Issue, error)
-	AddIssueEvents(ctx context.Context, issueID string, event ...IssueEvent) error
-
-	ActiveAlertExists(ctx context.Context, room, device, typ string) (bool, error)
-	ActiveAlerts(context.Context) ([]Alert, error)
-	ActiveAlertsByType(context.Context, string) ([]Alert, error)
-	ActiveIssues(context.Context) ([]Issue, error)
+type IncidentStore interface {
+	Incident(context.Context, string) (Incident, error)
+	IncidentByName(context.Context, string) (Incident, error)
+	AddIssueEvents(context.Context, string, ...IssueEvent)
 }
 
-type Issue struct {
-	ID    string
-	Room  string
-	Start time.Time
-	End   time.Time
-
-	// Alerts is a map of an alertID to an alert
-	Alerts map[string]Alert
-	Events []IssueEvent
-}
-
-func (i *Issue) Active() bool {
-	return i.End.IsZero()
-}
-
-type IssueEvent struct {
-	Timestamp time.Time
-	Type      string
-	Data      json.RawMessage
+type Incident struct {
+	ID   string
+	Name string
 }
 
 type Event struct {
@@ -103,3 +81,4 @@ func (a *Alert) Active() bool {
 type AlertManager interface {
 	Run(context.Context) error
 }
+

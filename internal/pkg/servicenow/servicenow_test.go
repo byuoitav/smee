@@ -24,6 +24,7 @@ func TestIncident(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// my test incident :)
 	inc, err := client.IncidentByNumber(ctx, "INC0481325")
 	is.NoErr(err)
 

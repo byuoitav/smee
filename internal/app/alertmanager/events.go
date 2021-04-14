@@ -52,9 +52,9 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 					alert:  alert,
 					events: []smee.IssueEvent{
 						{
-							Type:      "system-message",
+							Type:      smee.TypeSystemMessage,
 							Timestamp: time.Now(),
-							Data:      []byte(fmt.Sprintf(`{"msg": "|%v| %v alert started. Value: %v"}`, event.Device, typ, event.Value)),
+							Data:      smee.NewSystemMessage(fmt.Sprintf("|%v| %v alert started (Value: %v)", event.Device, typ, event.Value)),
 						},
 					},
 				}
@@ -116,9 +116,9 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 					alert:  alert,
 					events: []smee.IssueEvent{
 						{
-							Type:      "system-message",
+							Type:      smee.TypeSystemMessage,
 							Timestamp: time.Now(),
-							Data:      []byte(fmt.Sprintf(`{"msg": "|%v| %v alert ended. Value: %v"}`, event.Device, alert.Type, event.Value)),
+							Data:      smee.NewSystemMessage(fmt.Sprintf("|%v| %v alert ended (Value: %v)", event.Device, alert.Type, event.Value)),
 						},
 					},
 				}
