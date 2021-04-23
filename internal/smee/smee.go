@@ -13,8 +13,8 @@ type IncidentStore interface {
 }
 
 type Incident struct {
-	ID   string
-	Name string
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type Event struct {
@@ -65,13 +65,13 @@ type AlertTransitionStateQuery struct {
 
 // change to room/device ID's
 type Alert struct {
-	ID      string
-	IssueID string
-	Room    string
-	Device  string
-	Type    string
-	Start   time.Time
-	End     time.Time
+	ID      string    `json:"id"`
+	IssueID string    `json:"issueID"`
+	Room    string    `json:"room"`
+	Device  string    `json:"device"`
+	Type    string    `json:"type"`
+	Start   time.Time `json:"start"`
+	End     time.Time `json:"end"`
 }
 
 func (a *Alert) Active() bool {

@@ -65,9 +65,9 @@ func NewSystemMessage(msg string) json.RawMessage {
 }
 
 type IssueEvent struct {
-	Timestamp time.Time
-	Type      IssueEventType
-	Data      json.RawMessage
+	Timestamp time.Time       `json:"timestamp"`
+	Type      IssueEventType  `json:"type"`
+	Data      json.RawMessage `json:"data"`
 }
 
 func (i IssueEvent) ParseData() (interface{}, error) {

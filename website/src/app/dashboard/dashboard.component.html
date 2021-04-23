@@ -14,10 +14,33 @@
 				<td mat-cell *matCellDef="let row">{{row.room}}</td>
 			</ng-container>
 
+			<!-- Alert Count Column -->
+			<ng-container matColumnDef="alertCount">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>Active Alerts</th>
+				<td mat-cell *matCellDef="let row">{{row.alerts?.size}}</td>
+			</ng-container>
+
+			<!-- Started Column -->
+			<ng-container matColumnDef="started">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>Started At</th>
+				<td mat-cell *matCellDef="let row">{{row.start | date:'medium'}}</td>
+			</ng-container>
+
+			<!-- Incident Column -->
+			<ng-container matColumnDef="incidents">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>Incident</th>
+				<td mat-cell *matCellDef="let row">
+					<button *ngIf="row.incidents?.size == 0" mat-button>Create/Link</button>
+					<a *ngIf="row.incidents?.size > 0"
+						href="{{'https://support.byu.edu/nav_to.do?uri=task.do?sys_id=' + row.incidents.values().next().value.id}}"
+						mat-button>{{row.incidents.values().next().value.name}}</a>
+				</td>
+			</ng-container>
+
 			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 			<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
-			<tr class="mat-row" *matNoDatRow>
+			<tr class="mat-row" *matNoDataRow>
 				<td class="mat-cell" colspan="4">No issues found matching the filter</td>
 			</tr>
 		</table>
