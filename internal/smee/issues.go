@@ -22,26 +22,26 @@ type IssueStore interface {
 
 type Issue struct {
 	// ID is the unique ID of this Issue
-	ID string
+	ID string `json:"id"`
 
 	// Room is the room this issue is associated with
-	Room string
+	Room string `json:"room"`
 
 	// Start is the time this issue was created
-	Start time.Time
+	Start time.Time `json:"start"`
 
 	// End is the time this issue was resolved
-	End time.Time
+	End time.Time `json:"end"`
 
 	// Alerts is a map of alertID -> alert
-	Alerts map[string]Alert
+	Alerts map[string]Alert `json:"alerts"`
 
 	// Incidents is a map of incidentID -> incident
-	Incidents map[string]Incident
+	Incidents map[string]Incident `json:"incidents"`
 
 	// Events is an ordered list by time of IssueEvents that have happened
 	// on this Issue
-	Events []IssueEvent
+	Events []IssueEvent `json:"events"`
 }
 
 // Active returns true if this issue is currently active, and false if this
