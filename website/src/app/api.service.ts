@@ -69,6 +69,12 @@ export class ApiService {
       params: new HttpParams().set('incName', incName)
     }).pipe(
       tap(data => console.log("linkIssueToIncident response", data)),
+      map((issue: Issue) => {
+        issue.alerts = new Map(Object.entries(issue.alerts));
+        issue.incidents = new Map(Object.entries(issue.incidents));
+
+        return issue;
+      }),
     );
   }
 

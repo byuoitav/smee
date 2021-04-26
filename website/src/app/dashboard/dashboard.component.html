@@ -40,8 +40,7 @@
 						<button color="accent" (click)="linkIncident(row)" mat-button>Link</button>
 					</ng-container>
 
-					<a *ngIf="row.incidents?.size > 0"
-						href="{{'https://support.byu.edu/nav_to.do?uri=task.do?sys_id=' + row.incidents.values().next().value.id}}"
+					<a *ngIf="row.incidents?.size > 0" [href]="incidentLink(row.incidents.values().next().value)"
 						mat-button>{{row.incidents.values().next().value.name}}</a>
 				</td>
 			</ng-container>

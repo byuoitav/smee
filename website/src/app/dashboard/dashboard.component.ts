@@ -56,8 +56,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    ref.afterClosed().subscribe(() => {
+    ref.afterClosed().subscribe(issue => {
+      if (!issue || !issue.incidents) {
+        this.updateIssues();
+        return;
+      }
+
+      for (const [_, inc] of issue.incidents) {
+        window.open(this.incidentLink(inc));
+        break;
+      }
+
+      this.updateIssues();
     })
+  }
+
+  incidentLink(inc: Incident): string {
+    return `https://support.byu.edu/nav_to.do?uri=task.do?sys_id=${inc.id}`;
   }
 }
 
@@ -76,7 +91,7 @@ export class DashboardCreateDialog {
 export class DashboardLinkDialog {
   incidentName: string | undefined = undefined;
 
-  constructor(private dialogRef: MatDialogRef<DashboardLinkDialog>,
+  constructor(private dialogRef: MatDialogRef<DashboardLinkDialog, Issue>,
     private api: ApiService,
     @Inject(MAT_DIALOG_DATA) public data: DialogData) {}
 
@@ -86,9 +101,10 @@ export class DashboardLinkDialog {
     }
 
     this.api.linkIssueToIncident(this.data.issue.id, this.incidentName).subscribe(issue => {
-      this.dialogRef.close();
+      this.dialogRef.close(issue);
     }, err => {
       console.log("unable to link issue", err);
+
       // TODO show error popup
     });
   }
