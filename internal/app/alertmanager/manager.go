@@ -101,7 +101,7 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 
 	// TODO: remove test code
 	if issue.Room == "ITB-1102" {
-		err := m.IssueStore.LinkIncident(ctx, issue.ID, smee.Incident{ID: "82f043451ba320505ca79647b04bcb97", Name: "INC0481325"})
+		_, err := m.IssueStore.LinkIncident(ctx, issue.ID, smee.Incident{ID: "82f043451ba320505ca79647b04bcb97", Name: "INC0481325"})
 		if err != nil {
 			m.Log.Error("unable to link incident", zap.Error(err))
 		}

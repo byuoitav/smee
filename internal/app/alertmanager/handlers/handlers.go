@@ -12,7 +12,8 @@ import (
 // TODO something to view queue sizes
 
 type Handlers struct {
-	IssueStore smee.IssueStore
+	IssueStore    smee.IssueStore
+	IncidentStore smee.IncidentStore
 }
 
 func (h *Handlers) ActiveIssues(c *gin.Context) {
@@ -26,4 +27,30 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, issues)
+}
+
+func (h *Handlers) LinkIssueToIncident(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueID := c.Param("issueID")
+	incName := c.Query("incName")
+	if len(incName) == 0 {
+		c.String(http.StatusBadRequest, "must include incName")
+		return
+	}
+
+	inc, err := h.IncidentStore.IncidentByName(ctx, incName)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to get incident: %s", err)
+		return
+	}
+
+	iss, err := h.IssueStore.LinkIncident(ctx, issueID, inc)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to link incident: %s", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, iss)
 }

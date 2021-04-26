@@ -22,7 +22,8 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	}
 
 	d.handlers = &handlers.Handlers{
-		IssueStore: d.issueStore,
+		IssueStore:    d.issueStore,
+		IncidentStore: d.incidentStore,
 	}
 
 	// build engine
@@ -36,6 +37,7 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 
 	api := r.Group("api/v1")
 	api.GET("/issues", d.handlers.ActiveIssues)
+	api.PUT("/issues/:issueID/linkIncident", d.handlers.LinkIssueToIncident)
 
 	d.httpServer = r
 }

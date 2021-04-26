@@ -161,25 +161,27 @@ func (c *Cache) AddIssueEvents(ctx context.Context, issueID string, events ...sm
 	return nil
 }
 
-func (c *Cache) LinkIncident(ctx context.Context, issueID string, inc smee.Incident) error {
+func (c *Cache) LinkIncident(ctx context.Context, issueID string, inc smee.Incident) (smee.Issue, error) {
 	c.issuesMu.Lock()
 	defer c.issuesMu.Unlock()
 
 	if c.IssueStore != nil {
-		if err := c.IssueStore.LinkIncident(ctx, issueID, inc); err != nil {
-			return fmt.Errorf("unable to link incident on substore: %w", err)
+		iss, err := c.IssueStore.LinkIncident(ctx, issueID, inc)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to link incident on substore: %w", err)
 		}
 
-		return nil
+		return iss, nil
 	}
 
 	issue, ok := c.issues[issueID]
 	if !ok {
 		// for the cache, we're just going to assume this issue has been closed
-		return nil
+		// and that linking at this point doesn't do anything anyways
+		return smee.Issue{}, nil
 	}
 
 	issue.Incidents[inc.ID] = inc
 	c.issues[issue.ID] = issue
-	return nil
+	return issue, nil
 }

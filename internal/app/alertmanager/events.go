@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
+	"go.uber.org/zap"
 )
 
 func (m *Manager) generateEventAlerts(ctx context.Context) error {
@@ -98,7 +99,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 				switch {
 				case trans == nil:
 					continue
-				case event.Room != alert.Room && event.Device != alert.Device:
+				case event.Room != alert.Room || event.Device != alert.Device:
 					continue
 				case trans.KeyMatches != nil && !trans.KeyMatches.MatchString(event.Key):
 					continue
@@ -109,6 +110,8 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 				case trans.ValueDoesNotMatch != nil && trans.ValueDoesNotMatch.MatchString(event.Value):
 					continue
 				}
+
+				m.Log.Debug("Closing issue because of event", zap.Any("event", event))
 
 				// close the alert
 				m.queue <- alertAction{
