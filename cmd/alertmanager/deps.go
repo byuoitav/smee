@@ -10,6 +10,7 @@ import (
 	"github.com/byuoitav/smee/internal/app/alertmanager"
 	"github.com/byuoitav/smee/internal/app/alertmanager/incidents"
 	"github.com/byuoitav/smee/internal/app/alertmanager/issuecache"
+	"github.com/byuoitav/smee/internal/app/alertmanager/maintenance"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
 	"github.com/byuoitav/smee/internal/pkg/servicenow"
 	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
@@ -26,6 +27,7 @@ func (d *Deps) build() {
 	d.buildWSO2()
 	d.buildIncidentStore()
 	d.buildIssueStore(ctx)
+	d.buildMaintenanceStore(ctx)
 	d.buildEventStreamer()
 	d.buildAlertManager()
 	d.buildHTTPServer(ctx)
@@ -46,6 +48,18 @@ func (d *Deps) buildIssueStore(ctx context.Context) {
 	}
 
 	d.issueStore = cache
+}
+
+func (d *Deps) buildMaintenanceStore(ctx context.Context) {
+	cache := &maintenance.Cache{
+		Log: d.log.Named("maintenance-cache"),
+	}
+
+	if err := cache.Sync(ctx); err != nil {
+		d.log.Fatal("unable to sync maintenance cache", zap.Error(err))
+	}
+
+	d.maintenanceStore = cache
 }
 
 func (d *Deps) buildIncidentStore() {
@@ -74,8 +88,9 @@ func (d *Deps) buildEventStreamer() {
 
 func (d *Deps) buildAlertManager() {
 	d.alertManager = &alertmanager.Manager{
-		IssueStore:    d.issueStore,
-		EventStreamer: d.eventStreamer,
+		IssueStore:       d.issueStore,
+		MaintenanceStore: d.maintenanceStore,
+		EventStreamer:    d.eventStreamer,
 		AlertConfigs: map[string]smee.AlertConfig{
 			"websocket": {
 				Create: smee.AlertTransition{

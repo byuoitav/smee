@@ -14,6 +14,7 @@ import (
 // Need a process to create alerts and other to close them
 type Manager struct {
 	IssueStore       smee.IssueStore
+	MaintenanceStore smee.MaintenanceStore
 	EventStreamer    smee.EventStreamer
 	DeviceStateStore smee.DeviceStateStore
 	AlertConfigs     map[string]smee.AlertConfig
@@ -88,8 +89,18 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 		return
 	case exists:
 		// don't need to do anything, this alert already exists
-		m.Log.Info("NOT creating duplicate alert", zap.String("room", alert.Room))
 		// TODO maybe add the event to the issue?
+		return
+	}
+
+	// see if this room is in maintenance
+	maint, err := m.MaintenanceStore.RoomInMaintenance(ctx, alert.Room)
+	switch {
+	case err != nil:
+		m.Log.Error("unable to check if room is in maintenance", zap.Error(err), zap.String("room", alert.Room))
+		return
+	case maint:
+		// don't create an alert since this room is in maintenance
 		return
 	}
 

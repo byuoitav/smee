@@ -12,8 +12,9 @@ import (
 // TODO something to view queue sizes
 
 type Handlers struct {
-	IssueStore    smee.IssueStore
-	IncidentStore smee.IncidentStore
+	IssueStore       smee.IssueStore
+	IncidentStore    smee.IncidentStore
+	MaintenanceStore smee.MaintenanceStore
 }
 
 func (h *Handlers) ActiveIssues(c *gin.Context) {

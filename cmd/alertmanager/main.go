@@ -24,12 +24,13 @@ type Deps struct {
 	GatewayURL   string
 
 	// created by functions
-	log           *zap.Logger
-	wso2          *wso2.Client
-	issueStore    smee.IssueStore
-	incidentStore smee.IncidentStore
-	alertManager  smee.AlertManager
-	eventStreamer smee.EventStreamer
+	log              *zap.Logger
+	wso2             *wso2.Client
+	issueStore       smee.IssueStore
+	incidentStore    smee.IncidentStore
+	maintenanceStore smee.MaintenanceStore
+	alertManager     smee.AlertManager
+	eventStreamer    smee.EventStreamer
 
 	httpServer   *gin.Engine
 	handlers     *handlers.Handlers

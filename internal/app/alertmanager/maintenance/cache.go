@@ -32,6 +32,9 @@ func (c *Cache) Sync(ctx context.Context) error {
 		for i := range rooms {
 			c.rooms[rooms[i]] = true
 		}
+
+		// TODO remove
+		c.rooms["ITB-1010"] = true
 	}
 
 	c.Log.Info("Synced cache", zap.Int("roomsInMaintenance", len(c.rooms)))

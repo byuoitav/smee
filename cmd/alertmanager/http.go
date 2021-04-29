@@ -22,8 +22,9 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	}
 
 	d.handlers = &handlers.Handlers{
-		IssueStore:    d.issueStore,
-		IncidentStore: d.incidentStore,
+		IssueStore:       d.issueStore,
+		MaintenanceStore: d.maintenanceStore,
+		IncidentStore:    d.incidentStore,
 	}
 
 	// build engine
@@ -39,6 +40,10 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	api.GET("/issues", d.handlers.ActiveIssues)
 	api.PUT("/issues/:issueID/linkIncident", d.handlers.LinkIssueToIncident)
 	api.PUT("/issues/:issueID/createIncident", d.handlers.CreateIncidentFromIssue)
+
+	api.GET("/maintenance", d.handlers.RoomsInMaintenance)
+	api.GET("/maintenance/:roomID", d.handlers.RoomInMaintenance)
+	api.PUT("/maintenance/:roomID", d.handlers.SetRoomInMaintenance)
 
 	d.httpServer = r
 }
