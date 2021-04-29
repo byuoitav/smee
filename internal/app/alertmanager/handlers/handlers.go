@@ -54,3 +54,34 @@ func (h *Handlers) LinkIssueToIncident(c *gin.Context) {
 
 	c.JSON(http.StatusOK, iss)
 }
+
+func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueID := c.Param("issueID")
+	shortDesc := c.Query("shortDescription")
+	if len(shortDesc) == 0 {
+		c.String(http.StatusBadRequest, "must include shortDescription")
+		return
+	}
+
+	inc := smee.Incident{
+		ShortDescription: shortDesc,
+		Caller:           "", // pull from context once auth is done
+	}
+
+	inc, err := h.IncidentStore.CreateIncident(ctx, inc)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to create incident: %s", err)
+		return
+	}
+
+	iss, err := h.IssueStore.LinkIncident(ctx, issueID, inc)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to link incident: %s", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, iss)
+}

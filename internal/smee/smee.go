@@ -10,11 +10,17 @@ type IncidentStore interface {
 	Incident(context.Context, string) (Incident, error)
 	IncidentByName(context.Context, string) (Incident, error)
 	AddIssueEvents(context.Context, string, ...IssueEvent) error
+	CreateIncident(context.Context, Incident) (Incident, error)
 }
 
 type Incident struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+
+	// these fields are not filled in the issue store
+	// only when you use the incident store
+	Caller           string `json:"caller,omitempty"`
+	ShortDescription string `json:"shortDescription,omitempty"`
 }
 
 type Event struct {

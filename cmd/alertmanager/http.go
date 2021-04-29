@@ -38,6 +38,7 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	api := r.Group("api/v1")
 	api.GET("/issues", d.handlers.ActiveIssues)
 	api.PUT("/issues/:issueID/linkIncident", d.handlers.LinkIssueToIncident)
+	api.PUT("/issues/:issueID/createIncident", d.handlers.CreateIncidentFromIssue)
 
 	d.httpServer = r
 }

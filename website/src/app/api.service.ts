@@ -72,7 +72,19 @@ export class ApiService {
       map((issue: Issue) => {
         issue.alerts = new Map(Object.entries(issue.alerts));
         issue.incidents = new Map(Object.entries(issue.incidents));
+        return issue;
+      }),
+    );
+  }
 
+  createIncidentFromIssue(issueID: string, shortDescription: string): Observable<Issue> {
+    return this.http.put<Issue>(`/api/v1/issues/${issueID}/createIncident`, undefined, {
+      params: new HttpParams().set('shortDescription', shortDescription)
+    }).pipe(
+      tap(data => console.log("createIncidentFromIssue response", data)),
+      map((issue: Issue) => {
+        issue.alerts = new Map(Object.entries(issue.alerts));
+        issue.incidents = new Map(Object.entries(issue.incidents));
         return issue;
       }),
     );

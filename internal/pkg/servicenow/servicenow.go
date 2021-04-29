@@ -10,17 +10,30 @@ import (
 	"strings"
 
 	"github.com/byuoitav/auth/wso2"
+	"go.uber.org/zap"
 )
 
 type Client struct {
 	Client *wso2.Client
+	Log    *zap.Logger
 }
 
 type Incident struct {
-	ID     string `json:"sys_id,omitempty"`
-	Number string `json:"number,omitempty"`
+	ID               string `json:"sys_id,omitempty"`
+	Number           string `json:"number,omitempty"`
+	ShortDescription string `json:"short_description,omitempty"`
+	Priority         string `json:"priority,omitempty"`
+}
 
-	WorkNotes string `json:"work_notes"`
+type IncidentRequest struct {
+	ID               string `json:"sys_id,omitempty"`
+	Number           string `json:"number,omitempty"`
+	ShortDescription string `json:"short_description,omitempty"`
+	WorkNotes        string `json:"work_notes,omitempty"`
+	AssignmentGroup  string `json:"assignment_group,omitempty"`
+	CallerNetID      string `json:"u_caller_net_id,omitempty"`
+	Service          string `json:"business_service,omitempty"`
+	Priority         string `json:"priority,omitempty"`
 }
 
 func (c *Client) Incident(ctx context.Context, id string) (Incident, error) {
@@ -99,7 +112,7 @@ func (c *Client) IncidentByNumber(ctx context.Context, number string) (Incident,
 }
 
 func (c *Client) AddInternalNote(ctx context.Context, id, note string) error {
-	reqBody := Incident{
+	reqBody := IncidentRequest{
 		WorkNotes: note,
 	}
 
@@ -128,4 +141,40 @@ func (c *Client) AddInternalNote(ctx context.Context, id, note string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) CreateIncident(ctx context.Context, inc IncidentRequest) (Incident, error) {
+	reqBytes, err := json.Marshal(inc)
+	if err != nil {
+		return Incident{}, fmt.Errorf("unable to marshal body: %w", err)
+	}
+
+	url := "https://api.byu.edu:443/domains/servicenow/incident/v1.1/incident"
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(reqBytes))
+	if err != nil {
+		return Incident{}, fmt.Errorf("unable to build request: %w", err)
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return Incident{}, fmt.Errorf("unable to do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode/100 != 2 {
+		return Incident{}, fmt.Errorf("%v response", resp.StatusCode)
+	}
+
+	var wrapper struct {
+		Result Incident `json:"result"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&wrapper); err != nil {
+		return Incident{}, fmt.Errorf("unable to decode response: %w", err)
+	}
+
+	return wrapper.Result, nil
 }

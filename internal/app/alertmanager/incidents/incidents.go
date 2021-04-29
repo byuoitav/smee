@@ -12,12 +12,17 @@ import (
 // implements smee.IncidentStore
 type Store struct {
 	Client *servicenow.Client
+
+	Service         string
+	Priority        string
+	AssignmentGroup string
 }
 
 func convert(from servicenow.Incident) smee.Incident {
 	return smee.Incident{
-		ID:   from.ID,
-		Name: from.Number,
+		ID:               from.ID,
+		Name:             from.Number,
+		ShortDescription: from.ShortDescription,
 	}
 }
 
@@ -57,4 +62,21 @@ func (s *Store) AddIssueEvents(ctx context.Context, id string, events ...smee.Is
 	}
 
 	return nil
+}
+
+func (s *Store) CreateIncident(ctx context.Context, inc smee.Incident) (smee.Incident, error) {
+	req := servicenow.IncidentRequest{
+		ShortDescription: inc.ShortDescription,
+		CallerNetID:      inc.Caller,
+		AssignmentGroup:  s.AssignmentGroup,
+		Service:          s.Service,
+		Priority:         s.Priority,
+	}
+
+	snInc, err := s.Client.CreateIncident(ctx, req)
+	if err != nil {
+		return smee.Incident{}, err
+	}
+
+	return convert(snInc), nil
 }

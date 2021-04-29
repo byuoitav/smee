@@ -52,7 +52,11 @@ func (d *Deps) buildIncidentStore() {
 	d.incidentStore = &incidents.Store{
 		Client: &servicenow.Client{
 			Client: d.wso2,
+			Log:    d.log.Named("incidents"),
 		},
+		AssignmentGroup: "OIT-AV Engineers",
+		Service:         "TEC Room",
+		Priority:        "4",
 	}
 }
 

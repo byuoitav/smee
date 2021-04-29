@@ -45,7 +45,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     });
 
-    ref.afterClosed().subscribe(() => {
+    ref.afterClosed().subscribe(issue => {
+      if (!issue || !issue.incidents) {
+        this.updateIssues();
+        return;
+      }
+
+      for (const [_, inc] of issue.incidents) {
+        window.open(this.incidentLink(inc));
+        break;
+      }
+
+      this.updateIssues();
     })
   }
 
@@ -81,7 +92,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
   templateUrl: 'create-dialog.html',
 })
 export class DashboardCreateDialog {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: DialogData) {}
+  shortDesc: string | undefined = undefined;
+
+  constructor(private dialogRef: MatDialogRef<DashboardLinkDialog, Issue>,
+    private api: ApiService,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData) {}
+
+  create(): void {
+    if (!this.shortDesc) {
+      return;
+    }
+
+    this.api.createIncidentFromIssue(this.data.issue.id, this.shortDesc).subscribe(issue => {
+      this.dialogRef.close(issue);
+    }, err => {
+      console.log("unable to link issue", err);
+
+      // TODO show error popup
+    });
+  }
 }
 
 @Component({
