@@ -39,7 +39,7 @@ func (c *Cache) Sync(ctx context.Context) error {
 	c.rooms["ITB-1010"] = smee.MaintenanceInfo{
 		RoomID: "ITB-1010",
 		Start:  time.Now(),
-		End:    time.Now().Add(4 * time.Minute),
+		End:    time.Now().Add(1 * time.Hour),
 	}
 
 	c.Log.Info("Synced cache", zap.Int("roomsInMaintenance", len(c.rooms)))

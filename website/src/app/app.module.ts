@@ -15,6 +15,7 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatInputModule} from '@angular/material/input';
 import {MatDialogModule} from '@angular/material/dialog';
+import {MatCardModule} from '@angular/material/card';
 import {RoomComponent} from './room/room.component';
 import {RoomsComponent} from './rooms/rooms.component';
 
@@ -42,6 +43,7 @@ import {RoomsComponent} from './rooms/rooms.component';
     MatPaginatorModule,
     MatDialogModule,
     MatInputModule,
+    MatCardModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

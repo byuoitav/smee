@@ -20,7 +20,7 @@ export interface Incident {
 export interface IssueEvent {
   timestamp: Date;
   type: string;
-  data: string;
+  data: any;
 }
 
 export interface Issue {
@@ -31,6 +31,8 @@ export interface Issue {
   alerts: Map<string, Alert>;
   incidents: Map<string, Incident>;
   events: IssueEvent[];
+  maintenanceStart: Date | undefined;
+  maintenanceEnd: Date | undefined;
 }
 
 const emptyIssue = (): Issue => ({
@@ -41,6 +43,8 @@ const emptyIssue = (): Issue => ({
   alerts: new Map(),
   incidents: new Map(),
   events: [],
+  maintenanceStart: undefined,
+  maintenanceEnd: undefined,
 })
 
 @Injectable({
@@ -64,15 +68,14 @@ export class ApiService {
     )
   }
 
-  getIssue(): Observable<Issue[]> {
-    return this.http.get<Issue[]>("/api/v1/issues").pipe(
-      tap(data => console.log("got issues", data)),
-      catchError(this.handleError<Issue[]>("getIssues", [])),
-      map((issues: Issue[]) => {
-        for (let i in issues) {
-          issues[i].alerts = new Map(Object.entries(issues[i].alerts));
-          issues[i].incidents = new Map(Object.entries(issues[i].incidents));
-        }
+  getIssue(roomID: string): Observable<Issue> {
+    return this.http.get<Issue>("/api/v1/issues", {
+      params: new HttpParams().set("roomID", roomID)
+    }).pipe(
+      tap(data => console.log("got issue", data)),
+      map((issues: Issue) => {
+        issues.alerts = new Map(Object.entries(issues.alerts));
+        issues.incidents = new Map(Object.entries(issues.incidents));
 
         return issues;
       }),
@@ -81,7 +84,7 @@ export class ApiService {
 
   linkIssueToIncident(issueID: string, incName: string): Observable<Issue> {
     return this.http.put<Issue>(`/api/v1/issues/${issueID}/linkIncident`, undefined, {
-      params: new HttpParams().set('incName', incName)
+      params: new HttpParams().set("incName", incName)
     }).pipe(
       tap(data => console.log("linkIssueToIncident response", data)),
       map((issue: Issue) => {
