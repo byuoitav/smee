@@ -64,6 +64,21 @@ export class ApiService {
     )
   }
 
+  getIssue(): Observable<Issue[]> {
+    return this.http.get<Issue[]>("/api/v1/issues").pipe(
+      tap(data => console.log("got issues", data)),
+      catchError(this.handleError<Issue[]>("getIssues", [])),
+      map((issues: Issue[]) => {
+        for (let i in issues) {
+          issues[i].alerts = new Map(Object.entries(issues[i].alerts));
+          issues[i].incidents = new Map(Object.entries(issues[i].incidents));
+        }
+
+        return issues;
+      }),
+    )
+  }
+
   linkIssueToIncident(issueID: string, incName: string): Observable<Issue> {
     return this.http.put<Issue>(`/api/v1/issues/${issueID}/linkIncident`, undefined, {
       params: new HttpParams().set('incName', incName)

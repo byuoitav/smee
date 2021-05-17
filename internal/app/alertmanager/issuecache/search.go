@@ -85,6 +85,18 @@ func (c *Cache) ActiveAlertsByType(ctx context.Context, typ string) ([]smee.Aler
 	return res, nil
 }
 
+func (c *Cache) ActiveIssue(ctx context.Context, roomID string) (smee.Issue, error) {
+	c.issuesMu.RLock()
+	defer c.issuesMu.RUnlock()
+
+	issue, ok := c.activeRoomIssue(roomID)
+	if !ok {
+		return smee.Issue{}, nil
+	}
+
+	return issue, nil
+}
+
 func (c *Cache) ActiveIssues(ctx context.Context) ([]smee.Issue, error) {
 	c.issuesMu.RLock()
 	defer c.issuesMu.RUnlock()

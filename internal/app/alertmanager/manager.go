@@ -93,17 +93,6 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 		return
 	}
 
-	// see if this room is in maintenance
-	maint, err := m.MaintenanceStore.RoomInMaintenance(ctx, alert.Room)
-	switch {
-	case err != nil:
-		m.Log.Error("unable to check if room is in maintenance", zap.Error(err), zap.String("room", alert.Room))
-		return
-	case maint:
-		// don't create an alert since this room is in maintenance
-		return
-	}
-
 	issue, err := m.IssueStore.CreateAlert(ctx, alert)
 	if err != nil {
 		m.Log.Error("unable to create alert", zap.Error(err), zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))

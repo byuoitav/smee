@@ -17,17 +17,71 @@ type Handlers struct {
 	MaintenanceStore smee.MaintenanceStore
 }
 
+type issue struct {
+	ID               string                   `json:"id"`
+	Room             string                   `json:"room"`
+	Start            time.Time                `json:"start"`
+	End              time.Time                `json:"end"`
+	Alerts           map[string]smee.Alert    `json:"alerts"`
+	Incidents        map[string]smee.Incident `json:"incidents"`
+	Events           []smee.IssueEvent        `json:"events"`
+	MaintenanceStart *time.Time               `json:"maintenanceStart,omitempty"`
+	MaintenanceEnd   *time.Time               `json:"maintenanceEnd,omitempty"`
+}
+
 func (h *Handlers) ActiveIssues(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	issues, err := h.IssueStore.ActiveIssues(ctx)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+	roomID := c.Query("roomID")
+	if len(roomID) > 0 {
+		// get issue for this room
+		issue, err := h.IssueStore.ActiveIssue(ctx, roomID)
+		if err != nil {
+			c.String(http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, issue)
 		return
 	}
 
-	c.JSON(http.StatusOK, issues)
+	// get all issues
+	issues, err := h.IssueStore.ActiveIssues(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to get active issues: %s", err)
+		return
+	}
+
+	// get maintenance info
+	maint, err := h.MaintenanceStore.RoomsInMaintenance(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to get maintenance info: %s", err)
+		return
+	}
+
+	var res []issue
+	for _, iss := range issues {
+		issue := issue{
+			ID:        iss.ID,
+			Room:      iss.Room,
+			Start:     iss.Start,
+			End:       iss.End,
+			Alerts:    iss.Alerts,
+			Incidents: iss.Incidents,
+			Events:    iss.Events,
+		}
+
+		info, ok := maint[iss.Room]
+		if ok {
+			issue.MaintenanceStart = &info.Start
+			issue.MaintenanceEnd = &info.End
+		}
+
+		res = append(res, issue)
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handlers) LinkIssueToIncident(c *gin.Context) {

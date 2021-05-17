@@ -17,6 +17,8 @@ type IssueStore interface {
 	ActiveAlertExists(ctx context.Context, room, device, typ string) (bool, error)
 	ActiveAlerts(context.Context) ([]Alert, error)
 	ActiveAlertsByType(context.Context, string) ([]Alert, error)
+
+	ActiveIssue(context.Context, string) (Issue, error)
 	ActiveIssues(context.Context) ([]Issue, error)
 }
 
