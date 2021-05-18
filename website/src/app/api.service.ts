@@ -1,6 +1,6 @@
-import {HttpClient, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
 import {Injectable} from '@angular/core';
-import {Observable, of} from "rxjs";
+import {Observable, of, throwError} from "rxjs";
 import {tap, map, catchError} from "rxjs/operators";
 
 export interface Alert {
@@ -28,24 +28,18 @@ export interface Issue {
   room: string | undefined;
   start: Date | undefined;
   end: Date | undefined;
-  alerts: Map<string, Alert>;
-  incidents: Map<string, Incident>;
-  events: IssueEvent[];
+  alerts: Map<string, Alert> | undefined;
+  incidents: Map<string, Incident> | undefined;
+  events: IssueEvent[] | undefined;
   maintenanceStart: Date | undefined;
   maintenanceEnd: Date | undefined;
 }
 
-const emptyIssue = (): Issue => ({
-  id: '',
-  room: undefined,
-  start: undefined,
-  end: undefined,
-  alerts: new Map(),
-  incidents: new Map(),
-  events: [],
-  maintenanceStart: undefined,
-  maintenanceEnd: undefined,
-})
+export interface MaintenanceInfo {
+  roomID: string;
+  start: Date | undefined;
+  end: Date | undefined;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -59,8 +53,15 @@ export class ApiService {
       catchError(this.handleError<Issue[]>("getIssues", [])),
       map((issues: Issue[]) => {
         for (let i in issues) {
-          issues[i].alerts = new Map(Object.entries(issues[i].alerts));
-          issues[i].incidents = new Map(Object.entries(issues[i].incidents));
+          const issue = issues[i]; // apparently the ts compiler needs this to be happy
+
+          if (issue?.alerts) {
+            issues[i].alerts = new Map(Object.entries(issue.alerts));
+          }
+
+          if (issue?.incidents) {
+            issues[i].incidents = new Map(Object.entries(issue.incidents));
+          }
         }
 
         return issues;
@@ -73,11 +74,17 @@ export class ApiService {
       params: new HttpParams().set("roomID", roomID)
     }).pipe(
       tap(data => console.log("got issue", data)),
-      map((issues: Issue) => {
-        issues.alerts = new Map(Object.entries(issues.alerts));
-        issues.incidents = new Map(Object.entries(issues.incidents));
+      catchError(this.handleError<Issue>("getIssue", undefined)),
+      map((issue: Issue) => {
+        if (issue?.alerts) {
+          issue.alerts = new Map(Object.entries(issue.alerts));
+        }
 
-        return issues;
+        if (issue?.incidents) {
+          issue.incidents = new Map(Object.entries(issue.incidents));
+        }
+
+        return issue;
       }),
     )
   }
@@ -88,8 +95,14 @@ export class ApiService {
     }).pipe(
       tap(data => console.log("linkIssueToIncident response", data)),
       map((issue: Issue) => {
-        issue.alerts = new Map(Object.entries(issue.alerts));
-        issue.incidents = new Map(Object.entries(issue.incidents));
+        if (issue?.alerts) {
+          issue.alerts = new Map(Object.entries(issue.alerts));
+        }
+
+        if (issue?.incidents) {
+          issue.incidents = new Map(Object.entries(issue.incidents));
+        }
+
         return issue;
       }),
     );
@@ -101,11 +114,24 @@ export class ApiService {
     }).pipe(
       tap(data => console.log("createIncidentFromIssue response", data)),
       map((issue: Issue) => {
-        issue.alerts = new Map(Object.entries(issue.alerts));
-        issue.incidents = new Map(Object.entries(issue.incidents));
+        if (issue?.alerts) {
+          issue.alerts = new Map(Object.entries(issue.alerts));
+        }
+
+        if (issue?.incidents) {
+          issue.incidents = new Map(Object.entries(issue.incidents));
+        }
+
         return issue;
       }),
     );
+  }
+
+  getMaintenanceInfo(roomID: string): Observable<MaintenanceInfo> {
+    return this.http.get<MaintenanceInfo>(`/api/v1/maintenance/${roomID}`).pipe(
+      tap(data => console.log("got maintenance info", data)),
+      catchError(this.handleError<MaintenanceInfo>("getMaintenanceInfo", undefined))
+    )
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

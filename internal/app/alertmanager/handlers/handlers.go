@@ -37,8 +37,12 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 	if len(roomID) > 0 {
 		// get issue for this room
 		issue, err := h.IssueStore.ActiveIssue(ctx, roomID)
-		if err != nil {
+		switch {
+		case err != nil:
 			c.String(http.StatusInternalServerError, err.Error())
+			return
+		case issue.Room == "":
+			c.Status(http.StatusNotFound)
 			return
 		}
 

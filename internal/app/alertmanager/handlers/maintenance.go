@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handlers) RoomInMaintenance(c *gin.Context) {
+func (h *Handlers) MaintenanceInfo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
@@ -19,9 +19,7 @@ func (h *Handlers) RoomInMaintenance(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"maintenance": maint.Enabled(),
-	})
+	c.JSON(http.StatusOK, maint)
 }
 
 func (h *Handlers) SetRoomInMaintenance(c *gin.Context) {
