@@ -60,6 +60,14 @@
 					</div>
 				</div>
 			</ng-container>
+
+			<ng-container *ngIf="!issue">
+				<mat-card>
+					<mat-card-header>
+						<mat-card-title>No active issue in this room</mat-card-title>
+					</mat-card-header>
+				</mat-card>
+			</ng-container>
 		</div>
 
 		<div class="right">

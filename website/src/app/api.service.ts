@@ -41,15 +41,28 @@ export interface MaintenanceInfo {
   end: Date | undefined;
 }
 
+export interface Room {
+  id: string;
+  name: string;
+  inMaintenance: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   constructor(private http: HttpClient) {}
 
+  getRooms(): Observable<Room[]> {
+    return this.http.get<Room[]>("/api/v1/rooms").pipe(
+      tap(data => console.log("got rooms", data)),
+      catchError(this.handleError<Room[]>("getRooms", [])),
+    )
+  }
+
   getIssues(): Observable<Issue[]> {
     return this.http.get<Issue[]>("/api/v1/issues").pipe(
-      tap(data => console.log("got issues", data)),
+      // tap(data => console.log("got issues", data)),
       catchError(this.handleError<Issue[]>("getIssues", [])),
       map((issues: Issue[]) => {
         for (let i in issues) {
@@ -73,7 +86,7 @@ export class ApiService {
     return this.http.get<Issue>("/api/v1/issues", {
       params: new HttpParams().set("roomID", roomID)
     }).pipe(
-      tap(data => console.log("got issue", data)),
+      // tap(data => console.log("got issue", data)),
       catchError(this.handleError<Issue>("getIssue", undefined)),
       map((issue: Issue) => {
         if (issue?.alerts) {
@@ -129,7 +142,7 @@ export class ApiService {
 
   getMaintenanceInfo(roomID: string): Observable<MaintenanceInfo> {
     return this.http.get<MaintenanceInfo>(`/api/v1/maintenance/${roomID}`).pipe(
-      tap(data => console.log("got maintenance info", data)),
+      // tap(data => console.log("got maintenance info", data)),
       catchError(this.handleError<MaintenanceInfo>("getMaintenanceInfo", undefined)),
       map((info: MaintenanceInfo) => {
         if (info?.start) {

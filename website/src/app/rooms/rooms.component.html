@@ -1,0 +1,28 @@
+<div class="base">
+	<div class="filters">
+		<mat-form-field class="search">
+			<mat-label>Filter</mat-label>
+			<input matInput type="text" [(ngModel)]="filter">
+		</mat-form-field>
+
+		<span class="spacer"></span>
+
+		<mat-chip-list>
+			<mat-chip color="warn" [selected]="onlyMaintenance" (click)=" onlyMaintenance=!onlyMaintenance">Only
+				Maintenance</mat-chip>
+		</mat-chip-list>
+	</div>
+
+	<mat-grid-list class="rooms" cols="2" rowHeight="3:1">
+		<mat-grid-tile *ngFor="let room of filtered">
+			<mat-card class="card" [routerLink]="['/rooms/'+room.id]">
+				<span class="name">{{room?.name}}</span>
+				<span class="spacer"></span>
+
+				<mat-chip-list>
+					<mat-chip *ngIf="room?.inMaintenance" color="warn" selected>Maintenance</mat-chip>
+				</mat-chip-list>
+			</mat-card>
+		</mat-grid-tile>
+	</mat-grid-list>
+</div>

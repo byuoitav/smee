@@ -33,7 +33,7 @@ func convertMaintenance(info smee.MaintenanceInfo) maintenanceInfo {
 	}
 }
 
-func (h *Handlers) MaintenanceInfo(c *gin.Context) {
+func (h *Handlers) RoomMaintenanceInfo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
@@ -46,7 +46,7 @@ func (h *Handlers) MaintenanceInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, convertMaintenance(maint))
 }
 
-func (h *Handlers) SetRoomInMaintenance(c *gin.Context) {
+func (h *Handlers) SetMaintenanceInfo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
@@ -63,4 +63,17 @@ func (h *Handlers) SetRoomInMaintenance(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, convertMaintenance(maint))
+}
+
+func (h *Handlers) RoomsInMaintenance(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	rooms, err := h.MaintenanceStore.RoomsInMaintenance(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to get rooms in maintenance: %s", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, rooms)
 }

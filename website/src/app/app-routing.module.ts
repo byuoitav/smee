@@ -14,7 +14,7 @@ const routes: Routes = [
     component: RoomsComponent
   },
   {
-    path: 'rooms/:name',
+    path: 'rooms/:roomID',
     component: RoomComponent
   }
 ];

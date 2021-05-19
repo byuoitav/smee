@@ -1,0 +1,40 @@
+.base {
+	width: 100%;
+	height: 100%;
+	overflow-y: scroll;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.filters {
+	width: 80%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.search {
+		width: 40%;
+	}
+}
+
+.rooms {
+	width: 80%;
+
+	.card {
+		width: 80%;
+		height: 30%;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+
+		.name {
+			font-size: 1.1em;
+		}
+	}
+}
+
+.spacer {
+	flex: 1 1 auto;
+}

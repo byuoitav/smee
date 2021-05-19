@@ -2,6 +2,7 @@ import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
 import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {Alert, ApiService, Issue, MaintenanceInfo} from "../api.service";
+import {ActivatedRoute} from "@angular/router";
 
 interface DialogData {
   roomID: string;
@@ -23,13 +24,16 @@ export class RoomComponent implements OnInit, OnDestroy {
   alertColumns: string[] = ["device", "type", "started", "ended"];
   updateInterval: number | undefined;
 
-  constructor(private api: ApiService, private dialog: MatDialog) {}
+  constructor(private api: ApiService, private dialog: MatDialog, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.roomID = "ITB-1010"// get from route
-    this.room = "ITB-1010"
+    this.route.params.subscribe(params => {
+      this.roomID = params["roomID"];
+      this.room = this.roomID; // TODO get from update()
 
-    this.update();
+      this.update();
+    })
+
     this.updateInterval = window.setInterval(() => {
       this.update();
     }, 10000);
@@ -42,6 +46,10 @@ export class RoomComponent implements OnInit, OnDestroy {
   }
 
   private update(): void {
+    if (!this.roomID) {
+      return;
+    }
+
     this.api.getIssue(this.roomID).subscribe(issue => {
       this.issue = issue;
 
@@ -112,7 +120,7 @@ export class MaintenanceDialog {
     private api: ApiService,
     @Inject(MAT_DIALOG_DATA) public data: DialogData) {
     this.info = {
-      roomID: data.maintenance.roomID,
+      roomID: data.roomID,
       start: data.maintenance.start ? data.maintenance.start : new Date(),
       end: data.maintenance.end ? data.maintenance.end : new Date(new Date().getTime() + 60 * 60 * 24 * 1000),
     };
