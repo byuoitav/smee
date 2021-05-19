@@ -130,7 +130,36 @@ export class ApiService {
   getMaintenanceInfo(roomID: string): Observable<MaintenanceInfo> {
     return this.http.get<MaintenanceInfo>(`/api/v1/maintenance/${roomID}`).pipe(
       tap(data => console.log("got maintenance info", data)),
-      catchError(this.handleError<MaintenanceInfo>("getMaintenanceInfo", undefined))
+      catchError(this.handleError<MaintenanceInfo>("getMaintenanceInfo", undefined)),
+      map((info: MaintenanceInfo) => {
+        if (info?.start) {
+          info.start = new Date(info.start);
+        }
+
+        if (info?.end) {
+          info.end = new Date(info.end);
+        }
+
+        return info;
+      })
+    )
+  }
+
+  setMaintenanceInfo(info: MaintenanceInfo): Observable<MaintenanceInfo> {
+    return this.http.put<MaintenanceInfo>(`/api/v1/maintenance/${info.roomID}`, info).pipe(
+      tap(data => console.log("set maintenance info", data)),
+      catchError(this.handleError<MaintenanceInfo>("setMaintenanceInfo", undefined)),
+      map((info: MaintenanceInfo) => {
+        if (info?.start) {
+          info.start = new Date(info.start);
+        }
+
+        if (info?.end) {
+          info.end = new Date(info.end);
+        }
+
+        return info;
+      })
     )
   }
 

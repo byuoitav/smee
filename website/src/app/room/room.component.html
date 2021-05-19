@@ -1,7 +1,11 @@
 <div>
 	<!-- room -->
 	<div class="room">
-		<span>{{room}}</span>
+		<span *ngIf="!inMaintenance()">{{room}}</span>
+		<ng-container *ngIf="inMaintenance()">
+			<span>{{room}}</span>
+			<span class="maintenance">In maintenance until {{maintenance?.end | date:'medium'}}</span>
+		</ng-container>
 	</div>
 
 	<div class="content">
@@ -68,7 +72,7 @@
 					<a href="https://www.google.com" mat-button>Shipyard Information --></a>
 
 					<div class="maintenance">
-						<div *ngIf=""></div>
+						<button mat-button (click)="editMaintenance()">Edit Maintenance</button>
 					</div>
 				</mat-card-content>
 			</mat-card>

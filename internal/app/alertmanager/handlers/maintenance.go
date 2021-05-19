@@ -38,5 +38,5 @@ func (h *Handlers) SetRoomInMaintenance(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, maint)
 }

@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>
+	{{data?.room}} Maintenance Info
+</h2>
+
+<div mat-dialog-content class="content">
+	<mat-form-field>
+		<mat-label>Start</mat-label>
+		<input matInput type="datetime-local" [ngModel]="info?.start | date:'yyyy-MM-ddThh:mm'"
+			(ngModelChange)="info.start = parseDate($event)">
+	</mat-form-field>
+
+	<mat-form-field>
+		<mat-label>End</mat-label>
+		<input matInput type="datetime-local" [ngModel]="info?.end | date:'yyyy-MM-ddThh:mm'"
+			(ngModelChange)="info.end = parseDate($event)">
+	</mat-form-field>
+</div>
+
+<div mat-dialog-actions>
+	<button mat-button mat-dialog-close>Cancel</button>
+	<button mat-button [disabled]="!canSave()" (click)="save()">Save</button>
+</div>

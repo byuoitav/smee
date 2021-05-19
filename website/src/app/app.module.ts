@@ -17,7 +17,7 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import {MatInputModule} from '@angular/material/input';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
-import {RoomComponent} from './room/room.component';
+import {MaintenanceDialog, RoomComponent} from './room/room.component';
 import {RoomsComponent} from './rooms/rooms.component';
 
 @NgModule({
@@ -27,7 +27,8 @@ import {RoomsComponent} from './rooms/rooms.component';
     DashboardCreateDialog,
     DashboardLinkDialog,
     RoomComponent,
-    RoomsComponent
+    RoomsComponent,
+    MaintenanceDialog,
   ],
   imports: [
     BrowserModule,
