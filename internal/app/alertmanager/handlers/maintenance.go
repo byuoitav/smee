@@ -9,6 +9,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type maintenanceInfo struct {
+	RoomID string     `json:"roomID"`
+	Start  *time.Time `json:"start,omitempty"`
+	End    *time.Time `json:"end,omitempty"`
+}
+
+func convertMaintenance(info smee.MaintenanceInfo) maintenanceInfo {
+	var start, end *time.Time
+
+	if !info.Start.IsZero() {
+		start = &info.Start
+	}
+
+	if !info.End.IsZero() {
+		end = &info.End
+	}
+
+	return maintenanceInfo{
+		RoomID: info.RoomID,
+		Start:  start,
+		End:    end,
+	}
+}
+
 func (h *Handlers) MaintenanceInfo(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -19,7 +43,7 @@ func (h *Handlers) MaintenanceInfo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, maint)
+	c.JSON(http.StatusOK, convertMaintenance(maint))
 }
 
 func (h *Handlers) SetRoomInMaintenance(c *gin.Context) {
@@ -38,5 +62,5 @@ func (h *Handlers) SetRoomInMaintenance(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	c.JSON(http.StatusOK, maint)
+	c.JSON(http.StatusOK, convertMaintenance(maint))
 }

@@ -113,8 +113,8 @@ export class MaintenanceDialog {
     @Inject(MAT_DIALOG_DATA) public data: DialogData) {
     this.info = {
       roomID: data.maintenance.roomID,
-      start: data.maintenance.start,
-      end: data.maintenance.end,
+      start: data.maintenance.start ? data.maintenance.start : new Date(),
+      end: data.maintenance.end ? data.maintenance.end : new Date(new Date().getTime() + 60 * 60 * 24 * 1000),
     };
   }
 
@@ -150,7 +150,15 @@ export class MaintenanceDialog {
     })
   }
 
-  // TODO
-  disableMaintenance(): void {
+  disable(): void {
+    this.info.start = undefined;
+    this.info.end = undefined;
+
+    this.api.setMaintenanceInfo(this.info).subscribe(info => {
+      this.dialogRef.close(info);
+    }, err => {
+      // TODO show error popup
+      console.log("unable to disable maintenance", err);
+    })
   }
 }

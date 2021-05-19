@@ -21,7 +21,7 @@ type issue struct {
 	ID               string                   `json:"id"`
 	Room             string                   `json:"room"`
 	Start            time.Time                `json:"start"`
-	End              time.Time                `json:"end"`
+	End              *time.Time               `json:"end,omitempty"`
 	Alerts           map[string]smee.Alert    `json:"alerts"`
 	Incidents        map[string]smee.Incident `json:"incidents"`
 	Events           []smee.IssueEvent        `json:"events"`
@@ -66,20 +66,17 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 
 	var res []issue
 	for _, iss := range issues {
+		info := convertMaintenance(maint[iss.Room])
 		issue := issue{
-			ID:        iss.ID,
-			Room:      iss.Room,
-			Start:     iss.Start,
-			End:       iss.End,
-			Alerts:    iss.Alerts,
-			Incidents: iss.Incidents,
-			Events:    iss.Events,
-		}
-
-		info, ok := maint[iss.Room]
-		if ok {
-			issue.MaintenanceStart = &info.Start
-			issue.MaintenanceEnd = &info.End
+			ID:               iss.ID,
+			Room:             iss.Room,
+			Start:            iss.Start,
+			End:              &iss.End,
+			Alerts:           iss.Alerts,
+			Incidents:        iss.Incidents,
+			Events:           iss.Events,
+			MaintenanceStart: info.Start,
+			MaintenanceEnd:   info.End,
 		}
 
 		res = append(res, issue)
@@ -88,6 +85,7 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+// TODO maintenance
 func (h *Handlers) LinkIssueToIncident(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -114,6 +112,7 @@ func (h *Handlers) LinkIssueToIncident(c *gin.Context) {
 	c.JSON(http.StatusOK, iss)
 }
 
+// TODO maintenance
 func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
