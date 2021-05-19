@@ -1,12 +1,19 @@
-<div>
-	<!--
-	<mat-form-field>
-		<mat-label>Filter</mat-label>
-		<input matInput #filterInput />
-	</mat-form-field>
-	-->
+<div class="base">
+	<div class="filters">
+		<mat-form-field class="search">
+			<mat-label>Filter</mat-label>
+			<input matInput type="text" (keyup)="applyFilter($event)">
+		</mat-form-field>
 
-	<div class="mat-elevation-z8">
+		<span class="spacer"></span>
+
+		<mat-chip-list>
+			<mat-chip color="warn" [selected]="showMaintenance" (click)="showMaintenance =!showMaintenance">Show
+				Maintenance</mat-chip>
+		</mat-chip-list>
+	</div>
+
+	<div class="issues mat-elevation-z8">
 		<table mat-table [dataSource]="dataSource" matSort class="table">
 			<!-- Room Column -->
 			<ng-container matColumnDef="room">
@@ -46,7 +53,8 @@
 			</ng-container>
 
 			<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-			<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+			<tr mat-row *matRowDef="let row; columns: displayedColumns"
+				[class.hidden]="row?.maintenanceEnd && !showMaintenance"></tr>
 
 			<tr class="mat-row" *matNoDataRow>
 				<td class="mat-cell" colspan="4">No issues found matching the filter</td>

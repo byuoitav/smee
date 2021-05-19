@@ -16,6 +16,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   displayedColumns: string[] = ["room", "alertCount", "started", "incidents"];
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
   issueUpdateInterval: number | undefined;
+  showMaintenance: boolean = false;
 
   constructor(private api: ApiService, private dialog: MatDialog) {}
 
@@ -24,6 +25,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.issueUpdateInterval = window.setInterval(() => {
       this.updateIssues();
     }, 10000);
+
+    this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
+      const dataList = [];
+      dataList.push(data.room?.toLowerCase());
+
+      const dataStr = dataList.join("◬");
+
+      const transformedFilter = filter.trim().toLowerCase();
+      return dataStr.includes(transformedFilter)
+    };
   }
 
   ngOnDestroy(): void {
@@ -34,7 +45,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private updateIssues(): void {
     this.api.getIssues().subscribe(issues => {
-      this.dataSource = new MatTableDataSource(issues);
+      this.dataSource.data = issues;
     })
   }
 
@@ -84,6 +95,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   incidentLink(inc: Incident): string {
     return `https://support.byu.edu/nav_to.do?uri=task.do?sys_id=${inc.id}`;
+  }
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 }
 

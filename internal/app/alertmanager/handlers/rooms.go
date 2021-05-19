@@ -37,6 +37,10 @@ func (h *Handlers) Rooms(c *gin.Context) {
 			ID:   "ITB-1106",
 			Name: "ITB 1106",
 		},
+		{
+			ID:   "JRCB-296",
+			Name: "JRCB 296",
+		},
 	}
 
 	sort.Slice(rooms, func(i, j int) bool {
