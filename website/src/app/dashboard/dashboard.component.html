@@ -32,10 +32,16 @@
 				<td mat-cell *matCellDef="let row">{{row.alerts?.size}}</td>
 			</ng-container>
 
+			<!-- Alert Overview Column -->
+			<ng-container matColumnDef="alertOverview">
+				<th mat-header-cell *matHeaderCellDef mat-sort-header>Alerts</th>
+				<td mat-cell *matCellDef="let row">{{issueAlerts(row)}}</td>
+			</ng-container>
+
 			<!-- Started Column -->
 			<ng-container matColumnDef="started">
 				<th mat-header-cell *matHeaderCellDef mat-sort-header>Started At</th>
-				<td mat-cell *matCellDef="let row">{{row.start | date:'medium'}}</td>
+				<td mat-cell *matCellDef="let row">{{row.start | dateAgo}}</td>
 			</ng-container>
 
 			<!-- Incident Column -->

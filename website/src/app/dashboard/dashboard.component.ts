@@ -13,7 +13,7 @@ interface DialogData {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ["room", "alertCount", "started", "incidents"];
+  displayedColumns: string[] = ["room", "alertCount", "alertOverview", "started", "incidents"];
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
   issueUpdateInterval: number | undefined;
   showMaintenance: boolean = false;
@@ -100,6 +100,41 @@ export class DashboardComponent implements OnInit, OnDestroy {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  issueAlerts(issue: Issue): string {
+    if (!issue.alerts) {
+      return "No alerts";
+    }
+
+    // map of type -> array of names that have that type
+    const alerts = new Map<string, string[]>();
+    for (const [id, alert] of issue?.alerts.entries()) {
+      if (alert.end) {
+        // skip inactive alerts
+        console.log("skipping");
+        continue;
+      }
+
+      const split = alert.device.split("-");
+      let name = alert.device;
+      if (split.length == 3) {
+        name = split[2];
+      }
+
+      if (alerts.has(alert.type)) {
+        alerts.get(alert.type)?.push(name);
+      } else {
+        alerts.set(alert.type, [name]);
+      }
+    }
+
+    let str = "";
+    for (const [type, devices] of alerts) {
+      str += (type + ` (${devices.join(", ")})`);
+    }
+
+    return str;
   }
 }
 

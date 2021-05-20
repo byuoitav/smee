@@ -20,6 +20,7 @@ import {MatCardModule} from '@angular/material/card';
 import {MatChipsModule} from '@angular/material/chips';
 import {MaintenanceDialog, RoomComponent} from './room/room.component';
 import {RoomsComponent} from './rooms/rooms.component';
+import {DateAgoPipe} from "./date-ago.pipe";
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import {RoomsComponent} from './rooms/rooms.component';
     RoomComponent,
     RoomsComponent,
     MaintenanceDialog,
+    DateAgoPipe,
   ],
   imports: [
     BrowserModule,

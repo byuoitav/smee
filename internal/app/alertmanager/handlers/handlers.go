@@ -22,11 +22,21 @@ type issue struct {
 	Room             string                   `json:"room"`
 	Start            time.Time                `json:"start"`
 	End              *time.Time               `json:"end,omitempty"`
-	Alerts           map[string]smee.Alert    `json:"alerts"`
+	Alerts           map[string]alert         `json:"alerts"`
 	Incidents        map[string]smee.Incident `json:"incidents"`
 	Events           []smee.IssueEvent        `json:"events"`
 	MaintenanceStart *time.Time               `json:"maintenanceStart,omitempty"`
 	MaintenanceEnd   *time.Time               `json:"maintenanceEnd,omitempty"`
+}
+
+type alert struct {
+	ID      string     `json:"id"`
+	IssueID string     `json:"issueID"`
+	Room    string     `json:"room"`
+	Device  string     `json:"device"`
+	Type    string     `json:"type"`
+	Start   time.Time  `json:"start"`
+	End     *time.Time `json:"end"`
 }
 
 func (h *Handlers) ActiveIssues(c *gin.Context) {
@@ -71,12 +81,32 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 			ID:               iss.ID,
 			Room:             iss.Room,
 			Start:            iss.Start,
-			End:              &iss.End,
-			Alerts:           iss.Alerts,
+			Alerts:           make(map[string]alert, len(iss.Alerts)),
 			Incidents:        iss.Incidents,
 			Events:           iss.Events,
 			MaintenanceStart: info.Start,
 			MaintenanceEnd:   info.End,
+		}
+
+		if !iss.End.IsZero() {
+			issue.End = &iss.End
+		}
+
+		for _, a := range iss.Alerts {
+			alert := alert{
+				ID:      a.ID,
+				IssueID: a.IssueID,
+				Room:    a.Room,
+				Device:  a.Device,
+				Type:    a.Type,
+				Start:   a.Start,
+			}
+
+			if !a.End.IsZero() {
+				alert.End = &a.End
+			}
+
+			issue.Alerts[alert.ID] = alert
 		}
 
 		res = append(res, issue)
