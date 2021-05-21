@@ -129,12 +129,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       }
     }
 
-    let str = "";
+    const groups: string[] = [];
     for (const [type, devices] of alerts) {
-      str += (type + ` (${devices.join(", ")})`);
+      groups.push(type + ` (${devices.join(", ")})`);
     }
 
-    return str;
+    return groups.join(", ");
   }
 }
 

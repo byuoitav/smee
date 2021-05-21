@@ -36,7 +36,7 @@ func New(ctx context.Context, redisURL string) (*StateStore, error) {
 	}, nil
 }
 
-func (s *StateStore) AllQueries(ctx context.Context) (map[string][]string, error) {
+func (s *StateStore) RunQueries(ctx context.Context) (map[string][]string, error) {
 	start := time.Now()
 
 	res := make(map[string][]string)

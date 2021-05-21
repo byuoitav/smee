@@ -42,8 +42,8 @@ type EventStream interface {
 }
 
 type DeviceStateStore interface {
-	// Query runs store-specific query and returns a list of DeviceID's that match the query
-	Query(ctx context.Context, query string) ([]string, error)
+	// RunQueries runs all store-specific queries and returns a map of queryName -> device id's that match the query
+	RunQueries(ctx context.Context) (map[string][]string, error)
 }
 
 type AlertConfig struct {
@@ -53,8 +53,8 @@ type AlertConfig struct {
 }
 
 type AlertTransition struct {
-	Event      *AlertTransitionEvent
-	StateQuery *AlertTransitionStateQuery
+	Event *AlertTransitionEvent
+	// StateQuery *AlertTransitionStateQuery
 }
 
 type AlertTransitionEvent struct {
@@ -64,10 +64,12 @@ type AlertTransitionEvent struct {
 	ValueDoesNotMatch *regexp.Regexp
 }
 
+/*
 type AlertTransitionStateQuery struct {
 	Interval time.Duration
 	Query    string
 }
+*/
 
 // change to room/device ID's
 type Alert struct {

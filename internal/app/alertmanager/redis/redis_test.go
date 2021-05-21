@@ -17,7 +17,7 @@ func TestAllQueries(t *testing.T) {
 	ss, err := New(ctx, "")
 	is.NoErr(err)
 
-	queries, err := ss.AllQueries(ctx)
+	queries, err := ss.RunQueries(ctx)
 	is.NoErr(err)
 
 	for query, ids := range queries {

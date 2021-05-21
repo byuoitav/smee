@@ -22,6 +22,7 @@ type Deps struct {
 	ClientID     string
 	ClientSecret string
 	GatewayURL   string
+	RedisURL     string
 
 	// created by functions
 	log              *zap.Logger
@@ -31,6 +32,7 @@ type Deps struct {
 	maintenanceStore smee.MaintenanceStore
 	alertManager     smee.AlertManager
 	eventStreamer    smee.EventStreamer
+	deviceStateStore smee.DeviceStateStore
 
 	httpServer   *gin.Engine
 	handlers     *handlers.Handlers
@@ -46,6 +48,7 @@ func main() {
 	pflag.StringVar(&deps.ClientID, "client-id", "", "wso2 key")
 	pflag.StringVar(&deps.ClientSecret, "client-secret", "", "wso2 secret")
 	pflag.StringVar(&deps.GatewayURL, "gateway-url", "https://api.byu.edu", "wso2 gateway address")
+	pflag.StringVar(&deps.RedisURL, "redis-url", "", "redis url")
 	pflag.Parse()
 
 	deps.build()

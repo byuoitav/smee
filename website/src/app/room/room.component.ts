@@ -53,11 +53,6 @@ export class RoomComponent implements OnInit, OnDestroy {
     this.api.getIssue(this.roomID).subscribe(issue => {
       this.issue = issue;
 
-      // TODO remove
-      if (this.issue?.events) {
-        this.issue.events.push(this.issue.events[0]);
-      }
-
       if (this.issue?.alerts) {
         this.alertsDataSource = new MatTableDataSource([...this.issue.alerts.values()]);
       }
