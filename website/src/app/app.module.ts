@@ -21,6 +21,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {MaintenanceDialog, RoomComponent} from './room/room.component';
 import {RoomsComponent} from './rooms/rooms.component';
 import {DateAgoPipe} from "./date-ago.pipe";
+import {MatSortModule} from "@angular/material/sort";
 
 @NgModule({
   declarations: [
@@ -51,6 +52,7 @@ import {DateAgoPipe} from "./date-ago.pipe";
     MatCardModule,
     MatGridListModule,
     MatChipsModule,
+    MatSortModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

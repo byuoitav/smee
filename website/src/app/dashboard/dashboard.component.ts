@@ -1,5 +1,7 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, Inject, OnDestroy, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
+import {MatPaginator} from "@angular/material/paginator";
+import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
 import {ApiService, Issue, Alert, Incident, IssueEvent} from "../api.service";
 
@@ -12,11 +14,14 @@ interface DialogData {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  displayedColumns: string[] = ["room", "alertCount", "alertOverview", "started", "incidents"];
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+  displayedColumns: string[] = ["room", "alertCount", "alertOverview", "age", "incidents"];
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
   issueUpdateInterval: number | undefined;
   showMaintenance: boolean = false;
+
+  @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
+  @ViewChild(MatSort) sort: MatSort | null = null;
 
   constructor(private api: ApiService, private dialog: MatDialog) {}
 
@@ -35,6 +40,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
       const transformedFilter = filter.trim().toLowerCase();
       return dataStr.includes(transformedFilter)
     };
+
+    this.dataSource.sortData = (data: Issue[], sort: MatSort): Issue[] => {
+      if (!sort.active || sort.direction === '') {
+        return data;
+      }
+
+      const isAsc = sort.direction === 'asc';
+
+      const cmp = (a: number | string | Date | undefined, b: number | string | Date | undefined): number => {
+        // return -1 if a is less than b
+        // return 1 if b is less than a
+        if (!a && !b) {
+          return 0;
+        } else if (!b) {
+          return -1;
+        } else if (!a) {
+          return 1;
+        }
+
+        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+      }
+
+      return data.sort((a, b) => {
+        switch (sort.active) {
+          case 'room': return cmp(a.room, b.room);
+          case 'alertCount': return cmp(a.alerts?.size, b.alerts?.size);
+          case 'age': return cmp(a.start, b.start);
+          default: return 0;
+        }
+      });
+    }
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngOnDestroy(): void {
