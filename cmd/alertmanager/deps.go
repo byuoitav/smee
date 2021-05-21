@@ -218,7 +218,7 @@ func (d *Deps) buildAlertManager() {
 					},
 				},
 			*/
-			"battery": {
+			"mic-battery": {
 				Create: smee.AlertTransition{
 					Event: &smee.AlertTransitionEvent{
 						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),

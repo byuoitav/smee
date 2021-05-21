@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/byuoitav/smee/internal/smee"
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
 )
@@ -36,10 +37,10 @@ func New(ctx context.Context, redisURL string) (*StateStore, error) {
 	}, nil
 }
 
-func (s *StateStore) RunQueries(ctx context.Context) (map[string][]string, error) {
+func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.DeviceInfo, error) {
 	start := time.Now()
 
-	res := make(map[string][]string)
+	res := make(map[string][]smee.DeviceInfo)
 	runQueries := func(keys []string) error {
 		vals, err := s.rdb.MGet(ctx, keys...).Result()
 		if err != nil {
@@ -59,7 +60,10 @@ func (s *StateStore) RunQueries(ctx context.Context) (map[string][]string, error
 
 				for qName, q := range s.queries {
 					if q(key, dev) {
-						res[qName] = append(res[qName], key)
+						res[qName] = append(res[qName], smee.DeviceInfo{
+							RoomID:   dev.RoomID,
+							DeviceID: dev.DeviceID,
+						})
 					}
 				}
 			default:

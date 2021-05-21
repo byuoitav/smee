@@ -24,31 +24,33 @@ type device struct {
 
 type query func(id string, dev device) bool
 
+// TODO have something on the redis client to name the type of the alerts based on these
+// OR just register the queries in the main function
 func defaultQueries() map[string]query {
 	return map[string]query{
-		"displayTemperature": func(id string, dev device) bool {
+		"display-temperature": func(id string, dev device) bool {
 			return dev.DeviceType == "display" && dev.Temperature > 109
 		},
-		"lampHours": func(id string, dev device) bool {
+		"lamp-hours": func(id string, dev device) bool {
 			reg := regexp.MustCompile("^(Panasonic).*((EZ770)|(EZ570))")
 			return dev.DeviceType == "display" && dev.LampHours > 2850 && reg.MatchString(dev.HardwareVersion)
 		},
-		"systemCommunication": func(id string, dev device) bool {
+		"no-state-updates": func(id string, dev device) bool {
 			reg := regexp.MustCompile("-(LA|DMPS|CP)[0-9]*$")
 			return time.Since(dev.LastStateReceived) > 10*time.Minute && reg.MatchString(dev.DeviceID)
 		},
-		"systemOffline": func(id string, dev device) bool {
+		"sys-offline": func(id string, dev device) bool {
 			reg := regexp.MustCompile("-(LA|DMPS|CP|AGW|DS|TC|SP)[0-9]*$")
 			return time.Since(dev.LastHeartbeat) > 6*time.Minute && reg.MatchString(dev.DeviceID)
 		},
-		"systemOfflineCustomCrestron": func(id string, dev device) bool {
+		"sys-offline-custom": func(id string, dev device) bool {
 			reg := regexp.MustCompile("-(TECLITE1|CUSTOM1|TECSD1)$")
 			return time.Since(dev.LastHeartbeat) > 6*time.Minute && reg.MatchString(dev.DeviceID)
 		},
-		"websocketCommunication": func(id string, dev device) bool {
+		"websocket": func(id string, dev device) bool {
 			return (dev.DeviceType == "control-processor" || dev.DeviceType == "scheduling-panel") && dev.WebsocketCount == 0 && time.Since(dev.FieldStateReceived.WebsocketCount) > 3*time.Minute
 		},
-		"micBatteryType": func(id string, dev device) bool {
+		"mic-battery-type": func(id string, dev device) bool {
 			return dev.DeviceType == "microphone" && dev.BatteryType == "ALKA"
 		},
 	}

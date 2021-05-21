@@ -18,7 +18,7 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 			return ctx.Err()
 		case <-ticker.C:
 			// figure out which devices should be alerting
-			res, err := m.DeviceStateStore.RunQueries(ctx)
+			res, err := m.DeviceStateStore.RunAlertQueries(ctx)
 			if err != nil {
 				// TODO log
 				continue
@@ -33,29 +33,31 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 				}
 
 				// build a map of the devices that _should_ have an alert
-				shouldAlert := make(map[string]bool, len(devices))
+				shouldAlert := make(map[smee.DeviceInfo]bool, len(devices))
 				for i := range devices {
 					shouldAlert[devices[i]] = true
 				}
 
-				// build a map of the devices that have an alert
-				curAlerts := make(map[string]smee.Alert, len(alerts))
+				// build a map of the devices that currently have an alert
+				curAlerts := make(map[smee.DeviceInfo]smee.Alert, len(alerts))
 				for i := range alerts {
-					curAlerts[alerts[i].Device] = alerts[i]
+					curAlerts[smee.DeviceInfo{
+						RoomID:   alerts[i].Room,
+						DeviceID: alerts[i].Device,
+					}] = alerts[i]
 				}
 
 				// create alerts for every device that should be alerting
-				for device := range shouldAlert {
-					if _, ok := curAlerts[device]; ok {
+				for dev := range shouldAlert {
+					if _, ok := curAlerts[dev]; ok {
 						// don't need to create an alert if it already exists
 						continue
 					}
 
 					// create the alert
 					alert := smee.Alert{
-						// TODO get the room!!!
-						// Room:   event.Room
-						Device: device,
+						Room:   dev.RoomID,
+						Device: dev.DeviceID,
 						Type:   typ,
 						Start:  time.Now(),
 					}
@@ -67,7 +69,7 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 							{
 								Type:      smee.TypeSystemMessage,
 								Timestamp: time.Now(),
-								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started", device, typ)),
+								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started", dev.DeviceID, typ)),
 							},
 						},
 					}
