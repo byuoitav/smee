@@ -5,15 +5,6 @@
 --
 
 --
--- Create smee schema
---
-CREATE SCHEMA smee AUTHORIZATION smee;
-
--- Switch to smee schema
-SET search_path TO smee;
-SET role smee;
-
---
 -- Create Types
 --
 
@@ -25,8 +16,8 @@ SET role smee;
 CREATE TABLE issues (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	couch_room_id text,
-	start timestamptz,
-	end timestamptz
+	start_time timestamptz,
+	end_time timestamptz
 );
 
 CREATE TABLE alerts (
@@ -34,9 +25,9 @@ CREATE TABLE alerts (
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
 	couch_room_id text,
 	couch_device_id text,
-	type text,
-	start timestamptz,
-	end timestamptz
+	alert_type text,
+	start_time timestamptz,
+	end_time timestamptz
 );
 
 CREATE TABLE sn_incident_mappings (
@@ -49,11 +40,8 @@ CREATE TABLE sn_incident_mappings (
 CREATE TABLE issue_events (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
-	timestamp timestamptz,
-	type text,
+	ts timestamptz,
+	event_type text,
 	data jsonb
 );
 
--- Exit schema
-SET search_path TO public;
-RESET ROLE;
