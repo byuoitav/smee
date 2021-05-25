@@ -40,10 +40,10 @@ CREATE TABLE alerts (
 )
 
 CREATE TABLE incident_mappings (
-	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY, -- TODO don't really need an ID for this.. issue_id/sn_sys_id should be unique
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
 	sn_sys_id text, -- service now ticket ID
 	sn_ticket_number text, -- ticket number (INCXXXXXX)
+	PRIMARY KEY (issue_id, sn_sys_id)
 )
 
 CREATE TABLE issue_events (
