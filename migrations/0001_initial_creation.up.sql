@@ -24,7 +24,7 @@ SET role smee;
 -- Rooms
 CREATE TABLE issues (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-	-- room id
+	couch_room_id text,
 	start timestamptz,
 	end timestamptz
 )
@@ -32,8 +32,8 @@ CREATE TABLE issues (
 CREATE TABLE alerts (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
-	-- room id
-	-- device id
+	couch_room_id text,
+	couch_device_id text,
 	type text,
 	start timestamptz,
 	end timestamptz
