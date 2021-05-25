@@ -28,6 +28,27 @@
 		.hidden {
 			display: none;
 		}
+
+		// columns should add to 100% width
+		.mat-column-room {
+			width: 15%;
+		}
+
+		.mat-column-alertCount {
+			width: 5%;
+		}
+
+		.mat-column-alertOverview {
+			width: 50%;
+		}
+
+		.mat-column-age {
+			width: 10%;
+		}
+
+		.mat-column-incidents {
+			width: 20%;
+		}
 	}
 }
 
