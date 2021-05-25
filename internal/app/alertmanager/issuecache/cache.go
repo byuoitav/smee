@@ -12,6 +12,9 @@ import (
 	"go.uber.org/zap"
 )
 
+// TODO some timer to sync the cache with the issue store, or a way to force it (handler?)
+// probably for all of the caches, not just this one (issuecache, maintenancecache, ...maybe that's all of them)
+
 type Cache struct {
 	IssueStore    smee.IssueStore
 	IncidentStore smee.IncidentStore
@@ -49,32 +52,33 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	defer c.issuesMu.Unlock()
 
 	if c.IssueStore != nil {
-		issue, err := c.IssueStore.CreateAlert(ctx, alert)
+		iss, err := c.IssueStore.CreateAlert(ctx, alert)
 		if err != nil {
 			return smee.Issue{}, fmt.Errorf("unable to create alert on substore: %w", err)
 		}
 
-		c.issues[issue.Room] = issue
-		return issue, nil
+		// update the cache
+		c.issues[iss.ID] = iss
+		return iss, nil
 	}
 
 	alert.ID = ksuid.New().String()
 
-	issue, ok := c.activeRoomIssue(alert.Room)
+	issue, ok := c.activeRoomIssue(alert.Device.Room.ID)
 	if !ok {
 		// create an issue if needed
 		issue = smee.Issue{
 			ID:        ksuid.New().String(),
-			Room:      alert.Room,
+			Room:      alert.Device.Room,
 			Start:     alert.Start,
 			Alerts:    make(map[string]smee.Alert),
 			Incidents: make(map[string]smee.Incident),
 		}
 
-		c.Log.Info("Creating issue", zap.String("room", issue.Room), zap.String("issueID", issue.ID))
+		c.Log.Info("Creating issue", zap.String("roomID", issue.Room.ID), zap.String("issueID", issue.ID))
 	}
 
-	c.Log.Info("Creating alert", zap.String("room", alert.Room), zap.String("issueID", issue.ID), zap.String("alertID", alert.ID), zap.String("device", alert.Device), zap.String("type", alert.Type))
+	c.Log.Info("Creating alert", zap.String("roomID", alert.Device.Room.ID), zap.String("issueID", issue.ID), zap.String("alertID", alert.ID), zap.String("deviceID", alert.Device.ID), zap.String("type", alert.Type))
 
 	alert.IssueID = issue.ID
 	issue.Alerts[alert.ID] = alert
@@ -87,18 +91,19 @@ func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.I
 	defer c.issuesMu.Unlock()
 
 	if c.IssueStore != nil {
-		issue, err := c.IssueStore.CloseAlert(ctx, issueID, alertID)
+		iss, err := c.IssueStore.CloseAlert(ctx, issueID, alertID)
 		if err != nil {
 			return smee.Issue{}, fmt.Errorf("unable to close alert on substore: %w", err)
 		}
 
-		if issue.Active() {
-			c.issues[issue.ID] = issue
+		// update the cache
+		if iss.Active() {
+			c.issues[iss.ID] = iss
 		} else {
-			delete(c.issues, issue.ID)
+			delete(c.issues, iss.ID)
 		}
 
-		return issue, nil
+		return iss, nil
 	}
 
 	issue, ok := c.issues[issueID]
@@ -111,7 +116,7 @@ func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.I
 		return smee.Issue{}, errors.New("alert does not exist on issue")
 	}
 
-	c.Log.Info("Closing alert", zap.String("room", alert.Room), zap.String("issueID", issue.ID), zap.String("alertID", alert.ID), zap.String("device", alert.Device), zap.String("type", alert.Type))
+	c.Log.Info("Closing alert", zap.String("roomID", alert.Device.Room.ID), zap.String("issueID", issue.ID), zap.String("alertID", alert.ID), zap.String("deviceID", alert.Device.ID), zap.String("type", alert.Type))
 
 	alert.End = time.Now()
 	issue.Alerts[alert.ID] = alert
@@ -120,7 +125,7 @@ func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.I
 	if hasActiveAlerts(issue) {
 		c.issues[issue.ID] = issue
 	} else {
-		c.Log.Info("Closing issue", zap.String("room", issue.Room), zap.String("issueID", issueID))
+		c.Log.Info("Closing issue", zap.String("roomID", issue.Room.ID), zap.String("issueID", issueID))
 
 		issue.End = time.Now()
 		delete(c.issues, issue.ID)
@@ -137,13 +142,13 @@ func (c *Cache) AddIssueEvents(ctx context.Context, issueID string, events ...sm
 		if err := c.IssueStore.AddIssueEvents(ctx, issueID, events...); err != nil {
 			return fmt.Errorf("unable to add issue event on substore: %w", err)
 		}
-
-		return nil
 	}
 
 	issue, ok := c.issues[issueID]
 	if !ok {
-		// for the cache, we're just going to assume this issue has been closed
+		// TODO
+		// something is weird if the above didn't return an error (and c.IssueStore != nil)..
+		// like the cache is wrong?
 		return nil
 	}
 
@@ -171,6 +176,8 @@ func (c *Cache) LinkIncident(ctx context.Context, issueID string, inc smee.Incid
 			return smee.Issue{}, fmt.Errorf("unable to link incident on substore: %w", err)
 		}
 
+		// update the cache
+		c.issues[iss.ID] = iss
 		return iss, nil
 	}
 

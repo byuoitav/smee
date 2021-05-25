@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ type Handlers struct {
 
 type issue struct {
 	ID               string                   `json:"id"`
-	Room             string                   `json:"room"`
+	Room             smee.Room                `json:"room"`
 	Start            time.Time                `json:"start"`
 	End              *time.Time               `json:"end,omitempty"`
 	Alerts           map[string]alert         `json:"alerts"`
@@ -30,13 +31,12 @@ type issue struct {
 }
 
 type alert struct {
-	ID      string     `json:"id"`
-	IssueID string     `json:"issueID"`
-	Room    string     `json:"room"`
-	Device  string     `json:"device"`
-	Type    string     `json:"type"`
-	Start   time.Time  `json:"start"`
-	End     *time.Time `json:"end"`
+	ID      string      `json:"id"`
+	IssueID string      `json:"issueID"`
+	Device  smee.Device `json:"device"`
+	Type    string      `json:"type"`
+	Start   time.Time   `json:"start"`
+	End     *time.Time  `json:"end"`
 }
 
 func (h *Handlers) ActiveIssues(c *gin.Context) {
@@ -51,7 +51,7 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 		case err != nil:
 			c.String(http.StatusInternalServerError, err.Error())
 			return
-		case issue.Room == "":
+		case errors.Is(err, smee.ErrRoomIssueNotFound):
 			c.Status(http.StatusNotFound)
 			return
 		}
@@ -76,7 +76,7 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 
 	var res []issue
 	for _, iss := range issues {
-		info := convertMaintenance(maint[iss.Room])
+		info := convertMaintenance(maint[iss.Room.ID])
 		issue := issue{
 			ID:               iss.ID,
 			Room:             iss.Room,
@@ -96,7 +96,6 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 			alert := alert{
 				ID:      a.ID,
 				IssueID: a.IssueID,
-				Room:    a.Room,
 				Device:  a.Device,
 				Type:    a.Type,
 				Start:   a.Start,

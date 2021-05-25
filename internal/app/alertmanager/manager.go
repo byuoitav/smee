@@ -82,10 +82,10 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 	defer cancel()
 
 	// see if this alert already exists
-	exists, err := m.IssueStore.ActiveAlertExists(ctx, alert.Room, alert.Device, alert.Type)
+	exists, err := m.IssueStore.ActiveAlertExists(ctx, alert.Device.Room.ID, alert.Device.ID, alert.Type)
 	switch {
 	case err != nil:
-		m.Log.Error("unable to check if active alert exists", zap.Error(err), zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
+		m.Log.Error("unable to check if active alert exists", zap.Error(err), zap.String("roomID", alert.Device.Room.ID), zap.String("deviceID", alert.Device.ID), zap.String("type", alert.Type))
 		return
 	case exists:
 		// don't need to do anything, this alert already exists
@@ -95,12 +95,12 @@ func (m *Manager) createAlert(ctx context.Context, alert smee.Alert, events []sm
 
 	issue, err := m.IssueStore.CreateAlert(ctx, alert)
 	if err != nil {
-		m.Log.Error("unable to create alert", zap.Error(err), zap.String("room", alert.Room), zap.String("device", alert.Device), zap.String("type", alert.Type))
+		m.Log.Error("unable to create alert", zap.Error(err), zap.String("roomID", alert.Device.Room.ID), zap.String("deviceID", alert.Device.ID), zap.String("type", alert.Type))
 		return
 	}
 
 	if err := m.IssueStore.AddIssueEvents(ctx, issue.ID, events...); err != nil {
-		m.Log.Error("unable to add issue events", zap.Error(err), zap.String("issueID", issue.ID), zap.String("room", issue.Room))
+		m.Log.Error("unable to add issue events", zap.Error(err), zap.String("issueID", issue.ID), zap.String("roomID", issue.Room.ID))
 		return
 	}
 }

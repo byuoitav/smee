@@ -42,10 +42,14 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 				}
 
 				alert := smee.Alert{
-					Room:   event.Room,
-					Device: event.Device,
-					Type:   typ,
-					Start:  time.Now(),
+					Device: smee.Device{
+						ID: event.DeviceID,
+						Room: smee.Room{
+							ID: event.RoomID,
+						},
+					},
+					Type:  typ,
+					Start: time.Now(),
 				}
 
 				m.queue <- alertAction{
@@ -55,7 +59,7 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 						{
 							Type:      smee.TypeSystemMessage,
 							Timestamp: time.Now(),
-							Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started (Value: %v)", event.Device, typ, event.Value)),
+							Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started (Value: %v)", event.DeviceID, typ, event.Value)),
 						},
 					},
 				}
@@ -65,7 +69,7 @@ func (m *Manager) generateEventAlerts(ctx context.Context) error {
 }
 
 func (m *Manager) closeEventAlerts(ctx context.Context) error {
-	// stream setup timeout?
+	// TODO stream setup timeout?
 	stream, err := m.EventStreamer.Stream(ctx)
 	if err != nil {
 		return fmt.Errorf("unable to start event stream: %w", err)
@@ -99,7 +103,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 				switch {
 				case trans == nil:
 					continue
-				case event.Room != alert.Room || event.Device != alert.Device:
+				case event.DeviceID != alert.Device.ID || event.RoomID != alert.Device.Room.ID:
 					continue
 				case trans.KeyMatches != nil && !trans.KeyMatches.MatchString(event.Key):
 					continue
@@ -121,7 +125,7 @@ func (m *Manager) closeEventAlerts(ctx context.Context) error {
 						{
 							Type:      smee.TypeSystemMessage,
 							Timestamp: time.Now(),
-							Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert ended (Value: %v)", event.Device, alert.Type, event.Value)),
+							Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert ended (Value: %v)", event.DeviceID, alert.Type, event.Value)),
 						},
 					},
 				}

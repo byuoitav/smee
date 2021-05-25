@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
 	"go.uber.org/zap"
@@ -35,13 +34,6 @@ func (c *Cache) Sync(ctx context.Context) error {
 		}
 	}
 
-	// TODO remove
-	c.rooms["ITB-1010"] = smee.MaintenanceInfo{
-		RoomID: "ITB-1010",
-		Start:  time.Now(),
-		End:    time.Now().Add(1 * time.Hour),
-	}
-
 	c.Log.Info("Synced cache", zap.Int("roomsInMaintenance", len(c.rooms)))
 	return nil
 }
@@ -60,10 +52,10 @@ func (c *Cache) RoomsInMaintenance(ctx context.Context) (map[string]smee.Mainten
 	return rooms, nil
 }
 
-func (c *Cache) RoomMaintenanceInfo(ctx context.Context, room string) (smee.MaintenanceInfo, error) {
+func (c *Cache) RoomMaintenanceInfo(ctx context.Context, roomID string) (smee.MaintenanceInfo, error) {
 	c.roomsMu.RLock()
 	defer c.roomsMu.RUnlock()
-	return c.rooms[room], nil
+	return c.rooms[roomID], nil
 }
 
 func (c *Cache) SetMaintenanceInfo(ctx context.Context, info smee.MaintenanceInfo) error {

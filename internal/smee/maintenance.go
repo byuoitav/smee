@@ -6,8 +6,9 @@ import (
 )
 
 type MaintenanceStore interface {
+	// returns a map[roomID]MaintenanceInfo
 	RoomsInMaintenance(context.Context) (map[string]MaintenanceInfo, error)
-	RoomMaintenanceInfo(context.Context, string) (MaintenanceInfo, error)
+	RoomMaintenanceInfo(ctx context.Context, roomID string) (MaintenanceInfo, error)
 	SetMaintenanceInfo(context.Context, MaintenanceInfo) error
 }
 

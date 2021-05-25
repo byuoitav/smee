@@ -37,10 +37,10 @@ func New(ctx context.Context, redisURL string) (*StateStore, error) {
 	}, nil
 }
 
-func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.DeviceInfo, error) {
+func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.Device, error) {
 	start := time.Now()
 
-	res := make(map[string][]smee.DeviceInfo)
+	res := make(map[string][]smee.Device)
 	runQueries := func(keys []string) error {
 		vals, err := s.rdb.MGet(ctx, keys...).Result()
 		if err != nil {
@@ -60,9 +60,11 @@ func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.Dev
 
 				for qName, q := range s.queries {
 					if q(key, dev) {
-						res[qName] = append(res[qName], smee.DeviceInfo{
-							RoomID:   dev.RoomID,
-							DeviceID: dev.DeviceID,
+						res[qName] = append(res[qName], smee.Device{
+							ID: dev.DeviceID,
+							Room: smee.Room{
+								ID: dev.RoomID,
+							},
 						})
 					}
 				}
@@ -90,6 +92,7 @@ func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.Dev
 		}
 	}
 
+	// TODO remove
 	fmt.Printf("took: %s\n", time.Since(start))
 	return res, nil
 }

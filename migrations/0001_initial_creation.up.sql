@@ -11,8 +11,6 @@
 --
 -- Create Tables
 --
-
--- Rooms
 CREATE TABLE issues (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	couch_room_id text,
@@ -32,7 +30,7 @@ CREATE TABLE alerts (
 
 CREATE TABLE sn_incident_mappings (
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
-	sn_sys_id text, -- service now ticket ID
+	sn_sys_id text, -- ticket ID
 	sn_ticket_number text, -- ticket number (INCXXXXXX)
 	PRIMARY KEY (issue_id, sn_sys_id)
 );
@@ -40,7 +38,7 @@ CREATE TABLE sn_incident_mappings (
 CREATE TABLE issue_events (
 	id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
-	ts timestamptz,
+	time timestamptz,
 	event_type text,
 	data jsonb
 );

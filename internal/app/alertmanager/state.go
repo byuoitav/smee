@@ -12,6 +12,16 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 
+	// strip out the device/room name because those aren't always available
+	key := func(dev smee.Device) smee.Device {
+		return smee.Device{
+			ID: dev.ID,
+			Room: smee.Room{
+				ID: dev.Room.ID,
+			},
+		}
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -33,18 +43,15 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 				}
 
 				// build a map of the devices that _should_ have an alert
-				shouldAlert := make(map[smee.DeviceInfo]bool, len(devices))
+				shouldAlert := make(map[smee.Device]bool, len(devices))
 				for i := range devices {
-					shouldAlert[devices[i]] = true
+					shouldAlert[key(devices[i])] = true
 				}
 
 				// build a map of the devices that currently have an alert
-				curAlerts := make(map[smee.DeviceInfo]smee.Alert, len(alerts))
+				curAlerts := make(map[smee.Device]smee.Alert, len(alerts))
 				for i := range alerts {
-					curAlerts[smee.DeviceInfo{
-						RoomID:   alerts[i].Room,
-						DeviceID: alerts[i].Device,
-					}] = alerts[i]
+					curAlerts[key(alerts[i].Device)] = alerts[i]
 				}
 
 				// create alerts for every device that should be alerting
@@ -56,8 +63,7 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 
 					// create the alert
 					alert := smee.Alert{
-						Room:   dev.RoomID,
-						Device: dev.DeviceID,
+						Device: dev,
 						Type:   typ,
 						Start:  time.Now(),
 					}
@@ -69,7 +75,7 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 							{
 								Type:      smee.TypeSystemMessage,
 								Timestamp: time.Now(),
-								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started", dev.DeviceID, typ)),
+								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert started", dev.ID, typ)),
 							},
 						},
 					}
@@ -89,7 +95,7 @@ func (m *Manager) manageStateAlerts(ctx context.Context) error {
 							{
 								Type:      smee.TypeSystemMessage,
 								Timestamp: time.Now(),
-								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert ended", device, typ)),
+								Data:      smee.NewSystemMessage(fmt.Sprintf("AV Bot: |%v| %v alert ended", device.ID, typ)),
 							},
 						},
 					}

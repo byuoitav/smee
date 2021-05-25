@@ -11,10 +11,12 @@ import (
 type IssueStore interface {
 	CreateAlert(context.Context, Alert) (Issue, error)
 	CloseAlert(ctx context.Context, issueID, alertID string) (Issue, error)
+
+	// TODO should this return the updated issue? to update the cache?
 	AddIssueEvents(ctx context.Context, issueID string, event ...IssueEvent) error
 	LinkIncident(ctx context.Context, issueID string, inc Incident) (Issue, error)
 
-	ActiveAlertExists(ctx context.Context, room, device, typ string) (bool, error)
+	ActiveAlertExists(ctx context.Context, roomID, deviceID, typ string) (bool, error)
 	ActiveAlerts(context.Context) ([]Alert, error)
 	ActiveAlertsByType(context.Context, string) ([]Alert, error)
 
@@ -27,7 +29,7 @@ type Issue struct {
 	ID string `json:"id"`
 
 	// Room is the room this issue is associated with
-	Room string `json:"room"`
+	Room Room `json:"room"`
 
 	// Start is the time this issue was created
 	Start time.Time `json:"start"`

@@ -17,9 +17,9 @@ func hasActiveAlerts(issue smee.Issue) bool {
 }
 
 // activeRoomIssue assumes issuesMu is already read locked
-func (c *Cache) activeRoomIssue(room string) (smee.Issue, bool) {
+func (c *Cache) activeRoomIssue(roomID string) (smee.Issue, bool) {
 	for _, issue := range c.issues {
-		if issue.Active() && issue.Room == room {
+		if issue.Active() && issue.Room.ID == roomID {
 			return issue, true
 		}
 	}
@@ -27,17 +27,17 @@ func (c *Cache) activeRoomIssue(room string) (smee.Issue, bool) {
 	return smee.Issue{}, false
 }
 
-func (c *Cache) ActiveAlertExists(ctx context.Context, room, device, typ string) (bool, error) {
+func (c *Cache) ActiveAlertExists(ctx context.Context, roomID, deviceID, typ string) (bool, error) {
 	c.issuesMu.RLock()
 	defer c.issuesMu.RUnlock()
 
-	issue, ok := c.activeRoomIssue(room)
+	issue, ok := c.activeRoomIssue(roomID)
 	if !ok {
 		return false, nil
 	}
 
 	for _, alert := range issue.Alerts {
-		if alert.Active() && alert.Device == device && alert.Type == typ {
+		if alert.Active() && alert.Device.ID == deviceID && alert.Type == typ {
 			return true, nil
 		}
 	}
@@ -91,7 +91,7 @@ func (c *Cache) ActiveIssue(ctx context.Context, roomID string) (smee.Issue, err
 
 	issue, ok := c.activeRoomIssue(roomID)
 	if !ok {
-		return smee.Issue{}, nil
+		return smee.Issue{}, smee.ErrRoomIssueNotFound
 	}
 
 	return issue, nil

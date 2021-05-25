@@ -24,10 +24,10 @@ type Incident struct {
 }
 
 type Event struct {
-	Room   string
-	Device string
-	Key    string
-	Value  string
+	RoomID   string
+	DeviceID string
+	Key      string
+	Value    string
 }
 
 // EventStreamer ...
@@ -43,12 +43,20 @@ type EventStream interface {
 
 type DeviceStateStore interface {
 	// RunAlertQueries runs all store-specific queries and returns a map of queryName -> device id's that match the query
-	RunAlertQueries(ctx context.Context) (map[string][]DeviceInfo, error)
+	RunAlertQueries(ctx context.Context) (map[string][]Device, error)
 }
 
-type DeviceInfo struct {
-	DeviceID string
-	RoomID   string
+type Room struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Device struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+
+	// Room is the room a device is in
+	Room Room `json:"room"`
 }
 
 type AlertConfig struct {
@@ -70,11 +78,9 @@ type AlertTransitionEvent struct {
 
 // change to room/device ID's
 type Alert struct {
-	// TODO use DeviceInfo here
 	ID      string    `json:"id"`
 	IssueID string    `json:"issueID"`
-	Room    string    `json:"room"`
-	Device  string    `json:"device"`
+	Device  Device    `json:"device"`
 	Type    string    `json:"type"`
 	Start   time.Time `json:"start"`
 	End     time.Time `json:"end"`

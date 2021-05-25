@@ -42,10 +42,10 @@ func (s *stream) Next(ctx context.Context) (smee.Event, error) {
 	select {
 	case event := <-event:
 		return smee.Event{
-			Room:   event.TargetDevice.RoomID,
-			Device: event.TargetDevice.DeviceID,
-			Key:    event.Key,
-			Value:  event.Value,
+			RoomID:   event.TargetDevice.RoomID,
+			DeviceID: event.TargetDevice.DeviceID,
+			Key:      event.Key,
+			Value:    event.Value,
 		}, nil
 	case <-s.done:
 		return smee.Event{}, errors.New("stream closed")
