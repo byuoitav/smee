@@ -39,7 +39,7 @@ CREATE TABLE alerts (
 	end timestamptz
 )
 
-CREATE TABLE incident_mappings (
+CREATE TABLE sn_incident_mappings (
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE,
 	sn_sys_id text, -- service now ticket ID
 	sn_ticket_number text, -- ticket number (INCXXXXXX)
