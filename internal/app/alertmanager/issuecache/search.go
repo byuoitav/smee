@@ -17,6 +17,7 @@ func hasActiveAlerts(issue smee.Issue) bool {
 }
 
 // activeRoomIssue assumes issuesMu is already read locked
+// change to return error/smee.ErrRoomIssueNotFound
 func (c *Cache) activeRoomIssue(roomID string) (smee.Issue, bool) {
 	for _, issue := range c.issues {
 		if issue.Active() && issue.Room.ID == roomID {
