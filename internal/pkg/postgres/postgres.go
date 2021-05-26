@@ -16,8 +16,8 @@ type Client struct {
 type issue struct {
 	ID          int
 	CouchRoomID string
-	StartTime   time.Time // TODO should these be *time.Time?
-	EndTime     time.Time
+	StartTime   time.Time
+	EndTime     *time.Time
 }
 
 type alert struct {
@@ -26,28 +26,28 @@ type alert struct {
 	CouchRoomID   string
 	CouchDeviceID string
 	AlertType     string
-	StartTime     time.Time // TODO should these be *time.Time?
-	EndTime       time.Time
+	StartTime     time.Time
+	EndTime       *time.Time
 }
 
 type incidentMapping struct {
 	IssueID        int
-	snSysID        string
-	snTicketNumber string
+	SNSysID        string
+	SNTicketNumber string
 }
 
 type issueEvent struct {
 	ID        int
 	IssueID   int
-	Time      time.Time // TODO should this be *time.Time?
+	Time      time.Time
 	EventType string
-	Data      json.RawMessage // TODO double check this type
+	Data      json.RawMessage
 }
 
 type maintenanceInfo struct {
 	CouchRoomID string
-	StartTime   time.Time
-	EndTime     time.Time // TODO need to rerun migrations to fix type
+	StartTime   *time.Time
+	EndTime     *time.Time
 }
 
 func New(ctx context.Context, connString string) (*Client, error) {
@@ -55,8 +55,6 @@ func New(ctx context.Context, connString string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse connString: %w", err)
 	}
-
-	config.MaxConns = 32 // totally random...
 
 	pool, err := pgxpool.ConnectConfig(ctx, config)
 	if err != nil {

@@ -38,10 +38,10 @@ type Issue struct {
 	End time.Time `json:"end"`
 
 	// Alerts is a map of alertID -> alert
-	Alerts map[string]Alert `json:"alerts"`
+	Alerts map[string]Alert `json:"alerts"` // why a map...? i forgot -danny
 
 	// Incidents is a map of incidentID -> incident
-	Incidents map[string]Incident `json:"incidents"`
+	Incidents map[string]Incident `json:"incidents"` // why a map...? i forgot -danny
 
 	// Events is an ordered list by time of IssueEvents that have happened
 	// on this Issue
