@@ -33,7 +33,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
       const dataList = [];
-      dataList.push(data.room?.toLowerCase());
+      dataList.push(data.room.id.toLowerCase());
+      dataList.push(data.room.name.toLowerCase());
 
       const dataStr = dataList.join("◬");
 
@@ -64,7 +65,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
       return data.sort((a, b) => {
         switch (sort.active) {
-          case 'room': return cmp(a.room, b.room);
+          case 'room': return cmp(a.room.name, b.room.name);
           case 'alertCount': return cmp(a.alerts?.size, b.alerts?.size);
           case 'age': return cmp(a.start, b.start);
           default: return 0;
@@ -143,7 +144,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
-  issueAlerts(issue: Issue): string {
+  alertOverview(issue: Issue): string {
     if (!issue.alerts) {
       return "No alerts";
     }
@@ -153,12 +154,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     for (const [id, alert] of issue?.alerts.entries()) {
       if (alert.end) {
         // skip inactive alerts
-        console.log("skipping");
+        // TODO fix backend to not send these
+        console.log("skipping inactive alert");
         continue;
       }
 
-      const split = alert.device.split("-");
-      let name = alert.device;
+      const split = alert.device.name.split("-");
+      let name = alert.device.name;
       if (split.length == 3) {
         name = split[2];
       }

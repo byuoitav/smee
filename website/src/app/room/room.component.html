@@ -1,9 +1,9 @@
 <div>
 	<!-- room -->
 	<div class="room">
-		<span *ngIf="!inMaintenance()">{{room}}</span>
+		<span *ngIf="!inMaintenance()">{{roomName}}</span>
 		<ng-container *ngIf="inMaintenance()">
-			<span>{{room}}</span>
+			<span>{{roomName}}</span>
 			<span class="maintenance">In maintenance until {{maintenance?.end | date:'medium'}}</span>
 		</ng-container>
 	</div>
@@ -19,7 +19,7 @@
 						<!-- Room Column -->
 						<ng-container matColumnDef="device">
 							<th mat-header-cell *matHeaderCellDef mat-sort-header>Device</th>
-							<td mat-cell *matCellDef="let row">{{row.device}}</td>
+							<td mat-cell *matCellDef="let row">{{row.device.name}}</td>
 						</ng-container>
 
 						<!-- Type Column -->

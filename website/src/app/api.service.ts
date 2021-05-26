@@ -6,10 +6,21 @@ import {tap, map, catchError} from "rxjs/operators";
 export interface Alert {
   id: string;
   issueID: string;
-  room: string;
-  device: string; type: string;
+  device: Device;
+  type: string;
   start: Date;
   end: Date;
+}
+
+export interface Room {
+  id: string;
+  name: string;
+}
+
+export interface Device {
+  id: string;
+  name: string;
+  room: Room;
 }
 
 export interface Incident {
@@ -25,7 +36,7 @@ export interface IssueEvent {
 
 export interface Issue {
   id: string;
-  room: string | undefined;
+  room: Room;
   start: Date | undefined;
   end: Date | undefined;
   alerts: Map<string, Alert> | undefined;

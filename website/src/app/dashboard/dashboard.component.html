@@ -21,7 +21,7 @@
 				<td mat-cell *matCellDef="let row">
 					<!-- TODO room id -->
 					<a color="accent" routerLink="{{'/rooms/' + row.room}}" mat-button>
-						{{row.room}}
+						{{row.room.name}}
 					</a>
 				</td>
 			</ng-container>
@@ -35,7 +35,7 @@
 			<!-- Alert Overview Column -->
 			<ng-container matColumnDef="alertOverview">
 				<th mat-header-cell *matHeaderCellDef>Alerts</th>
-				<td mat-cell *matCellDef="let row">{{issueAlerts(row)}}</td>
+				<td mat-cell *matCellDef="let row">{{alertOverview(row)}}</td>
 			</ng-container>
 
 			<!-- Age Column -->

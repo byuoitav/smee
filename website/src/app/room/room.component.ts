@@ -17,7 +17,7 @@ interface DialogData {
 })
 export class RoomComponent implements OnInit, OnDestroy {
   roomID: string = "";
-  room: string = "";
+  roomName: string = "";
   issue: Issue | undefined;
   maintenance: MaintenanceInfo | undefined;
   alertsDataSource: MatTableDataSource<Alert> = new MatTableDataSource(undefined);
@@ -29,7 +29,7 @@ export class RoomComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.roomID = params["roomID"];
-      this.room = this.roomID; // TODO get from update()
+      this.roomName = this.roomID; // TODO get from update()
 
       this.update();
     })
@@ -83,7 +83,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       disableClose: true,
       data: {
         roomID: this.roomID,
-        room: this.room,
+        room: this.roomName,
         maintenance: this.maintenance,
       }
     });

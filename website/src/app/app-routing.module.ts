@@ -6,6 +6,11 @@ import {RoomsComponent} from "./rooms/rooms.component";
 
 const routes: Routes = [
   {
+    path: '',
+    redirectTo: '/dashboard',
+    pathMatch: 'full'
+  },
+  {
     path: 'dashboard',
     component: DashboardComponent
   },
