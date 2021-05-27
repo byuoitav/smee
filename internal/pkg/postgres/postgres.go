@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
@@ -86,17 +87,61 @@ func (c *Client) CreateAlert(ctx context.Context, smeeAlert smee.Alert) (smee.Is
 
 	c.Log.Info("Created alert", zap.String("roomID", a.CouchRoomID), zap.Int("issueID", issID), zap.Int("alertID", a.ID), zap.String("deviceID", a.CouchDeviceID), zap.String("type", a.AlertType))
 
-	// get the issue after creating this alert
+	smeeIss, err := c.smeeIssue(ctx, tx, issID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to get smeeIssue: %w", err)
+	}
 
 	if err := tx.Commit(ctx); err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to commit transaction: %w", err)
 	}
 
-	return smee.Issue{}, nil
+	return smeeIss, nil
 }
 
 func (c *Client) CloseAlert(ctx context.Context, issueID, alertID string) (smee.Issue, error) {
-	return smee.Issue{}, nil
+	aID, err := strconv.Atoi(alertID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to parse alertID: %w", err)
+	}
+
+	issID, err := strconv.Atoi(issueID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to parse issueID: %w", err)
+	}
+
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	if err := c.closeAlert(ctx, tx, aID); err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to close alert: %w", err)
+	}
+
+	// see if we need to close the issue
+	activeCount, err := c.activeAlertCount(ctx, tx, issID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to get active alert count: %w", err)
+	}
+
+	if activeCount == 0 {
+		if err := c.closeIssue(ctx, tx, issID); err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to closeIssue: %w", err)
+		}
+	}
+
+	smeeIss, err := c.smeeIssue(ctx, tx, issID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to get smeeIssue: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to commit transaction: %w", err)
+	}
+
+	return smeeIss, nil
 }
 
 func (c *Client) LinkIncident(ctx context.Context, issueID string, inc smee.Incident) (smee.Issue, error) {

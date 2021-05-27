@@ -29,6 +29,20 @@ func (c *Client) createAlert(ctx context.Context, tx pgx.Tx, a alert) (alert, er
 	return a, nil
 }
 
+func (c *Client) closeAlert(ctx context.Context, tx pgx.Tx, alertID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE alerts SET end_time = $1 WHERE id = $2",
+		time.Now(), alertID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec: %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid alertID")
+	}
+
+	return nil
+}
+
 func (c *Client) alerts(ctx context.Context, tx pgx.Tx, issueID int) ([]alert, error) {
 	var alerts []alert
 	var a alert
@@ -56,4 +70,24 @@ func (c *Client) alerts(ctx context.Context, tx pgx.Tx, issueID int) ([]alert, e
 	}
 
 	return alerts, nil
+}
+
+func (c *Client) activeAlertCount(ctx context.Context, tx pgx.Tx, issueID int) (int, error) {
+	var ids []int
+	var id int
+
+	_, err := tx.QueryFunc(ctx,
+		"SELECT id FROM alerts WHERE issue_id = $1 AND end_time is NULL",
+		[]interface{}{issueID},
+		[]interface{}{&id},
+		func(pgx.QueryFuncRow) error {
+			ids = append(ids, id)
+			return nil
+		},
+	)
+	if err != nil {
+		return 0, fmt.Errorf("unable to queryFunc: %w", err)
+	}
+
+	return len(ids), nil
 }

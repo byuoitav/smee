@@ -44,6 +44,20 @@ func (c *Client) createIssue(ctx context.Context, tx pgx.Tx, iss issue) (issue, 
 	return iss, nil
 }
 
+func (c *Client) closeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET end_time = $1 WHERE id = $2",
+		time.Now(), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec: %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+
+	return nil
+}
+
 func (c *Client) issue(ctx context.Context, tx pgx.Tx, id int) (issue, error) {
 	var iss issue
 
