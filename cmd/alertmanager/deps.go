@@ -13,6 +13,7 @@ import (
 	"github.com/byuoitav/smee/internal/app/alertmanager/maintenance"
 	"github.com/byuoitav/smee/internal/app/alertmanager/redis"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
+	"github.com/byuoitav/smee/internal/pkg/postgres"
 	"github.com/byuoitav/smee/internal/pkg/servicenow"
 	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
 	"github.com/byuoitav/smee/internal/smee"
@@ -26,9 +27,10 @@ func (d *Deps) build() {
 
 	d.buildLog()
 	d.buildWSO2()
+	d.buildIncidentMaintenanceStore(ctx)
 	d.buildIncidentStore()
-	d.buildIssueStore(ctx)
-	d.buildMaintenanceStore(ctx)
+	d.buildIssueCache(ctx)
+	d.buildMaintenanceCache(ctx)
 	d.buildEventStreamer()
 	d.buildDeviceStateStore(ctx)
 	d.buildAlertManager()
@@ -36,10 +38,22 @@ func (d *Deps) build() {
 }
 
 func (d *Deps) cleanup() {
-	d.log.Sync() // nolint:errcheck
+	d.log.Sync()       // nolint:errcheck
+	d.postgres.Close() // nolint:errcheck
 }
 
-func (d *Deps) buildIssueStore(ctx context.Context) {
+func (d *Deps) buildIncidentMaintenanceStore(ctx context.Context) {
+	store, err := postgres.New(ctx, d.PostgresURL)
+	if err != nil {
+		d.log.Fatal("unable to build postgres store", zap.Error(err))
+	}
+
+	d.postgres = store
+	// d.issueStore = store
+	// d.maintenanceStore = store
+}
+
+func (d *Deps) buildIssueCache(ctx context.Context) {
 	cache := &issuecache.Cache{
 		Log:           d.log.Named("issue-cache"),
 		IncidentStore: d.incidentStore,
@@ -52,9 +66,10 @@ func (d *Deps) buildIssueStore(ctx context.Context) {
 	d.issueStore = cache
 }
 
-func (d *Deps) buildMaintenanceStore(ctx context.Context) {
+func (d *Deps) buildMaintenanceCache(ctx context.Context) {
 	cache := &maintenance.Cache{
-		Log: d.log.Named("maintenance-cache"),
+		Log:              d.log.Named("maintenance-cache"),
+		MaintenanceStore: d.maintenanceStore,
 	}
 
 	if err := cache.Sync(ctx); err != nil {

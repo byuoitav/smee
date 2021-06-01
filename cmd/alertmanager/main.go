@@ -7,6 +7,7 @@ import (
 
 	"github.com/byuoitav/auth/wso2"
 	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
+	"github.com/byuoitav/smee/internal/pkg/postgres"
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
@@ -23,10 +24,12 @@ type Deps struct {
 	ClientSecret string
 	GatewayURL   string
 	RedisURL     string
+	PostgresURL  string
 
 	// created by functions
 	log              *zap.Logger
 	wso2             *wso2.Client
+	postgres         *postgres.Client
 	issueStore       smee.IssueStore
 	incidentStore    smee.IncidentStore
 	maintenanceStore smee.MaintenanceStore
@@ -49,6 +52,7 @@ func main() {
 	pflag.StringVar(&deps.ClientSecret, "client-secret", "", "wso2 secret")
 	pflag.StringVar(&deps.GatewayURL, "gateway-url", "https://api.byu.edu", "wso2 gateway address")
 	pflag.StringVar(&deps.RedisURL, "redis-url", "", "redis url")
+	pflag.StringVar(&deps.PostgresURL, "postgres-url", "", "postgres url")
 	pflag.Parse()
 
 	deps.build()

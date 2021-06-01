@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -15,12 +14,6 @@ import (
 type Client struct {
 	Log  *zap.Logger
 	pool *pgxpool.Pool
-}
-
-type maintenanceInfo struct {
-	CouchRoomID string
-	StartTime   *time.Time
-	EndTime     *time.Time
 }
 
 func New(ctx context.Context, connString string) (*Client, error) {
