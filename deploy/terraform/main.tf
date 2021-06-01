@@ -5,7 +5,7 @@ terraform {
     region         = "us-west-2"
 
     // THIS MUST BE UNIQUE
-    key = "smee-v2.tfstate"
+    key = "smee.tfstate"
   }
 }
 
@@ -19,4 +19,68 @@ data "aws_ssm_parameter" "eks_cluster_endpoint" {
 
 provider "kubernetes" {
   host = data.aws_ssm_parameter.eks_cluster_endpoint.value
+}
+
+data "aws_ssm_parameter" "eks_cluster_endpoint" {
+  name = "/eks/av-cluster-endpoint"
+}
+
+data "aws_ssm_parameter" "pg_username" {
+  name = "/rds/av-main/smee_username"
+}
+
+data "aws_ssm_parameter" "pg_password" {
+  name = "/rds/av-main/smee_password"
+}
+
+data "aws_ssm_parameter" "pg_hostname" {
+  name = "/rds/av-main/hostname"
+}
+
+data "aws_ssm_parameter" "pg_port" {
+  name = "/rds/av-main/port"
+}
+
+data "aws_ssm_parameter" "client_id" {
+  name = "/env/smee/client-id"
+}
+
+data "aws_ssm_parameter" "client_secret" {
+  name = "/env/smee/client-secret"
+}
+
+data "aws_ssm_parameter" "redis_url" {
+  name = "/env/smee/redis-url"
+}
+
+data "aws_ssm_parameter" "hub_address" {
+  name = "/env/hub-address"
+}
+
+module "smee" {
+  source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
+
+  // required
+  name  = "smee"
+  image = "docker.pkg.github.com/byuoitav/smee/smee-dev"
+  // image_version  = "7fa936f"
+  container_port = 8080
+  repo_url       = "https://github.com/byuoitav/camera-services"
+
+  // optional
+  image_pull_secret = "github-docker-registry"
+  public_urls       = ["newsmee.av.byu.edu"]
+  container_env = {
+    "GIN_MODE" = "release"
+  }
+  container_args = [
+    "--port", "8080",
+    "--log-level", "info",
+    "--hub-url", data.aws_ssm_parameter.hub_address.value,
+    "--client-id", data.aws_ssm_parameter.client_id.value,
+    "--client-secret", data.aws_ssm_parameter.client_secret.value,
+    "--redis-url", data.aws_ssm_parameter.redis_url.value,
+    "--postgres-url", "postgres://${data.aws_ssm_parameter.pg_username.value}:${data.aws_ssm_parameter.pg_password.value}@${data.aws_ssm_parameter.pg_hostname.value}:${data.aws_ssm_parameter.pg_port.value}/av?pool_max_conns=4",
+  ]
+  health_check = false
 }
