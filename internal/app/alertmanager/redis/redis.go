@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/go-redis/redis/v8"
@@ -38,8 +37,6 @@ func New(ctx context.Context, redisURL string) (*StateStore, error) {
 }
 
 func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.Device, error) {
-	start := time.Now()
-
 	res := make(map[string][]smee.Device)
 	runQueries := func(keys []string) error {
 		vals, err := s.rdb.MGet(ctx, keys...).Result()
@@ -92,7 +89,5 @@ func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.Dev
 		}
 	}
 
-	// TODO remove
-	fmt.Printf("took: %s\n", time.Since(start))
 	return res, nil
 }

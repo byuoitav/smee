@@ -26,12 +26,15 @@ func (c *Client) issueEvents(ctx context.Context, tx pgx.Tx, issueID int) ([]iss
 		[]interface{}{issueID},
 		[]interface{}{&event.ID, &event.IssueID, &event.Time, &event.EventType, &event.Data},
 		func(pgx.QueryFuncRow) error {
+			tmp := make(json.RawMessage, len(event.Data))
+			copy(tmp, event.Data)
+
 			events = append(events, issueEvent{
 				ID:        event.ID,
 				IssueID:   event.IssueID,
 				Time:      event.Time,
 				EventType: event.EventType,
-				Data:      event.Data,
+				Data:      tmp,
 			})
 
 			return nil
