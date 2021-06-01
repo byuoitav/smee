@@ -1,4 +1,4 @@
-NAME := smee 
+NAME := smee
 OWNER := byuoitav
 PKG := github.com/${OWNER}/${NAME}
 DOCKER_URL := docker.pkg.github.com
