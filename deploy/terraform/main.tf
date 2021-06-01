@@ -18,11 +18,8 @@ data "aws_ssm_parameter" "eks_cluster_endpoint" {
 }
 
 provider "kubernetes" {
-  host = data.aws_ssm_parameter.eks_cluster_endpoint.value
-}
-
-data "aws_ssm_parameter" "eks_cluster_endpoint" {
-  name = "/eks/av-cluster-endpoint"
+  host        = data.aws_ssm_parameter.eks_cluster_endpoint.value
+  config_path = "~/.kube/config"
 }
 
 data "aws_ssm_parameter" "pg_username" {
@@ -76,7 +73,7 @@ module "smee" {
   container_args = [
     "--port", "8080",
     "--log-level", "info",
-    "--hub-url", data.aws_ssm_parameter.hub_address.value,
+    "--hub-url", "ws://${data.aws_ssm_parameter.hub_address.value}",
     "--client-id", data.aws_ssm_parameter.client_id.value,
     "--client-secret", data.aws_ssm_parameter.client_secret.value,
     "--redis-url", data.aws_ssm_parameter.redis_url.value,
