@@ -11,8 +11,8 @@ import (
 
 type maintenanceInfo struct {
 	CouchRoomID string
-	StartTime   *time.Time
-	EndTime     *time.Time
+	StartTime   time.Time
+	EndTime     time.Time
 }
 
 func (c *Client) RoomsInMaintenance(ctx context.Context) (map[string]smee.MaintenanceInfo, error) {
@@ -20,7 +20,7 @@ func (c *Client) RoomsInMaintenance(ctx context.Context) (map[string]smee.Mainte
 	var info maintenanceInfo
 
 	_, err := c.pool.QueryFunc(ctx,
-		"SELECT * from room_maintenance_couch WHERE now() between start_time and end_time",
+		"SELECT * FROM room_maintenance_couch WHERE now() BETWEEN start_time AND end_time",
 		[]interface{}{},
 		[]interface{}{&info.CouchRoomID, &info.StartTime, &info.EndTime},
 		func(pgx.QueryFuncRow) error {
@@ -33,7 +33,7 @@ func (c *Client) RoomsInMaintenance(ctx context.Context) (map[string]smee.Mainte
 		return nil, fmt.Errorf("unable to queryFunc: %w", err)
 	}
 
-	return nil, nil
+	return maint, nil
 }
 
 func (c *Client) RoomMaintenanceInfo(ctx context.Context, roomID string) (smee.MaintenanceInfo, error) {
@@ -66,14 +66,8 @@ func (c *Client) SetMaintenanceInfo(ctx context.Context, info smee.MaintenanceIn
 func convertMaintenanceInfo(info maintenanceInfo) smee.MaintenanceInfo {
 	smeeInfo := smee.MaintenanceInfo{
 		RoomID: info.CouchRoomID,
-	}
-
-	if info.StartTime != nil {
-		smeeInfo.Start = *info.StartTime
-	}
-
-	if info.EndTime != nil {
-		smeeInfo.End = *info.EndTime
+		Start:  info.StartTime,
+		End:    info.EndTime,
 	}
 
 	return smeeInfo

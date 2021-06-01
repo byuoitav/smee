@@ -45,6 +45,6 @@ CREATE TABLE issue_events (
 
 CREATE TABLE room_maintenance_couch (
 	couch_room_id text PRIMARY KEY,
-	start_time timestamptz,
-	end_time timestamptz
+	start_time timestamptz IS NOT NULL,
+	end_time timestamptz IS NOT NULL
 );
