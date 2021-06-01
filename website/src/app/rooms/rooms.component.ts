@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ApiService, Room} from "../api.service";
+import {ApiService, RoomOverview} from "../api.service";
 
 @Component({
   selector: 'app-rooms',
@@ -9,7 +9,7 @@ import {ApiService, Room} from "../api.service";
 export class RoomsComponent implements OnInit {
   filter: string = "";
   onlyMaintenance: boolean = false;
-  rooms: Room[] = [];
+  rooms: RoomOverview[] = [];
 
   constructor(private api: ApiService) {}
 
@@ -23,7 +23,7 @@ export class RoomsComponent implements OnInit {
     })
   }
 
-  get filtered(): Room[] {
+  get filtered(): RoomOverview[] {
     return this.rooms.filter(room => {
       if (this.onlyMaintenance && !room.inMaintenance) {
         return false;

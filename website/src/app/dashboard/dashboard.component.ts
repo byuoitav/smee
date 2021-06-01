@@ -36,6 +36,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       dataList.push(data.room.id.toLowerCase());
       dataList.push(data.room.name.toLowerCase());
 
+      if (data.alerts) {
+        for (const [_, v] of data.alerts) {
+          dataList.push(v.device.id.toLowerCase());
+          dataList.push(v.device.name.toLowerCase());
+          dataList.push(v.type.toLowerCase());
+        }
+      }
+
       const dataStr = dataList.join("◬");
 
       const transformedFilter = filter.trim().toLowerCase();

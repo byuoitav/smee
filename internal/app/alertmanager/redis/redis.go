@@ -96,4 +96,3 @@ func (s *StateStore) RunAlertQueries(ctx context.Context) (map[string][]smee.Dev
 	fmt.Printf("took: %s\n", time.Since(start))
 	return res, nil
 }
-

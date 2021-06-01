@@ -20,7 +20,7 @@
 				<th mat-header-cell *matHeaderCellDef mat-sort-header>Room</th>
 				<td mat-cell *matCellDef="let row">
 					<!-- TODO room id -->
-					<a color="accent" routerLink="{{'/rooms/' + row.room}}" mat-button>
+					<a color="accent" routerLink="{{'/rooms/' + row?.room?.id}}" mat-button>
 						{{row.room.name}}
 					</a>
 				</td>

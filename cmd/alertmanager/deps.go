@@ -48,15 +48,18 @@ func (d *Deps) buildIncidentMaintenanceStore(ctx context.Context) {
 		d.log.Fatal("unable to build postgres store", zap.Error(err))
 	}
 
+	store.Log = d.log.Named("postgres")
+
 	d.postgres = store
-	// d.issueStore = store
-	// d.maintenanceStore = store
+	d.issueStore = store
+	d.maintenanceStore = store
 }
 
 func (d *Deps) buildIssueCache(ctx context.Context) {
 	cache := &issuecache.Cache{
 		Log:           d.log.Named("issue-cache"),
 		IncidentStore: d.incidentStore,
+		IssueStore:    d.issueStore,
 	}
 
 	if err := cache.Sync(ctx); err != nil {

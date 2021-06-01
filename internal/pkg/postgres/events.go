@@ -46,7 +46,7 @@ func (c *Client) issueEvents(ctx context.Context, tx pgx.Tx, issueID int) ([]iss
 
 func (c *Client) createIssueEvent(ctx context.Context, tx pgx.Tx, event issueEvent) (issueEvent, error) {
 	err := tx.QueryRow(ctx,
-		"INSERT INTO alerts (issue_id, time, event_type, data) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO issue_events (issue_id, time, event_type, data) VALUES ($1, $2, $3, $4) RETURNING id",
 		event.IssueID, event.Time, event.EventType, event.Data).Scan(&event.ID)
 	if err != nil {
 		return issueEvent{}, fmt.Errorf("unable to query/scan: %w", err)

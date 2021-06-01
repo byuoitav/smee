@@ -52,7 +52,7 @@ export interface MaintenanceInfo {
   end: Date | undefined;
 }
 
-export interface Room {
+export interface RoomOverview {
   id: string;
   name: string;
   inMaintenance: boolean;
@@ -64,10 +64,10 @@ export interface Room {
 export class ApiService {
   constructor(private http: HttpClient) {}
 
-  getRooms(): Observable<Room[]> {
-    return this.http.get<Room[]>("/api/v1/rooms").pipe(
+  getRooms(): Observable<RoomOverview[]> {
+    return this.http.get<RoomOverview[]>("/api/v1/rooms").pipe(
       tap(data => console.log("got rooms", data)),
-      catchError(this.handleError<Room[]>("getRooms", [])),
+      catchError(this.handleError<RoomOverview[]>("getRooms", [])),
     )
   }
 

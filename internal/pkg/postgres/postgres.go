@@ -59,6 +59,7 @@ func (c *Client) CreateAlert(ctx context.Context, smeeAlert smee.Alert) (smee.Is
 			return smee.Issue{}, fmt.Errorf("unable to create issue: %w", err)
 		}
 
+		issID = iss.ID
 		c.Log.Info("Created issue", zap.String("roomID", iss.CouchRoomID), zap.Int("issueID", issID))
 	case err != nil:
 		return smee.Issue{}, fmt.Errorf("unable to get active issue: %w", err)

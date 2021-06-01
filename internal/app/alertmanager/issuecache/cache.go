@@ -64,6 +64,14 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 
 	alert.ID = ksuid.New().String()
 
+	if alert.Device.Name == "" {
+		alert.Device.Name = alert.Device.ID
+	}
+
+	if alert.Device.Room.Name == "" {
+		alert.Device.Room.Name = alert.Device.Room.ID
+	}
+
 	issue, ok := c.activeRoomIssue(alert.Device.Room.ID)
 	if !ok {
 		// create an issue if needed

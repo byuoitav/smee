@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -25,7 +26,7 @@ type issue struct {
 	End              *time.Time               `json:"end,omitempty"`
 	Alerts           map[string]alert         `json:"alerts"`
 	Incidents        map[string]smee.Incident `json:"incidents"`
-	Events           []smee.IssueEvent        `json:"events"`
+	Events           []issueEvent             `json:"events"`
 	MaintenanceStart *time.Time               `json:"maintenanceStart,omitempty"`
 	MaintenanceEnd   *time.Time               `json:"maintenanceEnd,omitempty"`
 }
@@ -37,6 +38,12 @@ type alert struct {
 	Type    string      `json:"type"`
 	Start   time.Time   `json:"start"`
 	End     *time.Time  `json:"end"`
+}
+
+type issueEvent struct {
+	Timestamp time.Time        `json:"timestamp"`
+	Type      string           `json:"type"`
+	Data      *json.RawMessage `json:"data"`
 }
 
 func (h *Handlers) ActiveIssues(c *gin.Context) {
@@ -83,13 +90,21 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 			Start:            iss.Start,
 			Alerts:           make(map[string]alert, len(iss.Alerts)),
 			Incidents:        iss.Incidents,
-			Events:           iss.Events,
+			Events:           make([]issueEvent, len(iss.Events)),
 			MaintenanceStart: info.Start,
 			MaintenanceEnd:   info.End,
 		}
 
 		if !iss.End.IsZero() {
 			issue.End = &iss.End
+		}
+
+		for i, event := range iss.Events {
+			issue.Events[i] = issueEvent{
+				Timestamp: event.Timestamp,
+				Type:      string(event.Type),
+				Data:      &event.Data,
+			}
 		}
 
 		for _, a := range iss.Alerts {

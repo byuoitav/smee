@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type room struct {
+type roomOverview struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
 	InMaintenance bool   `json:"inMaintenance"`
@@ -20,7 +20,7 @@ func (h *Handlers) Rooms(c *gin.Context) {
 	defer cancel()
 
 	// TODO get real rooms
-	rooms := []room{
+	rooms := []roomOverview{
 		{
 			ID:   "ITB-1010",
 			Name: "ITB 1010",
