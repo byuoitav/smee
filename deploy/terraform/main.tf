@@ -61,11 +61,11 @@ module "smee" {
   source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
 
   // required
-  name  = "smee"
-  image = "docker.pkg.github.com/byuoitav/smee/smee-dev"
-  // image_version  = "7fa936f"
+  name           = "smee"
+  image          = "docker.pkg.github.com/byuoitav/smee/smee-dev"
+  image_version  = "60b5d53"
   container_port = 8080
-  repo_url       = "https://github.com/byuoitav/camera-services"
+  repo_url       = "https://github.com/byuoitav/smee"
 
   // optional
   image_pull_secret = "github-docker-registry"
