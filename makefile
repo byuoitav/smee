@@ -49,6 +49,10 @@ build: deps
 	@cd cmd/alertmanager/ && env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ../../dist/smee-linux-amd64
 
 	@echo
+	@echo Building website frontend...
+	@cd website/ && npm run-script build && ls -la && mv ./dist/website ../dist/website && rmdir ./dist
+
+	@echo
 	@echo Build output is located in ./dist/.
 
 docker: clean build

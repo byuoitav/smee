@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"path"
+	"path/filepath"
 
 	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/gin-gonic/gin"
@@ -30,6 +32,16 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	// build engine
 	r := gin.New()
 	r.Use(gin.Recovery())
+
+	r.NoRoute(func(c *gin.Context) {
+		dir, file := path.Split(c.Request.RequestURI)
+
+		if file == "" || filepath.Ext(file) == "" {
+			c.File("/website/index.html")
+		} else {
+			c.File("/website/" + path.Join(dir, file))
+		}
+	})
 
 	debug := r.Group("/debug")
 	debug.GET("/healthz", func(c *gin.Context) {
