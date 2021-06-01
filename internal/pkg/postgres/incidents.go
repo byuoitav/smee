@@ -37,3 +37,14 @@ func (c *Client) incidentMappings(ctx context.Context, tx pgx.Tx, issueID int) (
 
 	return incs, nil
 }
+
+func (c *Client) createIncidentMapping(ctx context.Context, tx pgx.Tx, mapping incidentMapping) error {
+	_, err := tx.Exec(ctx,
+		"INSERT INTO sn_incident_mappings (issue_id, sn_sys_id, sn_ticket_number) VALUES ($1, $2, $3)",
+		mapping.IssueID, mapping.SNSysID, mapping.SNTicketNumber)
+	if err != nil {
+		return fmt.Errorf("unable to exec: %w", err)
+	}
+
+	return nil
+}

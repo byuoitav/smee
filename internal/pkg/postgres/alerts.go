@@ -43,13 +43,11 @@ func (c *Client) closeAlert(ctx context.Context, tx pgx.Tx, alertID int) error {
 	return nil
 }
 
-func (c *Client) alerts(ctx context.Context, tx pgx.Tx, issueID int) ([]alert, error) {
+func (c *Client) queryAlerts(ctx context.Context, tx pgx.Tx, query string, args ...interface{}) ([]alert, error) {
 	var alerts []alert
 	var a alert
 
-	_, err := tx.QueryFunc(ctx,
-		"SELECT * FROM alerts WHERE issue_id = $1",
-		[]interface{}{issueID},
+	_, err := tx.QueryFunc(ctx, query, args,
 		[]interface{}{&a.ID, &a.IssueID, &a.CouchRoomID, &a.CouchDeviceID, &a.AlertType, &a.StartTime, &a.EndTime},
 		func(pgx.QueryFuncRow) error {
 			alerts = append(alerts, alert{
@@ -70,6 +68,29 @@ func (c *Client) alerts(ctx context.Context, tx pgx.Tx, issueID int) ([]alert, e
 	}
 
 	return alerts, nil
+}
+
+func (c *Client) alerts(ctx context.Context, tx pgx.Tx, issueID int) ([]alert, error) {
+	return c.queryAlerts(ctx, tx, "SELECT * FROM alerts WHERE issue_id = $1", issueID)
+}
+
+func (c *Client) activeAlertExists(ctx context.Context, tx pgx.Tx, roomID, deviceID, typ string) (bool, error) {
+	alerts, err := c.queryAlerts(ctx, tx,
+		"SELECT * FROM alerts WHERE end_time IS NULL AND couch_room_id = $1 AND couch_device_id = $2 AND alert_type = $3",
+		roomID, deviceID, typ)
+	if err != nil {
+		return false, fmt.Errorf("unable to query alerts: %w", err)
+	}
+
+	return len(alerts) > 0, nil
+}
+
+func (c *Client) activeAlerts(ctx context.Context, tx pgx.Tx) ([]alert, error) {
+	return c.queryAlerts(ctx, tx, "SELECT * FROM alerts WHERE end_time IS NULL")
+}
+
+func (c *Client) activeAlertsByType(ctx context.Context, tx pgx.Tx, typ string) ([]alert, error) {
+	return c.queryAlerts(ctx, tx, "SELECT * FROM alerts WHERE end_time IS NULL AND alert_type = $1", typ)
 }
 
 func (c *Client) activeAlertCount(ctx context.Context, tx pgx.Tx, issueID int) (int, error) {

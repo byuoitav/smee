@@ -16,12 +16,12 @@ type IssueStore interface {
 	AddIssueEvents(ctx context.Context, issueID string, event ...IssueEvent) error
 	LinkIncident(ctx context.Context, issueID string, inc Incident) (Issue, error)
 
+	ActiveIssue(ctx context.Context, roomID string) (Issue, error)
+	ActiveIssues(context.Context) ([]Issue, error)
+
 	ActiveAlertExists(ctx context.Context, roomID, deviceID, typ string) (bool, error)
 	ActiveAlerts(context.Context) ([]Alert, error)
 	ActiveAlertsByType(context.Context, string) ([]Alert, error)
-
-	ActiveIssue(context.Context, string) (Issue, error)
-	ActiveIssues(context.Context) ([]Issue, error)
 }
 
 type Issue struct {

@@ -145,9 +145,68 @@ func (c *Client) CloseAlert(ctx context.Context, issueID, alertID string) (smee.
 }
 
 func (c *Client) LinkIncident(ctx context.Context, issueID string, inc smee.Incident) (smee.Issue, error) {
-	return smee.Issue{}, nil
+	issID, err := strconv.Atoi(issueID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to parse issueID: %w", err)
+	}
+
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	mapping := incidentMapping{
+		IssueID:        issID,
+		SNSysID:        inc.ID,
+		SNTicketNumber: inc.Name,
+	}
+
+	if err := c.createIncidentMapping(ctx, tx, mapping); err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to create incident mapping: %w", err)
+	}
+
+	smeeIss, err := c.smeeIssue(ctx, tx, issID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to get smeeIssue: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to commit transaction: %w", err)
+	}
+
+	return smeeIss, nil
 }
 
-func (c *Client) AddIssueEvents(ctx context.Context, issueID string, events ...smee.IssueEvent) error {
+func (c *Client) AddIssueEvents(ctx context.Context, issueID string, smeeEvents ...smee.IssueEvent) error {
+	issID, err := strconv.Atoi(issueID)
+	if err != nil {
+		return fmt.Errorf("unable to parse issueID: %w", err)
+	}
+
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to start transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	for _, smeeEvent := range smeeEvents {
+		event := issueEvent{
+			IssueID:   issID,
+			Time:      smeeEvent.Timestamp,
+			EventType: string(smeeEvent.Type),
+			Data:      smeeEvent.Data,
+		}
+
+		_, err := c.createIssueEvent(ctx, tx, event)
+		if err != nil {
+			return fmt.Errorf("unable to create issue event: %w", err)
+		}
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("unable to commit transaction: %w", err)
+	}
+
 	return nil
 }

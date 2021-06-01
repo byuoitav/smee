@@ -33,6 +33,27 @@ func (c *Client) activeIssueID(ctx context.Context, tx pgx.Tx, roomID string) (i
 	return id, nil
 }
 
+func (c *Client) activeIssueIDs(ctx context.Context, tx pgx.Tx) ([]int, error) {
+	var ids []int
+	var id int
+
+	_, err := tx.QueryFunc(ctx,
+		"SELECT id FROM issues WHERE end_time IS NULL",
+		[]interface{}{},
+		[]interface{}{&id},
+		func(pgx.QueryFuncRow) error {
+			tmp := id // don't know if i actually need this or not
+			ids = append(ids, tmp)
+			return nil
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to queryFunc: %w", err)
+	}
+
+	return ids, nil
+}
+
 func (c *Client) createIssue(ctx context.Context, tx pgx.Tx, iss issue) (issue, error) {
 	err := tx.QueryRow(ctx,
 		"INSERT INTO issues (couch_room_id, start_time) VALUES ($1, $2) RETURNING id",
@@ -108,28 +129,16 @@ func buildIssue(iss issue, alerts []alert, incs []incidentMapping, events []issu
 			Name: iss.CouchRoomID,
 		},
 		Start:     iss.StartTime,
-		End:       derefTime(iss.EndTime),
 		Alerts:    make(map[string]smee.Alert),
 		Incidents: make(map[string]smee.Incident),
 	}
 
-	for _, a := range alerts {
-		smeeAlert := smee.Alert{
-			ID:      strconv.Itoa(a.ID),
-			IssueID: strconv.Itoa(a.IssueID),
-			Device: smee.Device{
-				ID:   a.CouchDeviceID,
-				Name: a.CouchDeviceID,
-				Room: smee.Room{
-					ID:   a.CouchRoomID,
-					Name: a.CouchRoomID,
-				},
-			},
-			Type:  a.AlertType,
-			Start: a.StartTime,
-			End:   derefTime(a.EndTime),
-		}
+	if iss.EndTime != nil {
+		smeeIss.End = *iss.EndTime
+	}
 
+	for _, a := range alerts {
+		smeeAlert := convertAlert(a)
 		smeeIss.Alerts[smeeAlert.ID] = smeeAlert
 	}
 
@@ -153,12 +162,4 @@ func buildIssue(iss issue, alerts []alert, incs []incidentMapping, events []issu
 	}
 
 	return smeeIss, nil
-}
-
-func derefTime(t *time.Time) time.Time {
-	if t == nil {
-		return time.Time{}
-	}
-
-	return *t
 }
