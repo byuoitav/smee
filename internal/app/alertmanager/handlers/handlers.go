@@ -63,7 +63,7 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, issue)
+		c.JSON(http.StatusOK, convertIssue(issue))
 		return
 	}
 
@@ -84,44 +84,10 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 	var res []issue
 	for _, iss := range issues {
 		info := convertMaintenance(maint[iss.Room.ID])
-		issue := issue{
-			ID:               iss.ID,
-			Room:             iss.Room,
-			Start:            iss.Start,
-			Alerts:           make(map[string]alert, len(iss.Alerts)),
-			Incidents:        iss.Incidents,
-			Events:           make([]issueEvent, len(iss.Events)),
-			MaintenanceStart: info.Start,
-			MaintenanceEnd:   info.End,
-		}
+		issue := convertIssue(iss)
 
-		if !iss.End.IsZero() {
-			issue.End = &iss.End
-		}
-
-		for i, event := range iss.Events {
-			issue.Events[i] = issueEvent{
-				Timestamp: event.Timestamp,
-				Type:      string(event.Type),
-				Data:      &event.Data,
-			}
-		}
-
-		for _, a := range iss.Alerts {
-			alert := alert{
-				ID:      a.ID,
-				IssueID: a.IssueID,
-				Device:  a.Device,
-				Type:    a.Type,
-				Start:   a.Start,
-			}
-
-			if !a.End.IsZero() {
-				alert.End = &a.End
-			}
-
-			issue.Alerts[alert.ID] = alert
-		}
+		issue.MaintenanceStart = info.Start
+		issue.MaintenanceEnd = info.End
 
 		res = append(res, issue)
 	}
@@ -186,4 +152,45 @@ func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, iss)
+}
+
+func convertIssue(iss smee.Issue) issue {
+	issue := issue{
+		ID:        iss.ID,
+		Room:      iss.Room,
+		Start:     iss.Start,
+		Alerts:    make(map[string]alert, len(iss.Alerts)),
+		Incidents: iss.Incidents,
+		Events:    make([]issueEvent, len(iss.Events)),
+	}
+
+	if !iss.End.IsZero() {
+		issue.End = &iss.End
+	}
+
+	for i, event := range iss.Events {
+		issue.Events[i] = issueEvent{
+			Timestamp: event.Timestamp,
+			Type:      string(event.Type),
+			Data:      &event.Data, // TODO should i make a new slice and copy()?
+		}
+	}
+
+	for _, a := range iss.Alerts {
+		alert := alert{
+			ID:      a.ID,
+			IssueID: a.IssueID,
+			Device:  a.Device,
+			Type:    a.Type,
+			Start:   a.Start,
+		}
+
+		if !a.End.IsZero() {
+			alert.End = &a.End
+		}
+
+		issue.Alerts[alert.ID] = alert
+	}
+
+	return issue
 }
