@@ -37,7 +37,7 @@
 						<!-- Ended Column -->
 						<ng-container matColumnDef="ended">
 							<th mat-header-cell *matHeaderCellDef mat-sort-header>Ended At</th>
-							<td mat-cell *matCellDef="let row">{{row.ended | date:'medium'}}</td>
+							<td mat-cell *matCellDef="let row">{{row.end | date:'medium'}}</td>
 						</ng-container>
 
 						<tr mat-header-row *matHeaderRowDef="alertColumns"></tr>
