@@ -1,0 +1,58 @@
+.base {
+	width: 100%;
+	height: 100%;
+	overflow-y: scroll;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.filters {
+	width: 95%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+
+	.search {
+		width: 40%;
+	}
+}
+
+.issues {
+	width: 95%;
+
+	.table {
+		width: 100%;
+
+		.hidden {
+			display: none;
+		}
+
+		// columns should add to 100% width
+		.mat-column-room {
+			width: 15%;
+		}
+
+		.mat-column-alertCount {
+			width: 5%;
+		}
+
+		.mat-column-alertOverview {
+			width: 50%;
+		}
+
+		.mat-column-age {
+			width: 10%;
+		}
+
+		.mat-column-incidents {
+			width: 20%;
+		}
+	}
+}
+
+
+.spacer {
+	flex: 1 1 auto;
+}

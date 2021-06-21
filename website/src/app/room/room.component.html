@@ -1,0 +1,89 @@
+<div>
+	<!-- room -->
+	<div class="room">
+		<span *ngIf="!inMaintenance()">{{roomName}}</span>
+		<ng-container *ngIf="inMaintenance()">
+			<span>{{roomName}}</span>
+			<span class="maintenance">In maintenance until {{maintenance?.end | date:'medium'}}</span>
+		</ng-container>
+	</div>
+
+	<div class="content">
+		<div class="left">
+			<!-- active issues alerts -->
+			<ng-container *ngIf="issue">
+				<div class="alerts mat-elevation-z8">
+					<span class="header">Active Issue</span>
+
+					<table mat-table [dataSource]="alertsDataSource" matSort class="table">
+						<!-- Room Column -->
+						<ng-container matColumnDef="device">
+							<th mat-header-cell *matHeaderCellDef mat-sort-header>Device</th>
+							<td mat-cell *matCellDef="let row">{{row.device.name}}</td>
+						</ng-container>
+
+						<!-- Type Column -->
+						<ng-container matColumnDef="type">
+							<th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+							<td mat-cell *matCellDef="let row">{{row.type}}</td>
+						</ng-container>
+
+						<!-- Started Column -->
+						<ng-container matColumnDef="started">
+							<th mat-header-cell *matHeaderCellDef mat-sort-header>Started At</th>
+							<td mat-cell *matCellDef="let row">{{row.start | date:'medium'}}</td>
+						</ng-container>
+
+						<!-- Ended Column -->
+						<ng-container matColumnDef="ended">
+							<th mat-header-cell *matHeaderCellDef mat-sort-header>Ended At</th>
+							<td mat-cell *matCellDef="let row">{{row.end | date:'medium'}}</td>
+						</ng-container>
+
+						<tr mat-header-row *matHeaderRowDef="alertColumns"></tr>
+						<tr mat-row *matRowDef="let row; columns: alertColumns"></tr>
+					</table>
+
+					<div class="log">
+						<span class="header">Event Log</span>
+
+						<div *ngFor="let event of issue.events">
+							<mat-card class="card">
+								<ng-container *ngIf="event.type == 'system-message'">
+									<div class="system-message">{{event?.data?.msg}}</div>
+								</ng-container>
+
+								<span class="spacer"></span>
+								<div class="timestamp">{{event.timestamp | date:'short'}}</div>
+							</mat-card>
+						</div>
+					</div>
+				</div>
+			</ng-container>
+
+			<ng-container *ngIf="!issue">
+				<mat-card>
+					<mat-card-header>
+						<mat-card-title>No active issue in this room</mat-card-title>
+					</mat-card-header>
+				</mat-card>
+			</ng-container>
+		</div>
+
+		<div class="right">
+			<mat-card class="info">
+				<mat-card-header>
+					<mat-card-title>Room Information</mat-card-title>
+				</mat-card-header>
+
+				<mat-card-content>
+					<a href="https://www.google.com" mat-button>Shipyard Information --></a>
+
+					<div class="maintenance">
+						<button mat-button (click)="editMaintenance()">Edit Maintenance</button>
+					</div>
+				</mat-card-content>
+			</mat-card>
+		</div>
+	</div>
+</div>

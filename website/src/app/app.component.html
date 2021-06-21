@@ -1,0 +1,14 @@
+<mat-toolbar>
+	<span style="margin-left: .5vw">BYU OIT AV Monitoring</span>
+</mat-toolbar>
+
+<mat-drawer-container class="drawer-container">
+	<mat-drawer mode="side" opened class="sidenav">
+		<button mat-flat-button routerLink="/dashboard" routerLinkActive="mat-accent">Dashboard</button>
+		<button mat-flat-button routerLink="/rooms" routerLinkActive="mat-accent">Rooms</button>
+	</mat-drawer>
+
+	<mat-drawer-content>
+		<router-outlet></router-outlet>
+	</mat-drawer-content>
+</mat-drawer-container>
