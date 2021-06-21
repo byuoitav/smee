@@ -13,7 +13,9 @@ func (c *Client) ActiveIssue(ctx context.Context, roomID string) (smee.Issue, er
 	if err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to start tx: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	issID, err := c.activeIssueID(ctx, tx, roomID)
 	if err != nil {
@@ -37,7 +39,9 @@ func (c *Client) ActiveIssues(ctx context.Context) ([]smee.Issue, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to start tx: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	issIds, err := c.activeIssueIDs(ctx, tx)
 	if err != nil {
@@ -66,7 +70,9 @@ func (c *Client) ActiveAlertExists(ctx context.Context, roomID, deviceID, typ st
 	if err != nil {
 		return false, fmt.Errorf("unable to start tx: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	exists, err := c.activeAlertExists(ctx, tx, roomID, deviceID, typ)
 	if err != nil {
@@ -85,7 +91,9 @@ func (c *Client) ActiveAlerts(ctx context.Context) ([]smee.Alert, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to start tx: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	alerts, err := c.activeAlerts(ctx, tx)
 	if err != nil {
@@ -109,7 +117,9 @@ func (c *Client) ActiveAlertsByType(ctx context.Context, typ string) ([]smee.Ale
 	if err != nil {
 		return nil, fmt.Errorf("unable to start tx: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	alerts, err := c.activeAlertsByType(ctx, tx, typ)
 	if err != nil {

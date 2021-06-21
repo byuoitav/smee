@@ -43,7 +43,9 @@ func (c *Client) CreateAlert(ctx context.Context, smeeAlert smee.Alert) (smee.Is
 	if err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx) // what does rollback do if ctx is past deadline?
+	defer func() {
+		_ = tx.Rollback(ctx) // what does rollback do if ctx is past deadline?
+	}()
 
 	issID, err := c.activeIssueID(ctx, tx, smeeAlert.Device.Room.ID)
 	switch {
@@ -108,7 +110,9 @@ func (c *Client) CloseAlert(ctx context.Context, issueID, alertID string) (smee.
 	if err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	if err := c.closeAlert(ctx, tx, aID); err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to close alert: %w", err)
@@ -148,7 +152,9 @@ func (c *Client) LinkIncident(ctx context.Context, issueID string, inc smee.Inci
 	if err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	mapping := incidentMapping{
 		IssueID:        issID,
@@ -182,7 +188,9 @@ func (c *Client) AddIssueEvents(ctx context.Context, issueID string, smeeEvents 
 	if err != nil {
 		return fmt.Errorf("unable to start transaction: %w", err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
 
 	for _, smeeEvent := range smeeEvents {
 		event := issueEvent{
