@@ -1,0 +1,7 @@
+{
+  "/api": {
+    "target": "https://newsmee.av.byu.edu",
+    "secure": true,
+    "changeOrigin": true
+  }
+}
