@@ -152,6 +152,23 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  getActiveAlerts(issue: Issue): number{ // counts the active alerts
+    var count = 0;
+    if (!issue.alerts) {
+      return 0;
+    }
+    for (const [id, alert] of issue?.alerts.entries()) {
+      if (alert.end) {
+        continue;
+      }else{
+       count++;
+      }
+
+    }
+    return count;
+  }
+
+  
   alertOverview(issue: Issue): string {
     if (!issue.alerts) {
       return "No alerts";
