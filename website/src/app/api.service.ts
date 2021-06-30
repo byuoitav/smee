@@ -44,6 +44,7 @@ export interface Issue {
   events: IssueEvent[] | undefined;
   maintenanceStart: Date | undefined;
   maintenanceEnd: Date | undefined;
+  isOnMaintenance : boolean; 
 }
 
 export interface MaintenanceInfo {
@@ -86,13 +87,27 @@ export class ApiService {
           if (issue?.incidents) {
             issues[i].incidents = new Map(Object.entries(issue.incidents));
           }
+          issues[i].isOnMaintenance = this.inMaintenance(issues[i]); //assings value to isOnMaintenance
         }
-
         return issues;
       }),
     )
   }
 
+  inMaintenance(issue : Issue):  boolean{ // funciton that dtermines if an issue is on Maintenance or not
+    if (!issue.maintenanceStart || !issue.maintenanceEnd){
+      return false;
+    }else{
+    const now = new Date();
+      if (now < issue.maintenanceStart){
+      return false;
+      } else if (now > issue.maintenanceEnd){
+        return false;
+      }
+    }
+    return true;
+  }
+  
   getIssue(roomID: string): Observable<Issue> {
     return this.http.get<Issue>("/api/v1/issues", {
       params: new HttpParams().set("roomID", roomID)

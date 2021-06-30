@@ -1,3 +1,12 @@
+.totals{
+	padding-top: 1%;
+	padding-left: 2.5%;
+	padding-right: 2.5%;
+	font-size: 130%;
+}
+.display-totals{
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
 .base {
 	width: 100%;
 	height: 100%;
@@ -18,7 +27,46 @@
 		width: 40%;
 	}
 }
+.maintenanceCheckBox{
+	font-size: 120%;
+}
 
+::ng-deep .mat-checkbox.mat-accent {
+	.mat-checkbox-frame {
+	  border: 1px solid #f44335;
+	}
+  
+	&.mat-checkbox-checked .mat-checkbox-background {
+	  background-color: #eb2a1c23;
+	  border: 1px solid dodger-blue;
+	}
+	.mat-checkbox-checkmark-path {
+	  stroke: #f44335 !important;
+	}
+  }
+  
+
+
+.tagMaintenance{
+	
+	display: inline-block;
+	background-color: #eb2a1c23;
+	align-items: left;
+	
+	border: 0.5px #f44335;
+	border-style: solid;
+	border-radius: 2em;
+	line-height: 20px;
+	text-align: center;
+	white-space: nowrap;
+	
+	font-family: monospace;
+	font-size: 90%;
+	font-weight: 500;
+	
+	color : #f44335;
+	padding: 0.3% 8%;
+}
 .issues {
 	width: 95%;
 
@@ -28,18 +76,25 @@
 		.hidden {
 			display: none;
 		}
-
 		// columns should add to 100% width
+		.mat-column-maintenance{
+			width: 8%;
+			padding: 0;
+		}
+
 		.mat-column-room {
-			width: 15%;
+			padding-left: 10px;
+			text-align: left;
+			width: 10%;
 		}
 
 		.mat-column-alertCount {
 			width: 5%;
+			text-align: center;
 		}
 
 		.mat-column-alertOverview {
-			width: 50%;
+			width: 47%;
 		}
 
 		.mat-column-age {
@@ -48,7 +103,9 @@
 
 		.mat-column-incidents {
 			width: 20%;
+			text-align: center;
 		}
+	
 	}
 }
 

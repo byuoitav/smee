@@ -22,6 +22,7 @@ import {MaintenanceDialog, RoomComponent} from './room/room.component';
 import {RoomsComponent} from './rooms/rooms.component';
 import {DateAgoPipe} from "./date-ago.pipe";
 import {MatSortModule} from "@angular/material/sort";
+import {MatCheckboxModule} from '@angular/material/checkbox'; 
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import {MatSortModule} from "@angular/material/sort";
     MatIconModule,
     MatSidenavModule,
     MatButtonModule,
+    MatCheckboxModule,
     MatTableModule,
     MatFormFieldModule,
     MatPaginatorModule,
