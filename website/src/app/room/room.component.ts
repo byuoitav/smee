@@ -16,13 +16,17 @@ interface DialogData {
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, OnDestroy {
+  alertColumns: string[] = ["device", "type", "started", "ended"];
+  updateInterval: number | undefined;
+  alertsDataSource: MatTableDataSource<Alert> = new MatTableDataSource(undefined);
+  
   roomID: string = "";
   roomName: string = "";
   issue: Issue | undefined;
   maintenance: MaintenanceInfo | undefined;
-  alertsDataSource: MatTableDataSource<Alert> = new MatTableDataSource(undefined);
-  alertColumns: string[] = ["device", "type", "started", "ended"];
-  updateInterval: number | undefined;
+  
+  
+  
 
   constructor(private api: ApiService, private dialog: MatDialog, private route: ActivatedRoute) {}
 

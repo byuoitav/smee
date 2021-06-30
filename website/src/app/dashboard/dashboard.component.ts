@@ -3,7 +3,9 @@ import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {ApiService, Issue, Alert, Incident, IssueEvent} from "../api.service";
+import { UrlHandlingStrategy } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import {ApiService, Issue, Alert, Incident, IssueEvent, MaintenanceInfo} from "../api.service";
 
 interface DialogData {
   issue: Issue;
@@ -15,10 +17,13 @@ interface DialogData {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
-  displayedColumns: string[] = ["room", "alertCount", "alertOverview", "age", "incidents"];
-  dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
+  displayedColumns: string[] = ["room", "maintenance","alertCount", "alertOverview", "age", "incidents"];
   issueUpdateInterval: number | undefined;
-  showMaintenance: boolean = false;
+  dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
+  showMaintenance: boolean = true;
+  filterValue: string = "";
+  totalAlerts: number = 0;
+  totalIssues: number = 0;
 
   @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
   @ViewChild(MatSort) sort: MatSort | null = null;
@@ -27,11 +32,27 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.updateIssues();
+    
     this.issueUpdateInterval = window.setInterval(() => {
       this.updateIssues();
     }, 10000);
 
     this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
+      
+      console.log(this.showMaintenance);
+      if(!this.showMaintenance){
+        
+        if(data.isOnMaintenance){
+          
+          return false;
+        }
+      }
+      //This is a workaround: The filter predicate does not run on a empty sting.
+      //This unicode replaces the empty filter value (it is not likely that the user would use a unicode chatacter in the search filter)
+      if(filter === "◬"){
+        return true;
+      }
+      //--------------------------------//
       const dataList = [];
       dataList.push(data.room.id.toLowerCase());
       dataList.push(data.room.name.toLowerCase());
@@ -43,7 +64,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           dataList.push(v.type.toLowerCase());
         }
       }
-
       const dataStr = dataList.join("◬");
 
       const transformedFilter = filter.trim().toLowerCase();
@@ -96,6 +116,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private updateIssues(): void {
     this.api.getIssues().subscribe(issues => {
       this.dataSource.data = issues;
+      this.totalIssues = issues.length;
+      this.totalAlerts = 0;
+      for (let index = 0; index < issues.length; index++) {
+        this.totalAlerts += this.getActiveAlerts(issues[index]);
+      }
     })
   }
 
@@ -147,9 +172,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     return `https://support.byu.edu/nav_to.do?uri=task.do?sys_id=${inc.id}`;
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  applyFilter() {
+    if(this.filterValue === ""){
+      this.dataSource.filter = "◬";
+    }else{
+      const filterValue = this.filterValue;
+      this.dataSource.filter = filterValue.trim().toLowerCase();
+    }
+    
   }
 
   getActiveAlerts(issue: Issue): number{ // counts the active alerts
@@ -163,12 +193,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }else{
        count++;
       }
-
     }
     return count;
   }
 
-  
   alertOverview(issue: Issue): string {
     if (!issue.alerts) {
       return "No alerts";

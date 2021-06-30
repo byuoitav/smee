@@ -1,16 +1,17 @@
+<div class="totals">
+	<p class="display-totals">Total Issues: {{totalIssues}} &nbsp; &nbsp; &nbsp; &nbsp; Total Active Alerts: {{totalAlerts}}</p>
+</div>
 <div class="base">
 	<div class="filters">
 		<mat-form-field class="search">
 			<mat-label>Filter</mat-label>
-			<input matInput type="text" (keyup)="applyFilter($event)">
+			<input matInput type="text" (keyup)="applyFilter()" [(ngModel)]="filterValue">
 		</mat-form-field>
 
 		<span class="spacer"></span>
 
-		<mat-chip-list>
-			<mat-chip color="warn" [selected]="showMaintenance" (click)="showMaintenance =!showMaintenance">Show
-				Maintenance</mat-chip>
-		</mat-chip-list>
+		<mat-checkbox class="maintenanceCheckBox" [(ngModel)]="showMaintenance" (change)="applyFilter()">Show Maintenance</mat-checkbox>
+
 	</div>
 
 	<div class="issues mat-elevation-z8">
@@ -22,14 +23,21 @@
 					<!-- TODO room id -->
 					<a color="accent" routerLink="{{'/rooms/' + row?.room?.id}}" mat-button>
 						{{row.room.name}}
-					</a>
+					</a> 
 				</td>
 			</ng-container>
 
+			<!-- Maintenance Column -->
+			<ng-container matColumnDef="maintenance">
+				<th mat-header-cell *matHeaderCellDef></th>
+				<td mat-cell *matCellDef="let row">
+					<div *ngIf="row.isOnMaintenance" class="tagMaintenance">Maintenance</div>
+				</td>
+			</ng-container>
 			<!-- Alert Count Column -->
 			<ng-container matColumnDef="alertCount">
 				<th mat-header-cell *matHeaderCellDef mat-sort-header>Active Alerts</th>
-				<td mat-cell *matCellDef="let row">{{getActiveAlerts(row)}}</td>
+				<td mat-cell *matCellDef="let row" class="alerts">{{getActiveAlerts(row)}}</td>
 			</ng-container>
 
 			<!-- Alert Overview Column -->
@@ -59,9 +67,9 @@
 			</ng-container>
 
 			<tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-			<tr mat-row *matRowDef="let row; columns: displayedColumns"
-				[class.hidden]="row?.maintenanceEnd && !showMaintenance"></tr>
-
+			
+			<tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+			
 			<tr class="mat-row" *matNoDataRow>
 				<td class="mat-cell" colspan="4">No issues found matching the filter</td>
 				<!-- TODO
