@@ -24,9 +24,6 @@ export class RoomComponent implements OnInit, OnDestroy {
   roomName: string = "";
   issue: Issue | undefined;
   maintenance: MaintenanceInfo | undefined;
-  
-  
-  
 
   constructor(private api: ApiService, private dialog: MatDialog, private route: ActivatedRoute) {}
 
