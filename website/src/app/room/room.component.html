@@ -47,7 +47,7 @@
 					<div class="log">
 						<span class="header">Event Log</span>
 
-						<div *ngFor="let event of issue.events">
+						<div *ngFor="let event of issue.events?.slice()?.reverse() let i = index">
 							<mat-card class="card">
 								<ng-container *ngIf="event.type == 'system-message'">
 									<div class="system-message">{{event?.data?.msg}}</div>
@@ -57,7 +57,9 @@
 								<div class="timestamp">{{event.timestamp | date:'short'}}</div>
 							</mat-card>
 						</div>
+
 					</div>
+
 				</div>
 			</ng-container>
 
