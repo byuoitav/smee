@@ -31,9 +31,14 @@ func (d *Deps) build() {
 	d.buildIncidentStore()
 	d.buildIssueCache(ctx)
 	d.buildMaintenanceCache(ctx)
-	d.buildEventStreamer()
-	d.buildDeviceStateStore(ctx)
-	d.buildAlertManager()
+
+	// Disable building alert management stuff if we have disabled it
+	if !d.DisableAlertManager {
+		d.buildEventStreamer()
+		d.buildDeviceStateStore(ctx)
+		d.buildAlertManager()
+	}
+
 	d.buildHTTPServer(ctx)
 }
 

@@ -17,14 +17,16 @@ import (
 
 type Deps struct {
 	// set by command line flags
-	Port         int
-	HubURL       string
-	LogLevel     string
-	ClientID     string
-	ClientSecret string
-	GatewayURL   string
-	RedisURL     string
-	PostgresURL  string
+	Port                int
+	HubURL              string
+	LogLevel            string
+	ClientID            string
+	ClientSecret        string
+	GatewayURL          string
+	RedisURL            string
+	PostgresURL         string
+	DisableAlertManager bool
+	WebRoot             string
 
 	// created by functions
 	log              *zap.Logger
@@ -53,6 +55,8 @@ func main() {
 	pflag.StringVar(&deps.GatewayURL, "gateway-url", "https://api.byu.edu", "wso2 gateway address")
 	pflag.StringVar(&deps.RedisURL, "redis-url", "", "redis url")
 	pflag.StringVar(&deps.PostgresURL, "postgres-url", "", "postgres url")
+	pflag.BoolVar(&deps.DisableAlertManager, "disable-alert-manager", false, "Disables the Alert Management portion of smee")
+	pflag.StringVar(&deps.WebRoot, "web-root", "/website", "The location on the filesystem of the root of the website files")
 	pflag.Parse()
 
 	deps.build()
@@ -60,13 +64,16 @@ func main() {
 
 	g, ctx := errgroup.WithContext(context.Background())
 
-	g.Go(func() error {
-		if err := deps.alertManager.Run(ctx); err != nil {
-			return fmt.Errorf("unable to run alert manager: %w", err)
-		}
+	// Skip turning on the alert manager if we have disabled it
+	if !deps.DisableAlertManager {
+		g.Go(func() error {
+			if err := deps.alertManager.Run(ctx); err != nil {
+				return fmt.Errorf("unable to run alert manager: %w", err)
+			}
 
-		return fmt.Errorf("alert manager stopped running")
-	})
+			return fmt.Errorf("alert manager stopped running")
+		})
+	}
 
 	g.Go(func() error {
 		if err := deps.httpServer.RunListener(deps.httpListener); err != nil {

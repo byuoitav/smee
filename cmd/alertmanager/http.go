@@ -37,9 +37,9 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 		dir, file := path.Split(c.Request.RequestURI)
 
 		if file == "" || filepath.Ext(file) == "" {
-			c.File("/website/index.html")
+			c.File(fmt.Sprintf("%s/index.html", d.WebRoot))
 		} else {
-			c.File("/website/" + path.Join(dir, file))
+			c.File(fmt.Sprintf("%s/", d.WebRoot) + path.Join(dir, file))
 		}
 	})
 

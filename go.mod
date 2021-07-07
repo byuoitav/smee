@@ -21,4 +21,5 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
+	google.golang.org/protobuf v1.27.1 // indirect
 )
