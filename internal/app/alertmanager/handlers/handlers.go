@@ -178,7 +178,7 @@ func convertIssue(iss smee.Issue) issue {
 		}
 	}
 
-	for i, _ := range iss.Alerts {
+	for i := range iss.Alerts {
 		alert := alert{
 			ID:      iss.Alerts[i].ID,
 			IssueID: iss.Alerts[i].IssueID,
