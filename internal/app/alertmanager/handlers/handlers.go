@@ -171,7 +171,6 @@ func convertIssue(iss smee.Issue) issue {
 	for i, event := range iss.Events {
 		tempData := event.Data
 
-		//fmt.Printf("event data ==> %v \n", string(event.Data))
 		issue.Events[i] = issueEvent{
 			Timestamp: event.Timestamp,
 			Type:      string(event.Type),
