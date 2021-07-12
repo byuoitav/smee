@@ -169,28 +169,31 @@ func convertIssue(iss smee.Issue) issue {
 	}
 
 	for i, event := range iss.Events {
+		tempData := event.Data
+
+		//fmt.Printf("event data ==> %v \n", string(event.Data))
 		issue.Events[i] = issueEvent{
 			Timestamp: event.Timestamp,
 			Type:      string(event.Type),
-			Data:      &event.Data, // TODO should i make a new slice and copy()?
+			Data:      &tempData, // TODO should i make a new slice and copy()?
 		}
 	}
 
-	for _, a := range iss.Alerts {
+	for i, _ := range iss.Alerts {
 		alert := alert{
-			ID:      a.ID,
-			IssueID: a.IssueID,
-			Device:  a.Device,
-			Type:    a.Type,
-			Start:   a.Start,
+			ID:      iss.Alerts[i].ID,
+			IssueID: iss.Alerts[i].IssueID,
+			Device:  iss.Alerts[i].Device,
+			Type:    iss.Alerts[i].Type,
+			Start:   iss.Alerts[i].Start,
 		}
 
-		if !a.End.IsZero() {
-			alert.End = &a.End
+		if !iss.Alerts[i].End.IsZero() {
+			tempEnd := iss.Alerts[i].End
+			alert.End = &tempEnd
 		}
-
 		issue.Alerts[alert.ID] = alert
-	}
 
+	}
 	return issue
 }
