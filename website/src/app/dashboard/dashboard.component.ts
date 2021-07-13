@@ -41,7 +41,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       
       console.log(this.showMaintenance);
       if(!this.showMaintenance){
-        
         if(data.isOnMaintenance){
           
           return false;
@@ -53,6 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         return true;
       }
       //--------------------------------//
+
       const dataList = [];
       dataList.push(data.room.id.toLowerCase());
       dataList.push(data.room.name.toLowerCase());
@@ -66,8 +66,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
       const dataStr = dataList.join("◬");
 
-      const transformedFilter = filter.trim().toLowerCase();
-      return dataStr.includes(transformedFilter)
+      if (filter.charAt(0) == '-'){
+        var newfilter = filter.substring(1);
+        const transformedFilter = newfilter.trim().toLowerCase();
+        return !dataStr.includes(transformedFilter)
+
+      }else{
+        const transformedFilter = filter.trim().toLowerCase();
+        return dataStr.includes(transformedFilter)
+      }
+
     };
 
     this.dataSource.sortData = (data: Issue[], sort: MatSort): Issue[] => {
