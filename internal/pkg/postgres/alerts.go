@@ -59,7 +59,6 @@ func (c *Client) queryAlerts(ctx context.Context, tx pgx.Tx, query string, args 
 				StartTime:     a.StartTime,
 				EndTime:       a.EndTime,
 			})
-
 			return nil
 		},
 	)
