@@ -39,7 +39,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
       
-      console.log(this.showMaintenance);
+      
       if(!this.showMaintenance){
         if(data.isOnMaintenance){
           
@@ -185,9 +185,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.dataSource.filter = "◬";
     }else{
       const filterValue = this.filterValue;
-      this.dataSource.filter = filterValue.trim().toLowerCase();
+      var filters = filterValue.split(" ", 10);
+      for(var word of filters){
+        console.log(word);
+        this.dataSource.filter = word.trim().toLowerCase();
+      
+      }
     }
-    
   }
 
   getActiveAlerts(issue: Issue): number{ // counts the active alerts
