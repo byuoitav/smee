@@ -14,6 +14,12 @@
 		<input matInput type="datetime-local" [ngModel]="info?.end | date:'yyyy-MM-ddTHH:mm'"
 			(ngModelChange)="info.end = parseDate($event)">
 	</mat-form-field>
+	
+	<mat-form-field appearance="fill">
+		<mat-label>Maintenance Note</mat-label>
+		<textarea matInput placeholder="Type Maintenance Note" [ngModel]="info?.note" (ngModelChange)="info.note = $event"></textarea>
+	</mat-form-field>
+
 </div>
 
 <div mat-dialog-actions>

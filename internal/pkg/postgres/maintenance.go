@@ -13,6 +13,7 @@ type maintenanceInfo struct {
 	CouchRoomID string
 	StartTime   time.Time
 	EndTime     time.Time
+	Note        string
 }
 
 func (c *Client) RoomsInMaintenance(ctx context.Context) (map[string]smee.MaintenanceInfo, error) {
@@ -22,7 +23,7 @@ func (c *Client) RoomsInMaintenance(ctx context.Context) (map[string]smee.Mainte
 	_, err := c.pool.QueryFunc(ctx,
 		"SELECT * FROM room_maintenance_couch WHERE now() BETWEEN start_time AND end_time",
 		[]interface{}{},
-		[]interface{}{&info.CouchRoomID, &info.StartTime, &info.EndTime},
+		[]interface{}{&info.CouchRoomID, &info.StartTime, &info.EndTime, &info.Note},
 		func(pgx.QueryFuncRow) error {
 			smeeInfo := convertMaintenanceInfo(info)
 			maint[smeeInfo.RoomID] = smeeInfo
@@ -41,7 +42,7 @@ func (c *Client) RoomMaintenanceInfo(ctx context.Context, roomID string) (smee.M
 
 	err := c.pool.QueryRow(ctx,
 		"SELECT * FROM room_maintenance_couch WHERE couch_room_id = $1",
-		roomID).Scan(&info.CouchRoomID, &info.StartTime, &info.EndTime)
+		roomID).Scan(&info.CouchRoomID, &info.StartTime, &info.EndTime, &info.Note)
 	switch {
 	case err == pgx.ErrNoRows:
 		return smee.MaintenanceInfo{}, smee.ErrRoomIssueNotFound // TODO change error type
@@ -54,8 +55,8 @@ func (c *Client) RoomMaintenanceInfo(ctx context.Context, roomID string) (smee.M
 
 func (c *Client) SetMaintenanceInfo(ctx context.Context, info smee.MaintenanceInfo) error {
 	_, err := c.pool.Exec(ctx,
-		"INSERT INTO room_maintenance_couch (couch_room_id, start_time, end_time) values ($1, $2, $3) ON CONFLICT (couch_room_id) DO UPDATE SET start_time = EXCLUDED.start_time, end_time = EXCLUDED.end_time",
-		info.RoomID, info.Start, info.End)
+		"INSERT INTO room_maintenance_couch (couch_room_id, start_time, end_time, notes) values ($1, $2, $3, $4) ON CONFLICT (couch_room_id) DO UPDATE SET start_time = EXCLUDED.start_time, end_time = EXCLUDED.end_time",
+		info.RoomID, info.Start, info.End, info.Note)
 	if err != nil {
 		return fmt.Errorf("unable to exec :%w", err)
 	}
@@ -68,6 +69,7 @@ func convertMaintenanceInfo(info maintenanceInfo) smee.MaintenanceInfo {
 		RoomID: info.CouchRoomID,
 		Start:  info.StartTime,
 		End:    info.EndTime,
+		Note:   info.Note,
 	}
 
 	return smeeInfo

@@ -13,6 +13,7 @@ type maintenanceInfo struct {
 	RoomID string     `json:"roomID"`
 	Start  *time.Time `json:"start,omitempty"`
 	End    *time.Time `json:"end,omitempty"`
+	Note   string     `json:"note,omitempty"`
 }
 
 func convertMaintenance(info smee.MaintenanceInfo) maintenanceInfo {
@@ -30,6 +31,7 @@ func convertMaintenance(info smee.MaintenanceInfo) maintenanceInfo {
 		RoomID: info.RoomID,
 		Start:  start,
 		End:    end,
+		Note:   info.Note,
 	}
 }
 
