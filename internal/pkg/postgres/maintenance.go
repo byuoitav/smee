@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -13,7 +14,7 @@ type maintenanceInfo struct {
 	CouchRoomID string
 	StartTime   time.Time
 	EndTime     time.Time
-	Note        string
+	Note        sql.NullString
 }
 
 func (c *Client) RoomsInMaintenance(ctx context.Context) (map[string]smee.MaintenanceInfo, error) {
@@ -55,7 +56,7 @@ func (c *Client) RoomMaintenanceInfo(ctx context.Context, roomID string) (smee.M
 
 func (c *Client) SetMaintenanceInfo(ctx context.Context, info smee.MaintenanceInfo) error {
 	_, err := c.pool.Exec(ctx,
-		"INSERT INTO room_maintenance_couch (couch_room_id, start_time, end_time, notes) values ($1, $2, $3, $4) ON CONFLICT (couch_room_id) DO UPDATE SET start_time = EXCLUDED.start_time, end_time = EXCLUDED.end_time",
+		"INSERT INTO room_maintenance_couch (couch_room_id, start_time, end_time, notes) values ($1, $2, $3, $4) ON CONFLICT (couch_room_id) DO UPDATE SET start_time = EXCLUDED.start_time, end_time = EXCLUDED.end_time, notes = EXCLUDED.notes",
 		info.RoomID, info.Start, info.End, info.Note)
 	if err != nil {
 		return fmt.Errorf("unable to exec :%w", err)
@@ -69,7 +70,10 @@ func convertMaintenanceInfo(info maintenanceInfo) smee.MaintenanceInfo {
 		RoomID: info.CouchRoomID,
 		Start:  info.StartTime,
 		End:    info.EndTime,
-		Note:   info.Note,
+	}
+
+	if info.Note.Valid {
+		smeeInfo.Note = info.Note.String
 	}
 
 	return smeeInfo

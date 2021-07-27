@@ -13,7 +13,7 @@ type maintenanceInfo struct {
 	RoomID string     `json:"roomID"`
 	Start  *time.Time `json:"start,omitempty"`
 	End    *time.Time `json:"end,omitempty"`
-	Note   string     `json:"note,omitempty"`
+	Note   string     `json:"note"`
 }
 
 func convertMaintenance(info smee.MaintenanceInfo) maintenanceInfo {

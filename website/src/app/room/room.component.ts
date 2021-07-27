@@ -119,7 +119,7 @@ export class MaintenanceDialog {
       roomID: data.roomID,
       start: data.maintenance.start ? data.maintenance.start : new Date(),
       end: data.maintenance.end ? data.maintenance.end : new Date(new Date().getTime() + 60 * 60 * 24 * 1000),
-      note: data.maintenance.note ? data.maintenance.note : ""
+      note: data.maintenance.note ? data.maintenance.note : undefined
     };
   }  
   parseDate(value: string): Date {
