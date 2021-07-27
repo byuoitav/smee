@@ -197,7 +197,6 @@ export class ApiService {
         if (info?.end) {
           info.end = new Date(info.end);
         }
-        console.log(info)
         return info;
       })
     )
