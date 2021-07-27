@@ -51,6 +51,7 @@ export interface MaintenanceInfo {
   roomID: string;
   start: Date | undefined;
   end: Date | undefined;
+  note: string | undefined;
 }
 
 export interface RoomOverview {
@@ -196,7 +197,6 @@ export class ApiService {
         if (info?.end) {
           info.end = new Date(info.end);
         }
-
         return info;
       })
     )

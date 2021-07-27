@@ -82,8 +82,17 @@
 					<a href="https://www.google.com" mat-button>Shipyard Information --></a>
 
 					<div class="maintenance">
-						<button mat-button (click)="editMaintenance()">Edit Maintenance</button>
+						<button class="maintenance-button" mat-button (click)="editMaintenance()">Edit Maintenance</button>
 					</div>
+				</mat-card-content>
+			</mat-card>
+			<br>
+			<mat-card class="note" *ngIf="maintenance?.note">
+				<mat-card-header>
+					<mat-card-title>Maintenance Note</mat-card-title>
+				</mat-card-header>
+				<mat-card-content>
+					<div>{{maintenance?.note}}</div>
 				</mat-card-content>
 			</mat-card>
 		</div>

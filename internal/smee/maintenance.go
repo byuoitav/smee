@@ -16,6 +16,7 @@ type MaintenanceInfo struct {
 	RoomID string    `json:"roomID"`
 	Start  time.Time `json:"start"`
 	End    time.Time `json:"end"`
+	Note   string    `json:"note"`
 }
 
 func (i MaintenanceInfo) Enabled() bool {

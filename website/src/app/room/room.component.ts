@@ -119,9 +119,9 @@ export class MaintenanceDialog {
       roomID: data.roomID,
       start: data.maintenance.start ? data.maintenance.start : new Date(),
       end: data.maintenance.end ? data.maintenance.end : new Date(new Date().getTime() + 60 * 60 * 24 * 1000),
+      note: data.maintenance.note ? data.maintenance.note : undefined
     };
-  }
-
+  }  
   parseDate(value: string): Date {
     return new Date(value);
   }
@@ -157,7 +157,8 @@ export class MaintenanceDialog {
   disable(): void {
     this.info.start = undefined;
     this.info.end = undefined;
-
+    this.info.note = undefined;
+    
     this.api.setMaintenanceInfo(this.info).subscribe(info => {
       this.dialogRef.close(info);
     }, err => {
