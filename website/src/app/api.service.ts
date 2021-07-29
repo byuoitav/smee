@@ -10,6 +10,7 @@ export interface Alert {
   type: string;
   start: Date;
   end: Date;
+  //add a service now KB
 }
 
 export interface Room {

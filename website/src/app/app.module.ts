@@ -55,6 +55,7 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     MatGridListModule,
     MatChipsModule,
     MatSortModule,
+    MatTableModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
