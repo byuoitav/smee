@@ -102,7 +102,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       return data.sort((a, b) => {
         switch (sort.active) {
           case 'room': return cmp(a.room.name, b.room.name);
-          case 'alertCount': return cmp(a.alerts?.size, b.alerts?.size);
+          case 'alertCount': return cmp(this.getActiveAlerts(a), this.getActiveAlerts(b));
           case 'age': return cmp(a.start, b.start);
           default: return 0;
         }

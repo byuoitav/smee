@@ -1,8 +1,10 @@
-import {Component, Inject, OnDestroy, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {MatTableDataSource} from "@angular/material/table";
+import {MatSort} from "@angular/material/sort";
 import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {Alert, ApiService, Issue, MaintenanceInfo} from "../api.service";
 import {ActivatedRoute} from "@angular/router";
+import { ViewChild } from '@angular/core';
 
 interface DialogData {
   roomID: string;
@@ -15,19 +17,22 @@ interface DialogData {
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
-export class RoomComponent implements OnInit, OnDestroy {
-  alertColumns: string[] = ["device", "type", "started", "ended"];
+export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
+  alertColumns: string[] = ["device", "type", "start", "end", "serviceNow"];
   updateInterval: number | undefined;
   alertsDataSource: MatTableDataSource<Alert> = new MatTableDataSource(undefined);
-  
   roomID: string = "";
   roomName: string = "";
   issue: Issue | undefined;
   maintenance: MaintenanceInfo | undefined;
 
+  @ViewChild(MatSort) sort: MatSort | null = null;
+  
   constructor(private api: ApiService, private dialog: MatDialog, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    this.update();
+    this.alertsDataSource.sort = this.sort;
     this.route.params.subscribe(params => {
       this.roomID = params["roomID"];
       this.roomName = this.roomID; // TODO get from update()
@@ -37,8 +42,42 @@ export class RoomComponent implements OnInit, OnDestroy {
 
     this.updateInterval = window.setInterval(() => {
       this.update();
-    }, 10000);
+    }, 1000);
+    
+    this.alertsDataSource.sortData = (data: Alert[], sort: MatSort): Alert[] => {
+      if (!sort.active || sort.direction === ''){
+        return data;
+      }
+      const isAsc = sort.direction === 'asc';
+
+      const cmp = (a: string | Date | undefined, b: string | Date | undefined): number => {
+        if (!a && !b){
+          return 0;
+        } else if (!b) {
+          return -1;
+        } else if (!a) {
+          return 1;
+        }
+
+        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+      }
+
+      return data.sort((a, b) => {
+        switch (sort.active) {
+          case 'type': return cmp (a.type, b.type);
+          case 'start': return cmp (a.start, b.start);
+          case 'end': return cmp (a.end, b.end);
+          default: return 0;
+        }
+      });
+    }
+    
   }
+
+  ngAfterViewInit() {
+    this.alertsDataSource.sort = this.sort;
+  }
+
 
   ngOnDestroy(): void {
     if (this.updateInterval) {
@@ -50,12 +89,11 @@ export class RoomComponent implements OnInit, OnDestroy {
     if (!this.roomID) {
       return;
     }
-
     this.api.getIssue(this.roomID).subscribe(issue => {
       this.issue = issue;
-
       if (this.issue?.alerts) {
         this.alertsDataSource = new MatTableDataSource([...this.issue.alerts.values()]);
+        this.alertsDataSource.sort = this.sort;
       }
     });
 
@@ -95,6 +133,7 @@ export class RoomComponent implements OnInit, OnDestroy {
       }
     })
   }
+  
 }
 
 @Component({
