@@ -35,6 +35,7 @@ type Deps struct {
 	issueStore       smee.IssueStore
 	incidentStore    smee.IncidentStore
 	maintenanceStore smee.MaintenanceStore
+	issuetypeStore   smee.IssueTypeStore
 	alertManager     smee.AlertManager
 	eventStreamer    smee.EventStreamer
 	deviceStateStore smee.DeviceStateStore

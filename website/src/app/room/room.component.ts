@@ -2,7 +2,7 @@ import {AfterViewInit, Component, Inject, OnDestroy, OnInit} from '@angular/core
 import {MatTableDataSource} from "@angular/material/table";
 import {MatSort} from "@angular/material/sort";
 import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {Alert, ApiService, Issue, MaintenanceInfo} from "../api.service";
+import {Alert, ApiService, Issue, MaintenanceInfo, IssueType, IssueTypeMap} from "../api.service";
 import {ActivatedRoute} from "@angular/router";
 import { ViewChild } from '@angular/core';
 
@@ -25,24 +25,24 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
   roomName: string = "";
   issue: Issue | undefined;
   maintenance: MaintenanceInfo | undefined;
+  issueType : IssueTypeMap | undefined;
 
   @ViewChild(MatSort) sort: MatSort | null = null;
   
   constructor(private api: ApiService, private dialog: MatDialog, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.update();
     this.alertsDataSource.sort = this.sort;
+    this.update();
     this.route.params.subscribe(params => {
       this.roomID = params["roomID"];
       this.roomName = this.roomID; // TODO get from update()
-
       this.update();
     })
 
     this.updateInterval = window.setInterval(() => {
       this.update();
-    }, 1000);
+    }, 10000);
     
     this.alertsDataSource.sortData = (data: Alert[], sort: MatSort): Alert[] => {
       if (!sort.active || sort.direction === ''){
@@ -71,13 +71,11 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
     }
-    
-  }
 
+  }
   ngAfterViewInit() {
     this.alertsDataSource.sort = this.sort;
   }
-
 
   ngOnDestroy(): void {
     if (this.updateInterval) {
@@ -95,12 +93,30 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.alertsDataSource = new MatTableDataSource([...this.issue.alerts.values()]);
         this.alertsDataSource.sort = this.sort;
       }
+      this.api.getIssueType().subscribe(info =>{
+        this.issueType = info;
+      });
+      this.api.getMaintenanceInfo(this.roomID).subscribe(info => {
+        this.maintenance = info;
+      })
     });
-
-    this.api.getMaintenanceInfo(this.roomID).subscribe(info => {
-      this.maintenance = info;
-    })
   }
+
+  IssueTypeUrl(alert : Alert): string{
+    const IssueMap = this.issueType?.IssueType
+    const url = "https://it.byu.edu/nav_to.do?uri=kb_view.do?sysparm_article="
+    var issuetypeurl = url + IssueMap?.get(alert.type)?.kbArticle
+    return issuetypeurl
+  }
+
+  isInIssueType(alert : Alert): boolean{
+    const IssueMap = this.issueType?.IssueType
+    if (!IssueMap){
+      return false
+    }
+    return IssueMap.has(alert.type)
+  }
+
 
   inMaintenance(): boolean {
     if (!this.maintenance?.start || !this.maintenance?.end) {
