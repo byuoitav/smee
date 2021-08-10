@@ -28,7 +28,7 @@ CREATE TABLE alerts (
 	end_time timestamptz
 );
 
-CREATE TABLE  (
+CREATE TABLE sn_incident_mappings (
 	issue_id integer REFERENCES issues (id) ON DELETE CASCADE IS NOT NULl,
 	sn_sys_id text IS NOT NULL, -- ticket ID
 	sn_ticket_number text IS NOT NULL, -- ticket number (INCXXXXXX)

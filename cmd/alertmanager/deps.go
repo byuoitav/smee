@@ -62,11 +62,7 @@ func (d *Deps) buildIncidentMaintenanceStore(ctx context.Context) {
 }
 
 func (d *Deps) buildIssueTypeStore(ctx context.Context) {
-	store, err := postgres.New(ctx, d.PostgresURL)
-	if err != nil {
-		d.log.Fatal("unable to build postgres store", zap.Error(err))
-	}
-	d.issuetypeStore = store
+	d.issuetypeStore = d.postgres
 }
 
 func (d *Deps) buildIssueCache(ctx context.Context) {

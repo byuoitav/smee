@@ -33,12 +33,15 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.alertsDataSource.sort = this.sort;
+    this.api.getIssueType().subscribe(info =>{
+      this.issueType = info;
+    });
     this.update();
     this.route.params.subscribe(params => {
       this.roomID = params["roomID"];
       this.roomName = this.roomID; // TODO get from update()
       this.update();
-    })
+    });
 
     this.updateInterval = window.setInterval(() => {
       this.update();
@@ -93,9 +96,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.alertsDataSource = new MatTableDataSource([...this.issue.alerts.values()]);
         this.alertsDataSource.sort = this.sort;
       }
-      this.api.getIssueType().subscribe(info =>{
-        this.issueType = info;
-      });
       this.api.getMaintenanceInfo(this.roomID).subscribe(info => {
         this.maintenance = info;
       })
