@@ -43,6 +43,7 @@ jobs:
                   file: ./coverage.txt
     deploy:
         name: Deploy
+        needs: [lint, test]
         runs-on: ubuntu-latest
         steps:
             - name: Set up go
