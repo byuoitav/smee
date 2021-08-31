@@ -12,6 +12,10 @@ interface DialogData {
   maintenance: MaintenanceInfo;
 }
 
+interface CloseDialogData {
+  issue: Issue;
+}
+
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
@@ -133,6 +137,21 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     return true;
   }
 
+  closeIssue(): void {
+    const ref = this.dialog.open(CloseIssueDialog, {
+      disableClose : true,
+      data: {
+        issue: this.issue
+      }
+    });
+
+    ref.afterClosed().subscribe(saved => {
+      if (saved){
+        this.update();
+      }
+    })
+  }
+
   editMaintenance(): void {
     const ref = this.dialog.open(MaintenanceDialog, {
       disableClose: true,
@@ -150,6 +169,34 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     })
   }
   
+}
+
+@Component({
+  selector: 'app-close-dialog',
+  templateUrl: 'close-dialog.html',
+  styles: [
+    `
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+    `
+  ],
+})
+export class CloseIssueDialog {
+  constructor(private dialogRef: MatDialogRef<CloseIssueDialog, Issue>,
+    private api: ApiService,
+    @Inject(MAT_DIALOG_DATA) public data: CloseDialogData) {
+  }
+  
+  close(): void {
+      this.api.closeIssue(this.data.issue.id).subscribe(info => {
+        this.dialogRef.close(info);
+      }, err => {
+        console.log("unable to set close issue", err);
+        
+      })
+  }
 }
 
 @Component({

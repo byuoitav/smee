@@ -172,6 +172,14 @@ export class ApiService {
     );
   }
 
+  closeIssue(issueID: string): Observable<Issue> {
+    return this.http.put<Issue>(`/api/v1/issues/${issueID}/closeIssue`, undefined, {
+    }).pipe(
+      tap(data => console.log("closing issue", data)),
+      catchError(this.handleError<Issue>("closeIssue", undefined)),
+    );
+  }                                                                                                       
+
   createIncidentFromIssue(issueID: string, shortDescription: string): Observable<Issue> {
     return this.http.put<Issue>(`/api/v1/issues/${issueID}/createIncident`, undefined, {
       params: new HttpParams().set('shortDescription', shortDescription)

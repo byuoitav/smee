@@ -143,6 +143,20 @@ func (h *Handlers) LinkIssueToIncident(c *gin.Context) {
 	c.JSON(http.StatusOK, iss)
 }
 
+func (h *Handlers) CloseIssue(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueID := c.Param("issueID")
+	iss, err := h.IssueStore.CloseAlertsForIssue(ctx, issueID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to close issue: %s", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, iss)
+}
+
 // TODO maintenance
 func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
