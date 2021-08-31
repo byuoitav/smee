@@ -17,7 +17,7 @@ type issue struct {
 	EndTime     *time.Time
 }
 
-func (c *Client) inactiveIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
+/*func (c *Client) inactiveIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
 	var id int
 
 	err := tx.QueryRow(ctx,
@@ -73,7 +73,7 @@ func (c *Client) IssuesID(ctx context.Context, tx pgx.Tx) ([]int, error) {
 	}
 
 	return ids, nil
-}
+}*/
 
 func (c *Client) activeIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
 	var id int
