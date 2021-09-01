@@ -17,64 +17,6 @@ type issue struct {
 	EndTime     *time.Time
 }
 
-/*func (c *Client) inactiveIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
-	var id int
-
-	err := tx.QueryRow(ctx,
-		"SELECT id FROM issues WHERE couch_room_id = $1 AND end_time IS NOT NULL LIMIT 1",
-		roomID).Scan(&id)
-	switch {
-	case err == pgx.ErrNoRows:
-		return 0, smee.ErrRoomIssueNotFound
-	case err != nil:
-		return 0, fmt.Errorf("unable to query/scan: %w", err)
-	}
-
-	return id, nil
-}
-
-func (c *Client) inactiveIssueIDs(ctx context.Context, tx pgx.Tx) ([]int, error) {
-	var ids []int
-	var id int
-
-	_, err := tx.QueryFunc(ctx,
-		"SELECT id FROM issues WHERE end_time IS NOT NULL",
-		[]interface{}{},
-		[]interface{}{&id},
-		func(pgx.QueryFuncRow) error {
-			tmp := id
-			ids = append(ids, tmp)
-			return nil
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("unable to queryFunc: %w", err)
-	}
-
-	return ids, nil
-}
-
-func (c *Client) IssuesID(ctx context.Context, tx pgx.Tx) ([]int, error) {
-	var ids []int
-	var id int
-
-	_, err := tx.QueryFunc(ctx,
-		"SELECT id FROM issues",
-		[]interface{}{},
-		[]interface{}{&id},
-		func(pgx.QueryFuncRow) error {
-			tmp := id
-			ids = append(ids, tmp)
-			return nil
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("unable to queryFunc: %w", err)
-	}
-
-	return ids, nil
-}*/
-
 func (c *Client) activeIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
 	var id int
 
