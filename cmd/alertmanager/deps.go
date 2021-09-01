@@ -98,7 +98,7 @@ func (d *Deps) buildIncidentStore() {
 			Client: d.wso2,
 			Log:    d.log.Named("incidents"),
 		},
-		AssignmentGroup: "OIT-AV Engineers",
+		AssignmentGroup: "OIT-AV Support",
 		Service:         "TEC Room",
 		Priority:        "4",
 	}
