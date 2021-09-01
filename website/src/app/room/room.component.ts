@@ -154,6 +154,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     ref.afterClosed().subscribe(saved => {
       if (saved){
         this.update();
+        
       }
     })
   }
@@ -224,7 +225,7 @@ export class CloseIssueDialog {
     })
 
     ref.afterClosed().subscribe(saved => {
-      
+
     })
   }
 
