@@ -121,7 +121,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     return IssueMap.has(alert.type)
   }
 
-
   inMaintenance(): boolean {
     if (!this.maintenance?.start || !this.maintenance?.end) {
       return false;

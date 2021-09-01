@@ -41,6 +41,9 @@ deps:
 	@echo Downloading dependencies...
 	@go mod download
 
+	@echo Setting Up Node
+	@cd website && npm install
+
 build: deps
 	@mkdir -p dist
 
