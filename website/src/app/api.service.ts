@@ -1,5 +1,7 @@
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
+import { stringify } from "@angular/compiler/src/util";
 import {Injectable} from '@angular/core';
+import { MatPaginator } from "@angular/material/paginator";
 import {Observable, of, throwError} from "rxjs";
 import {tap, map, catchError} from "rxjs/operators";
 
@@ -10,7 +12,7 @@ export interface Alert {
   type: string;
   start: Date;
   end: Date;
-  //add a service now KB
+  link: string | undefined;
 }
 
 export interface Room {
@@ -61,6 +63,15 @@ export interface RoomOverview {
   inMaintenance: boolean;
 }
 
+export interface IssueType{
+  idAlertType : string
+  kbArticle : string
+}
+
+export interface IssueTypeMap{
+  IssueType: Map<string, IssueType>;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +82,18 @@ export class ApiService {
     return this.http.get<RoomOverview[]>("/api/v1/rooms").pipe(
       tap(data => console.log("got rooms", data)),
       catchError(this.handleError<RoomOverview[]>("getRooms", [])),
+    )
+  }
+
+  getIssueType(): Observable<IssueTypeMap> {
+    return this.http.get<IssueTypeMap>("api/v1/issuetype").pipe(
+      tap(data => console.log("got issue type", data)),
+      catchError(this.handleError<IssueTypeMap>("getIssueType", )),
+      map((issuetype : IssueTypeMap) => {
+        const issTypeMap = issuetype.IssueType
+        issuetype.IssueType = new Map(Object.entries(issTypeMap));
+        return issuetype
+      }),
     )
   }
 

@@ -17,6 +17,7 @@ type Handlers struct {
 	IssueStore       smee.IssueStore
 	IncidentStore    smee.IncidentStore
 	MaintenanceStore smee.MaintenanceStore
+	IssueTypeStore   smee.IssueTypeStore
 }
 
 type issue struct {
@@ -44,6 +45,26 @@ type issueEvent struct {
 	Timestamp time.Time        `json:"timestamp"`
 	Type      string           `json:"type"`
 	Data      *json.RawMessage `json:"data"`
+}
+
+type IssType struct {
+	Type map[string]smee.IssueType `json:"IssueType"`
+}
+
+func (h *Handlers) SNIssueType(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueT, err := h.IssueTypeStore.IssueType(ctx)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to get Service Now Alert Type: %s", err)
+		return
+	}
+
+	var issT IssType
+	issT.Type = issueT
+
+	c.JSON(http.StatusOK, issT)
 }
 
 func (h *Handlers) ActiveIssues(c *gin.Context) {

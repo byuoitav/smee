@@ -31,6 +31,7 @@ func (d *Deps) build() {
 	d.buildIncidentStore()
 	d.buildIssueCache(ctx)
 	d.buildMaintenanceCache(ctx)
+	d.buildIssueTypeStore(ctx)
 
 	// Disable building alert management stuff if we have disabled it
 	if !d.DisableAlertManager {
@@ -58,6 +59,10 @@ func (d *Deps) buildIncidentMaintenanceStore(ctx context.Context) {
 	d.postgres = store
 	d.issueStore = store
 	d.maintenanceStore = store
+}
+
+func (d *Deps) buildIssueTypeStore(ctx context.Context) {
+	d.issuetypeStore = d.postgres
 }
 
 func (d *Deps) buildIssueCache(ctx context.Context) {

@@ -27,6 +27,7 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 		IssueStore:       d.issueStore,
 		MaintenanceStore: d.maintenanceStore,
 		IncidentStore:    d.incidentStore,
+		IssueTypeStore:   d.issuetypeStore,
 	}
 
 	// build engine
@@ -58,6 +59,7 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	api.PUT("/maintenance/:roomID", d.handlers.SetMaintenanceInfo)
 
 	api.GET("/rooms", d.handlers.Rooms)
+	api.GET("/issuetype", d.handlers.SNIssueType)
 
 	d.httpServer = r
 }
