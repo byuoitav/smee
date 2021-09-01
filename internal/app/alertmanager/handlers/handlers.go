@@ -157,7 +157,7 @@ func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 
 	inc := smee.Incident{
 		ShortDescription: shortDesc,
-		Caller:           "", // pull from context once auth is done
+		Caller:           "avmonit1", // using av monitoring user as caller
 	}
 
 	inc, err := h.IncidentStore.CreateIncident(ctx, inc)
