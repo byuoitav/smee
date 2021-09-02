@@ -9,13 +9,15 @@ import (
 )
 
 type alert struct {
-	ID            int
-	IssueID       int
-	CouchRoomID   string
-	CouchDeviceID string
-	AlertType     string
-	StartTime     time.Time
-	EndTime       *time.Time
+	ID              int
+	IssueID         int
+	CouchRoomID     string
+	CouchDeviceID   string
+	AlertType       string
+	StartTime       time.Time
+	EndTime         *time.Time
+	AcknowledgeTime time.Time
+	AcknowledgeBy   string
 }
 
 func (c *Client) createAlert(ctx context.Context, tx pgx.Tx, a alert) (alert, error) {
@@ -64,13 +66,15 @@ func (c *Client) queryAlerts(ctx context.Context, tx pgx.Tx, query string, args 
 		[]interface{}{&a.ID, &a.IssueID, &a.CouchRoomID, &a.CouchDeviceID, &a.AlertType, &a.StartTime, &a.EndTime},
 		func(pgx.QueryFuncRow) error {
 			alerts = append(alerts, alert{
-				ID:            a.ID,
-				IssueID:       a.IssueID,
-				CouchRoomID:   a.CouchRoomID,
-				CouchDeviceID: a.CouchDeviceID,
-				AlertType:     a.AlertType,
-				StartTime:     a.StartTime,
-				EndTime:       a.EndTime,
+				ID:              a.ID,
+				IssueID:         a.IssueID,
+				CouchRoomID:     a.CouchRoomID,
+				CouchDeviceID:   a.CouchDeviceID,
+				AlertType:       a.AlertType,
+				StartTime:       a.StartTime,
+				EndTime:         a.EndTime,
+				AcknowledgeTime: a.AcknowledgeTime,
+				AcknowledgeBy:   a.AcknowledgeBy,
 			})
 			return nil
 		},

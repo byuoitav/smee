@@ -11,10 +11,12 @@ import (
 )
 
 type issue struct {
-	ID          int
-	CouchRoomID string
-	StartTime   time.Time
-	EndTime     *time.Time
+	ID              int
+	CouchRoomID     string
+	StartTime       time.Time
+	EndTime         *time.Time
+	AcknowledgeTime time.Time
+	AcknowledgeBy   string
 }
 
 func (c *Client) activeIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
