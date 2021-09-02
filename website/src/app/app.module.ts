@@ -18,7 +18,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card';
 import {MatChipsModule} from '@angular/material/chips';
-import {MaintenanceDialog, RoomComponent} from './room/room.component';
+import {MaintenanceDialog, RoomComponent, CloseIssueDialog, ErrorPopup} from './room/room.component';
 import {RoomsComponent} from './rooms/rooms.component';
 import {DateAgoPipe} from "./date-ago.pipe";
 import {MatSortModule} from "@angular/material/sort";
@@ -34,6 +34,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     RoomsComponent,
     MaintenanceDialog,
     DateAgoPipe,
+    CloseIssueDialog,
+    ErrorPopup,
   ],
   imports: [
     BrowserModule,

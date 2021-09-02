@@ -94,6 +94,42 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	return issue, nil
 }
 
+func (c *Cache) CloseAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		iss, err := c.IssueStore.CloseAlertsForIssue(ctx, issueID)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to close issue on substore: %w", err)
+		}
+
+		if iss.Active() {
+			c.issues[iss.ID] = iss
+		} else {
+			delete(c.issues, iss.ID)
+		}
+
+		return iss, nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+
+	if hasActiveAlerts(issue) {
+		c.issues[issue.ID] = issue
+	} else {
+		c.Log.Info("Closing issue", zap.String("roomID", issue.Room.ID), zap.String("issueID", issueID))
+
+		issue.End = time.Now()
+		delete(c.issues, issue.ID)
+	}
+
+	return issue, nil
+}
+
 func (c *Cache) CloseAlert(ctx context.Context, issueID, alertID string) (smee.Issue, error) {
 	c.issuesMu.Lock()
 	defer c.issuesMu.Unlock()

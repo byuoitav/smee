@@ -43,6 +43,19 @@ func (c *Client) closeAlert(ctx context.Context, tx pgx.Tx, alertID int) error {
 	return nil
 }
 
+func (c *Client) closeAlertsforIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE alerts SET end_time = $1 WHERE issue_id = $2 AND end_time IS NULL",
+		time.Now(), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec: %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid IssueID")
+	}
+	return nil
+}
+
 func (c *Client) queryAlerts(ctx context.Context, tx pgx.Tx, query string, args ...interface{}) ([]alert, error) {
 	var alerts []alert
 	var a alert

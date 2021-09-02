@@ -94,7 +94,7 @@
 					</div>
 				</mat-card-content>
 			</mat-card>
-			<br>
+			<br *ngIf="maintenance?.note">
 			<mat-card class="note" *ngIf="maintenance?.note">
 				<mat-card-header>
 					<mat-card-title>Maintenance Note</mat-card-title>
@@ -102,6 +102,10 @@
 				<mat-card-content>
 					<div>{{maintenance?.note}}</div>
 				</mat-card-content>
+			</mat-card>
+			<br>
+			<mat-card class="close">
+				<button class="close-button" mat-button (click)="closeIssue()">Close Issue</button>
 			</mat-card>
 		</div>
 	</div>

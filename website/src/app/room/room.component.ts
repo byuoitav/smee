@@ -12,6 +12,16 @@ interface DialogData {
   maintenance: MaintenanceInfo;
 }
 
+interface CloseDialogData {
+  issue: Issue;
+}
+
+interface ErrorData {
+  room: string;
+  roomID: string;
+  issueID: string;
+}
+
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
@@ -117,7 +127,6 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     return IssueMap.has(alert.type)
   }
 
-
   inMaintenance(): boolean {
     if (!this.maintenance?.start || !this.maintenance?.end) {
       return false;
@@ -131,6 +140,22 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     return true;
+  }
+
+  closeIssue(): void {
+    const ref = this.dialog.open(CloseIssueDialog, {
+      disableClose : true,
+      data: {
+        issue: this.issue
+      }
+    });
+
+    ref.afterClosed().subscribe(saved => {
+      if (saved){
+        this.update();
+        
+      }
+    })
   }
 
   editMaintenance(): void {
@@ -150,6 +175,68 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
     })
   }
   
+}
+
+@Component({
+  selector: 'app-error-popup',
+  templateUrl: 'error-popup.html',
+  styles: [
+    `
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+    `
+  ],
+})
+export class ErrorPopup {
+  constructor(private dialogRef: MatDialogRef<ErrorPopup>,
+    @Inject(MAT_DIALOG_DATA) public data: ErrorData) {
+    }
+}
+
+@Component({
+  selector: 'app-close-dialog',
+  templateUrl: 'close-dialog.html',
+  styles: [
+    `
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+    `
+  ],
+})
+export class CloseIssueDialog {
+  constructor(private dialogRef: MatDialogRef<CloseIssueDialog, Issue>,private dialog : MatDialog, 
+    private api: ApiService,
+    @Inject(MAT_DIALOG_DATA) public data: CloseDialogData) {
+  }
+
+  errorPopup(): void {
+    const ref = this.dialog.open(ErrorPopup, {
+      disableClose: true,
+      data: {
+        room: this.data.issue.room.name,
+        roomid: this.data.issue.room.id,
+        issueID: this.data.issue.id,
+      }
+    })
+
+    ref.afterClosed().subscribe(saved => {
+
+    })
+  }
+
+  
+  close(): void {
+      this.api.closeIssue(this.data.issue.id).subscribe(info => {
+        this.dialogRef.close(info);
+      }, err => {
+        console.log("unable to set close issue", err);
+        this.errorPopup()
+      })
+  }
 }
 
 @Component({
