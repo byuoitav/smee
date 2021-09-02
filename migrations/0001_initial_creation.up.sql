@@ -16,6 +16,8 @@ CREATE TABLE issues (
 	couch_room_id text IS NOT NULL,
 	start_time timestamptz IS NOT NULL,
 	end_time timestamptz
+	acknowledged_at timestamptz
+	acknowledged_by text
 );
 
 CREATE TABLE alerts (
@@ -26,6 +28,8 @@ CREATE TABLE alerts (
 	alert_type text IS NOT NULL,
 	start_time timestamptz IS NOT NULL,
 	end_time timestamptz
+	acknowledged_at timestamptz
+	acknowledged_by text
 );
 
 CREATE TABLE sn_incident_mappings (
