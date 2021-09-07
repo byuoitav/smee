@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -69,11 +70,13 @@ func (c *Client) CreateAlert(ctx context.Context, smeeAlert smee.Alert) (smee.Is
 
 	// create the alert
 	a := alert{
-		IssueID:       issID,
-		CouchRoomID:   smeeAlert.Device.Room.ID,
-		CouchDeviceID: smeeAlert.Device.ID,
-		AlertType:     smeeAlert.Type,
-		StartTime:     smeeAlert.Start,
+		IssueID:           issID,
+		CouchRoomID:       smeeAlert.Device.Room.ID,
+		CouchDeviceID:     smeeAlert.Device.ID,
+		AlertType:         smeeAlert.Type,
+		StartTime:         smeeAlert.Start,
+		Acknowledged_By:   "",
+		Acknowledged_Time: time.Time{},
 	}
 
 	a, err = c.createAlert(ctx, tx, a)

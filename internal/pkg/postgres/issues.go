@@ -11,10 +11,12 @@ import (
 )
 
 type issue struct {
-	ID          int
-	CouchRoomID string
-	StartTime   time.Time
-	EndTime     *time.Time
+	ID                int
+	CouchRoomID       string
+	StartTime         time.Time
+	EndTime           *time.Time
+	Acknowledged_By   string
+	Acknowledged_Time time.Time
 }
 
 func (c *Client) activeIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
@@ -84,7 +86,7 @@ func (c *Client) issue(ctx context.Context, tx pgx.Tx, id int) (issue, error) {
 
 	err := tx.QueryRow(ctx,
 		"SELECT * FROM issues WHERE id = $1",
-		id).Scan(&iss.ID, &iss.CouchRoomID, &iss.StartTime, &iss.EndTime)
+		id).Scan(&iss.ID, &iss.CouchRoomID, &iss.StartTime, &iss.EndTime, &iss.Acknowledged_By, &iss.Acknowledged_Time)
 	if err != nil {
 		return issue{}, fmt.Errorf("unable to get query/scan: %w", err)
 	}

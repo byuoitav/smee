@@ -9,13 +9,15 @@ import (
 )
 
 type alert struct {
-	ID            int
-	IssueID       int
-	CouchRoomID   string
-	CouchDeviceID string
-	AlertType     string
-	StartTime     time.Time
-	EndTime       *time.Time
+	ID                int
+	IssueID           int
+	CouchRoomID       string
+	CouchDeviceID     string
+	AlertType         string
+	StartTime         time.Time
+	EndTime           *time.Time
+	Acknowledged_By   string
+	Acknowledged_Time time.Time
 }
 
 func (c *Client) createAlert(ctx context.Context, tx pgx.Tx, a alert) (alert, error) {
@@ -61,16 +63,18 @@ func (c *Client) queryAlerts(ctx context.Context, tx pgx.Tx, query string, args 
 	var a alert
 
 	_, err := tx.QueryFunc(ctx, query, args,
-		[]interface{}{&a.ID, &a.IssueID, &a.CouchRoomID, &a.CouchDeviceID, &a.AlertType, &a.StartTime, &a.EndTime},
+		[]interface{}{&a.ID, &a.IssueID, &a.CouchRoomID, &a.CouchDeviceID, &a.AlertType, &a.StartTime, &a.EndTime, &a.Acknowledged_By, &a.Acknowledged_Time},
 		func(pgx.QueryFuncRow) error {
 			alerts = append(alerts, alert{
-				ID:            a.ID,
-				IssueID:       a.IssueID,
-				CouchRoomID:   a.CouchRoomID,
-				CouchDeviceID: a.CouchDeviceID,
-				AlertType:     a.AlertType,
-				StartTime:     a.StartTime,
-				EndTime:       a.EndTime,
+				ID:                a.ID,
+				IssueID:           a.IssueID,
+				CouchRoomID:       a.CouchRoomID,
+				CouchDeviceID:     a.CouchDeviceID,
+				AlertType:         a.AlertType,
+				StartTime:         a.StartTime,
+				EndTime:           a.EndTime,
+				Acknowledged_By:   a.Acknowledged_By,
+				Acknowledged_Time: a.Acknowledged_Time,
 			})
 			return nil
 		},
