@@ -47,6 +47,12 @@ type Issue struct {
 	// Events is an ordered list by time of IssueEvents that have happened
 	// on this Issue
 	Events []IssueEvent `json:"events"`
+
+	// Who Acknowledged the issue
+	Acknowledged_By string `json:"acknowledged_by"`
+
+	// Time the issue was acknowledged
+	Acknowledged_Time time.Time `json:"acknowledged_time"`
 }
 
 // Active returns true if this issue is currently active, and false if this
