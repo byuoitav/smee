@@ -116,7 +116,6 @@ func (h *Handlers) ActiveIssues(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// TODO maintenance
 func (h *Handlers) LinkIssueToIncident(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -157,7 +156,6 @@ func (h *Handlers) CloseIssue(c *gin.Context) {
 	c.JSON(http.StatusOK, iss)
 }
 
-// TODO maintenance
 func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
