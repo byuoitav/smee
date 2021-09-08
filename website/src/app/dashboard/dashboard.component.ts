@@ -18,10 +18,10 @@ interface DialogData {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   displayedColumns: string[] = ["room", "maintenance","alertCount", "alertOverview", "age", "incidents"];
-  acknowledgeColumns: string[] = ["room", "alertCount", "alertOverview", "age", "acknowledge"];
+  
   issueUpdateInterval: number | undefined;
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
-  unacknowledgedDataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
+  
   showMaintenance: boolean = true;
   filterValue: string = "";
   totalAlerts: number = 0;
@@ -38,16 +38,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.issueUpdateInterval = window.setInterval(() => {
       this.updateIssues();
     }, 10000);
-
-    const unacknowledgedIssues: Issue[] = [
-      {id: "1998", room: {id: "2005", name: "ITB-4101"}, start: new Date(2020, 11, 17), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "CTB-3201"}, start: new Date(2021, 3, 12), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "EB-2301"}, start: new Date(), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "TMCB-1401"}, start: new Date(2021, 6, 15), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "JKB-1501"}, start: new Date(2021, 4, 22), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-    ];
-
-    this.unacknowledgedDataSource.data = unacknowledgedIssues;
 
     this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
       
