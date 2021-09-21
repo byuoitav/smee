@@ -53,7 +53,9 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	api.GET("/issues", d.handlers.ActiveIssues)
 	api.PUT("/issues/:issueID/linkIncident", d.handlers.LinkIssueToIncident)
 	api.PUT("/issues/:issueID/createIncident", d.handlers.CreateIncidentFromIssue)
-	api.PUT("issues/:issueID/closeIssue", d.handlers.CloseIssue)
+	api.PUT("/issues/:issueID/closeIssue", d.handlers.CloseIssue)
+	api.PUT("/issues/:issueID/acknowledgeIssue", d.handlers.AcknowledgeIssue)
+	api.PUT("/issues/:issueID/setStatus", d.handlers.SetStatus)
 
 	api.GET("/maintenance", d.handlers.RoomsInMaintenance)
 	api.GET("/maintenance/:roomID", d.handlers.RoomMaintenanceInfo)

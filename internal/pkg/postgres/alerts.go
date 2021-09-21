@@ -56,6 +56,19 @@ func (c *Client) closeAlertsforIssue(ctx context.Context, tx pgx.Tx, issueID int
 	return nil
 }
 
+func (c *Client) acknowledgeAlertsforIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE alerts SET acknowledge_time = $1 WHERE issue_id = $2 AND acknowledge_time IS NULL",
+		time.Now(), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec: %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid IssueID")
+	}
+	return nil
+}
+
 func (c *Client) queryAlerts(ctx context.Context, tx pgx.Tx, query string, args ...interface{}) ([]alert, error) {
 	var alerts []alert
 	var a alert
@@ -111,6 +124,26 @@ func (c *Client) activeAlertCount(ctx context.Context, tx pgx.Tx, issueID int) (
 
 	_, err := tx.QueryFunc(ctx,
 		"SELECT id FROM alerts WHERE issue_id = $1 AND end_time is NULL",
+		[]interface{}{issueID},
+		[]interface{}{&id},
+		func(pgx.QueryFuncRow) error {
+			ids = append(ids, id)
+			return nil
+		},
+	)
+	if err != nil {
+		return 0, fmt.Errorf("unable to queryFunc: %w", err)
+	}
+
+	return len(ids), nil
+}
+
+func (c *Client) unacknowledgedAlertCount(ctx context.Context, tx pgx.Tx, issueID int) (int, error) {
+	var ids []int
+	var id int
+
+	_, err := tx.QueryFunc(ctx,
+		"SELECT id FROM alerts WHERE issue_id = $1 AND acknowledge_time is NULL",
 		[]interface{}{issueID},
 		[]interface{}{&id},
 		func(pgx.QueryFuncRow) error {

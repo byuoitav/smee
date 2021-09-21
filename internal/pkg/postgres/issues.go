@@ -79,6 +79,47 @@ func (c *Client) closeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
 	return nil
 }
 
+func (c *Client) acknowledgeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET acknowledge_time = $1 WHERE id = $2",
+		time.Now(), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec: %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+
+	return nil
+}
+
+func (c *Client) unacknowledgeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET acknowledge_time = $1 WHERE id = $2",
+		new(time.Time), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+
+	return nil
+}
+
+func (c *Client) setIssueStatus(ctx context.Context, tx pgx.Tx, issueID int, status string) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET status = $1 WHERE id = $2",
+		status, issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+	return nil
+}
+
 func (c *Client) issue(ctx context.Context, tx pgx.Tx, id int) (issue, error) {
 	var iss issue
 

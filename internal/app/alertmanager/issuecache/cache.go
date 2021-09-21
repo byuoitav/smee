@@ -94,6 +94,45 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	return issue, nil
 }
 
+func (c *Cache) AcknowledgeAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		iss, err := c.IssueStore.AcknowledgeAlertsForIssue(ctx, issueID)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to acknowledge issue on substore: %w", err)
+		}
+
+		return iss, nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+
+	return issue, nil
+}
+
+func (c *Cache) SetIssueStatus(ctx context.Context, issueID string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		iss, err := c.IssueStore.SetIssueStatus(ctx, issueID)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to set issue status on substore: %w", err)
+		}
+		return iss, nil
+	}
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+	return issue, nil
+}
+
 func (c *Cache) CloseAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
 	c.issuesMu.Lock()
 	defer c.issuesMu.Unlock()

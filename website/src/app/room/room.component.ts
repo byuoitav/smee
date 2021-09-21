@@ -12,6 +12,11 @@ interface DialogData {
   maintenance: MaintenanceInfo;
 }
 
+interface StatusDialogData {
+  room: string;
+  issue: Issue;
+}
+
 interface CloseDialogData {
   issue: Issue;
 }
@@ -174,6 +179,15 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     })
   }
+
+  editStatus(): void {
+    const ref = this.dialog.open(StatusDialog,{
+      disableClose: true,
+      data: {
+        issue: this.issue,
+      }
+    })
+  }
   
 }
 
@@ -308,4 +322,35 @@ export class MaintenanceDialog {
       console.log("unable to disable maintenance", err);
     })
   }
+}
+
+@Component({
+  selector: 'app-status-dialog',
+  templateUrl: 'status-dialog.html',
+  styles: [
+    `
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+    `
+  ],
+})
+export class StatusDialog {
+  status: string | undefined;
+  constructor(private dialogRef: MatDialogRef<StatusDialog, Issue>,
+    private api: ApiService,
+    @Inject(MAT_DIALOG_DATA) public data: StatusDialogData) {
+      this.status = data.issue.status;
+    }
+    setStatus(): void {
+      this.api.setIssueStatus(this.data.issue.id, this.status).subscribe(info => {
+        this.dialogRef.close(info);
+      }, err => {
+        console.log("unable to set maintenance info", err);
+        const roomName = this.data.issue.room.name
+        alert("Unable to set Issue Status for " + roomName);
+      });
+    }
+
 }

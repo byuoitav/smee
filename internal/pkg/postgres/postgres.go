@@ -95,6 +95,46 @@ func (c *Client) CreateAlert(ctx context.Context, smeeAlert smee.Alert) (smee.Is
 	return smeeIss, nil
 }
 
+func (c *Client) AcknowledgeAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+	issID, err := strconv.Atoi(issueID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to parse issueID: %w", err)
+	}
+	tx, err := c.pool.Begin(ctx)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to start transaction: %w", err)
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	if err := c.acknowledgeAlertsforIssue(ctx, tx, issID); err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to acknowledge alerts from issue: %w", err)
+	}
+
+	unacknowledgedCount, err := c.unacknowledgedAlertCount(ctx, tx, issID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to get unacknowleged alerts from issue: %w", err)
+	}
+
+	if unacknowledgedCount == 0 {
+		if err := c.acknowledgeIssue(ctx, tx, issID); err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to acknowledgeIssue: %w", err)
+		}
+	}
+
+	smeeIss, err := c.smeeIssue(ctx, tx, issID)
+	if err != nil {
+		return smee.Issue{}, fmt.Errorf("unable to get smeeIssue: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return smee.Issue{}, fmt.Errorf("unavle to commit transaction: %w", err)
+	}
+
+	return smeeIss, nil
+}
+
 func (c *Client) CloseAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
 	issID, err := strconv.Atoi(issueID)
 	if err != nil {

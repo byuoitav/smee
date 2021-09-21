@@ -48,6 +48,7 @@ export interface Issue {
   maintenanceStart: Date | undefined;
   maintenanceEnd: Date | undefined;
   isOnMaintenance : boolean; 
+  status: string | undefined;
 }
 
 export interface MaintenanceInfo {
@@ -178,7 +179,15 @@ export class ApiService {
       tap(data => console.log("closing issue", data)),
       catchError(this.handleError<Issue>("closeIssue", undefined)),
     );
-  }                                                                                                       
+  }      
+  
+  acknowledgeIssue(issue : Issue): Observable<Issue> {
+    return this.http.put<Issue>(`/api/v1/issues/${issue.id}/acknowledgeIssue`, undefined, {
+    }).pipe(
+      tap(data => console.log("acknowledging issue", data)),
+      catchError(this.handleError<Issue>("acknowledgeIssue", undefined)),
+    );
+  }
 
   createIncidentFromIssue(issueID: string, shortDescription: string): Observable<Issue> {
     return this.http.put<Issue>(`/api/v1/issues/${issueID}/createIncident`, undefined, {
@@ -231,6 +240,14 @@ export class ApiService {
         }
         return info;
       })
+    )
+  }
+
+  setIssueStatus(issueID: string, status: string | undefined): Observable<Issue> {
+    return this.http.put<Issue>(`/api/v1/issues/${issueID}/setStatus`, status).pipe(
+      tap(data => console.log("set status", data)),
+      catchError(this.handleError<Issue>("setIssueStatus", undefined)),
+      
     )
   }
 

@@ -17,7 +17,7 @@ interface DialogData {
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
-  displayedColumns: string[] = ["room", "maintenance","alertCount", "alertOverview", "age", "incidents"];
+  displayedColumns: string[] = ["room", "maintenance","alertCount", "alertOverview", "age", "incidents", "status"];
   acknowledgeColumns: string[] = ["room", "alertCount", "alertOverview", "age", "acknowledge"];
   issueUpdateInterval: number | undefined;
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
@@ -40,11 +40,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 10000);
 
     const unacknowledgedIssues: Issue[] = [
-      {id: "1998", room: {id: "2005", name: "ITB-4101"}, start: new Date(2020, 11, 17), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "CTB-3201"}, start: new Date(2021, 3, 12), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "EB-2301"}, start: new Date(), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "TMCB-1401"}, start: new Date(2021, 6, 15), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
-      {id: "1998", room: {id: "2005", name: "JKB-1501"}, start: new Date(2021, 4, 22), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false},
+      {id: "1998", room: {id: "2005", name: "ITB-4101"}, start: new Date(2020, 11, 17), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
+      {id: "1998", room: {id: "2005", name: "CTB-3201"}, start: new Date(2021, 3, 12), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
+      {id: "1998", room: {id: "2005", name: "EB-2301"}, start: new Date(), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
+      {id: "1998", room: {id: "2005", name: "TMCB-1401"}, start: new Date(2021, 6, 15), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
+      {id: "1998", room: {id: "2005", name: "JKB-1501"}, start: new Date(2021, 4, 22), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined}, 
     ];
 
     this.unacknowledgedDataSource.data = unacknowledgedIssues;
@@ -142,6 +142,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.totalAlerts += this.getActiveAlerts(issues[index]);
       }
     })
+  }
+
+  acknowledgeIssue(issue: Issue): void {
+    this.api.acknowledgeIssue(issue);
   }
 
   createIncident(issue: Issue): void {

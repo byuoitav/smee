@@ -157,6 +157,33 @@ func (h *Handlers) CloseIssue(c *gin.Context) {
 	c.JSON(http.StatusOK, iss)
 }
 
+func (h *Handlers) AcknowledgeIssue(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueID := c.Param("issueID")
+	iss, err := h.IssueStore.AcknowledgeAlertsForIssue(ctx, issueID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to acknowledge issue: %s", err)
+		return
+	}
+	c.JSON(http.StatusOK, iss)
+}
+
+func (h *Handlers) SetStatus(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueID := c.Param("issueID")
+	iss, err := h.IssueStore.SetIssueStatus(ctx, issueID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to set issue status: %s", err)
+		return
+	}
+	c.JSON(http.StatusOK, iss)
+
+}
+
 // TODO maintenance
 func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
