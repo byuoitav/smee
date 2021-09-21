@@ -78,12 +78,14 @@ type AlertTransitionEvent struct {
 
 // change to room/device ID's
 type Alert struct {
-	ID      string    `json:"id"`
-	IssueID string    `json:"issueID"`
-	Device  Device    `json:"device"`
-	Type    string    `json:"type"`
-	Start   time.Time `json:"start"`
-	End     time.Time `json:"end"`
+	ID                string    `json:"id"`
+	IssueID           string    `json:"issueID"`
+	Device            Device    `json:"device"`
+	Type              string    `json:"type"`
+	Start             time.Time `json:"start"`
+	End               time.Time `json:"end"`
+	Acknowledged_By   string    `json:"acknowledged_by"`
+	Acknowledged_Time time.Time `json:"acknowledge_time"`
 }
 
 func (a *Alert) Active() bool {
