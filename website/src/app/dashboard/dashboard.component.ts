@@ -18,8 +18,10 @@ interface DialogData {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   displayedColumns: string[] = ["room", "maintenance","alertCount", "alertOverview", "age", "incidents"];
+  
   issueUpdateInterval: number | undefined;
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
+  
   showMaintenance: boolean = true;
   filterValue: string = "";
   totalAlerts: number = 0;
@@ -261,13 +263,12 @@ export class DashboardCreateDialog {
     if (!this.shortDesc) {
       return;
     }
-
     this.api.createIncidentFromIssue(this.data.issue.id, this.shortDesc).subscribe(issue => {
       this.dialogRef.close(issue);
     }, err => {
       console.log("unable to link issue", err);
-
-      // TODO show error popup
+      const roomName = this.data.issue.room.name
+      alert("Unable to create incident for " + roomName);
     });
   }
 }
@@ -287,13 +288,12 @@ export class DashboardLinkDialog {
     if (!this.incidentName) {
       return;
     }
-
     this.api.linkIssueToIncident(this.data.issue.id, this.incidentName).subscribe(issue => {
       this.dialogRef.close(issue);
     }, err => {
       console.log("unable to link issue", err);
-
-      // TODO show error popup
+      const roomName = this.data.issue.room.name
+      alert("Unable to link incident for " + roomName);
     });
   }
 }

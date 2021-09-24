@@ -287,12 +287,12 @@ export class MaintenanceDialog {
     if (!this.canSave()) {
       return;
     }
-
     this.api.setMaintenanceInfo(this.info).subscribe(info => {
       this.dialogRef.close(info);
     }, err => {
       console.log("unable to set maintenance info", err);
-      // TODO show error popup
+      const roomName = this.data.room
+      alert("Unable to set maintenance info " + roomName);
     })
   }
 
@@ -304,8 +304,10 @@ export class MaintenanceDialog {
     this.api.setMaintenanceInfo(this.info).subscribe(info => {
       this.dialogRef.close(info);
     }, err => {
-      // TODO show error popup
       console.log("unable to disable maintenance", err);
+      const roomName = this.data.room
+      alert("Unable to disable maintenance info " + roomName);
+      
     })
   }
 }
