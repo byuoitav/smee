@@ -20,7 +20,8 @@ type IssueStore interface {
 	ActiveIssues(context.Context) ([]Issue, error)
 	CloseAlertsForIssue(ctx context.Context, issueID string) (Issue, error)
 	AcknowledgeAlertsForIssue(ctx context.Context, issueID string) (Issue, error)
-	SetIssueStatus(ctx context.Context, issueID string) (Issue, error)
+	SetIssueStatus(ctx context.Context, issueID string, status string) (Issue, error)
+	UnacknowledgeIssue(ctx context.Context, issueID string) (Issue, error)
 
 	ActiveAlertExists(ctx context.Context, roomID, deviceID, typ string) (bool, error)
 	ActiveAlerts(context.Context) ([]Alert, error)
@@ -55,12 +56,24 @@ type Issue struct {
 
 	// Time the issue was acknowledged
 	Acknowledged_Time time.Time `json:"acknowledged_time"`
+
+	// Issue status
+	Status string `json:"status"`
 }
 
 // Active returns true if this issue is currently active, and false if this
 // has been closed.
 func (i *Issue) Active() bool {
 	return i.End.IsZero()
+}
+
+func (i *Issue) Acknowledged() bool {
+	for _, element := range i.Alerts {
+		if element.Acknowledged_Time.IsZero() {
+			return true
+		}
+	}
+	return false
 }
 
 type IssueEventType string

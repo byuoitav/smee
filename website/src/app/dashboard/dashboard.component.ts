@@ -30,6 +30,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
   @ViewChild(MatSort) sort: MatSort | null = null;
 
+
+  @ViewChild(MatPaginator) unakwpaginator: MatPaginator | null = null;
+  @ViewChild(MatSort) unakwsort: MatSort | null = null;
+
+
   constructor(private api: ApiService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
@@ -38,16 +43,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.issueUpdateInterval = window.setInterval(() => {
       this.updateIssues();
     }, 10000);
-
-    const unacknowledgedIssues: Issue[] = [
-      {id: "1998", room: {id: "2005", name: "ITB-4101"}, start: new Date(2020, 11, 17), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
-      {id: "1998", room: {id: "2005", name: "CTB-3201"}, start: new Date(2021, 3, 12), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
-      {id: "1998", room: {id: "2005", name: "EB-2301"}, start: new Date(), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
-      {id: "1998", room: {id: "2005", name: "TMCB-1401"}, start: new Date(2021, 6, 15), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined},
-      {id: "1998", room: {id: "2005", name: "JKB-1501"}, start: new Date(2021, 4, 22), end: undefined, alerts: undefined, incidents: undefined, events: undefined, maintenanceStart: undefined, maintenanceEnd: undefined, isOnMaintenance: false, status: undefined}, 
-    ];
-
-    this.unacknowledgedDataSource.data = unacknowledgedIssues;
 
     this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
       
@@ -90,12 +85,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     };
 
-    this.dataSource.sortData = (data: Issue[], sort: MatSort): Issue[] => {
-      if (!sort.active || sort.direction === '') {
+    this.dataSource.sortData = (data: Issue[], akwSort: MatSort): Issue[] => {
+      if (!akwSort.active || akwSort.direction === '') {
         return data;
       }
 
-      const isAsc = sort.direction === 'asc';
+      const isAsc = akwSort.direction === 'asc';
 
       const cmp = (a: number | string | Date | undefined, b: number | string | Date | undefined): number => {
         // return -1 if a is less than b
@@ -112,7 +107,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       return data.sort((a, b) => {
-        switch (sort.active) {
+        switch (akwSort.active) {
           case 'room': return cmp(a.room.name, b.room.name);
           case 'alertCount': return cmp(this.getActiveAlerts(a), this.getActiveAlerts(b));
           case 'age': return cmp(a.start, b.start);
@@ -120,11 +115,47 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
     }
+
+    this.unacknowledgedDataSource.sortData = (data: Issue[], unakwSort: MatSort): Issue[] => {
+      if (!unakwSort.active || unakwSort.direction === '') {
+        return data;
+      }
+
+      const isAsc = unakwSort.direction === 'asc';
+
+      const cmp = (a: number | string | Date | undefined, b: number | string | Date | undefined): number => {
+        // return -1 if a is less than b
+        // return 1 if b is less than a
+        if (!a && !b) {
+          return 0;
+        } else if (!b) {
+          return -1;
+        } else if (!a) {
+          return 1;
+        }
+
+        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+      }
+
+      return data.sort((a, b) => {
+        switch (unakwSort.active) {
+          case 'room': return cmp(a.room.name, b.room.name);
+          case 'alertCount': return cmp(this.getActiveAlerts(a), this.getActiveAlerts(b));
+          case 'age': return cmp(a.start, b.start);
+          default: return 0;
+        }
+      });
+    }
+    
+
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+
+    this.unacknowledgedDataSource.paginator = this.paginator;
+    this.unacknowledgedDataSource.sort = this.sort;
   }
 
   ngOnDestroy(): void {
@@ -134,8 +165,18 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private updateIssues(): void {
+    var unacknowledgedIssues : Issue[] = [];
+    var acknowledgedIssues : Issue[] = [];
     this.api.getIssues().subscribe(issues => {
-      this.dataSource.data = issues;
+      for (let index = 0; index < issues.length; index++) {
+        if(issues[index].acknowledgedTime != undefined){
+          acknowledgedIssues.push(issues[index]);
+        }else{
+          unacknowledgedIssues.push(issues[index]);
+        }
+      }
+      this.dataSource.data = acknowledgedIssues;
+      this.unacknowledgedDataSource.data = unacknowledgedIssues;
       this.totalIssues = issues.length;
       this.totalAlerts = 0;
       for (let index = 0; index < issues.length; index++) {
@@ -145,7 +186,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   acknowledgeIssue(issue: Issue): void {
-    this.api.acknowledgeIssue(issue);
+    console.log("clicked");
+    this.api.acknowledgeIssue(issue).subscribe(issue => {
+      console.log(issue);
+    }, err => {
+      console.log("unable to link issue", err);
+    });
+    this.updateIssues();
   }
 
   createIncident(issue: Issue): void {

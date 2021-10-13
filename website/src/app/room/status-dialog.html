@@ -1,17 +1,18 @@
 <h2 mat-dialog-title>
-	{{data?.room}} Staus
+	{{data?.roomID}} Status
 </h2>
 
 <div mat-dialog-content class="content">
 		
 	<mat-form-field appearance="fill">
 		<mat-label>Issue Status</mat-label>
-		<textarea matInput placeholder="Type Issue Status"></textarea>
+		<textarea matInput placeholder="Type Issue Status"  [ngModel]="issue?.status" (ngModelChange)="issue.status = $event"></textarea>
 	</mat-form-field>
 
 </div>
 
 <div mat-dialog-actions>
 	<button mat-button mat-dialog-close>Cancel</button>
+	<button mat-button [disabled]="!data?.issue?.status" (click)="clear()">Clear Status</button>
 	<button mat-button [disabled]="" (click)="setStatus()">Save</button>
 </div>

@@ -30,15 +30,20 @@ type issue struct {
 	Events           []issueEvent             `json:"events"`
 	MaintenanceStart *time.Time               `json:"maintenanceStart,omitempty"`
 	MaintenanceEnd   *time.Time               `json:"maintenanceEnd,omitempty"`
+	AcknowledgedBy   string                   `json:"acknowledgedBy"`
+	AcknowledgedTime *time.Time               `json:"acknowledgedTime"`
+	Status           string                   `json:"status"`
 }
 
 type alert struct {
-	ID      string      `json:"id"`
-	IssueID string      `json:"issueID"`
-	Device  smee.Device `json:"device"`
-	Type    string      `json:"type"`
-	Start   time.Time   `json:"start"`
-	End     *time.Time  `json:"end"`
+	ID                string      `json:"id"`
+	IssueID           string      `json:"issueID"`
+	Device            smee.Device `json:"device"`
+	Type              string      `json:"type"`
+	Start             time.Time   `json:"start"`
+	End               *time.Time  `json:"end"`
+	Acknowledged_By   string      `json:"acknowledged_by"`
+	Acknowledged_Time *time.Time  `json:"acknowledge_time"`
 }
 
 type issueEvent struct {
@@ -170,12 +175,26 @@ func (h *Handlers) AcknowledgeIssue(c *gin.Context) {
 	c.JSON(http.StatusOK, iss)
 }
 
+func (h *Handlers) UnacknowledgeIssue(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+	defer cancel()
+
+	issueID := c.Param("issueID")
+	iss, err := h.IssueStore.UnacknowledgeIssue(ctx, issueID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to acknowledge issue: %s", err)
+		return
+	}
+	c.JSON(http.StatusOK, iss)
+}
+
 func (h *Handlers) SetStatus(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	issueID := c.Param("issueID")
-	iss, err := h.IssueStore.SetIssueStatus(ctx, issueID)
+	issueStatus := c.Query("status")
+	iss, err := h.IssueStore.SetIssueStatus(ctx, issueID, issueStatus)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "unable to set issue status: %s", err)
 		return
@@ -218,12 +237,18 @@ func (h *Handlers) CreateIncidentFromIssue(c *gin.Context) {
 
 func convertIssue(iss smee.Issue) issue {
 	issue := issue{
-		ID:        iss.ID,
-		Room:      iss.Room,
-		Start:     iss.Start,
-		Alerts:    make(map[string]alert, len(iss.Alerts)),
-		Incidents: iss.Incidents,
-		Events:    make([]issueEvent, len(iss.Events)),
+		ID:             iss.ID,
+		Room:           iss.Room,
+		Start:          iss.Start,
+		Alerts:         make(map[string]alert, len(iss.Alerts)),
+		Incidents:      iss.Incidents,
+		Events:         make([]issueEvent, len(iss.Events)),
+		AcknowledgedBy: iss.Acknowledged_By,
+		Status:         iss.Status,
+	}
+
+	if !iss.Acknowledged_Time.IsZero() {
+		issue.AcknowledgedTime = &iss.Acknowledged_Time
 	}
 
 	if !iss.End.IsZero() {
@@ -242,17 +267,24 @@ func convertIssue(iss smee.Issue) issue {
 
 	for i := range iss.Alerts {
 		alert := alert{
-			ID:      iss.Alerts[i].ID,
-			IssueID: iss.Alerts[i].IssueID,
-			Device:  iss.Alerts[i].Device,
-			Type:    iss.Alerts[i].Type,
-			Start:   iss.Alerts[i].Start,
+			ID:              iss.Alerts[i].ID,
+			IssueID:         iss.Alerts[i].IssueID,
+			Device:          iss.Alerts[i].Device,
+			Type:            iss.Alerts[i].Type,
+			Start:           iss.Alerts[i].Start,
+			Acknowledged_By: iss.Alerts[i].Acknowledged_By,
 		}
 
 		if !iss.Alerts[i].End.IsZero() {
 			tempEnd := iss.Alerts[i].End
 			alert.End = &tempEnd
 		}
+
+		if !iss.Alerts[i].Acknowledged_Time.IsZero() {
+			tempAkwd := iss.Alerts[i].Acknowledged_Time
+			alert.Acknowledged_Time = &tempAkwd
+		}
+
 		issue.Alerts[alert.ID] = alert
 
 	}
