@@ -362,7 +362,7 @@ export class StatusDialog {
         this.dialogRef.close(info);
       }, err => {
         const roomName = this.roomID
-        alert("Unable to set Issue Status for " + roomName + " " + err);
+        alert("Unable to set Issue Status for " + roomName);
       });
     }
 
@@ -373,7 +373,7 @@ export class StatusDialog {
         this.dialogRef.close(info);
       }, err => {
         const roomName = this.roomID
-        alert("Unable to clear Issue Status for " + roomName + " " + err);
+        alert("Unable to clear Issue Status for " + roomName);
       });
 
     }
