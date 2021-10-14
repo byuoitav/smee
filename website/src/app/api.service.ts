@@ -1,7 +1,5 @@
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
-import { stringify } from "@angular/compiler/src/util";
 import {Injectable} from '@angular/core';
-import { MatPaginator } from "@angular/material/paginator";
 import {Observable, of, throwError} from "rxjs";
 import {tap, map, catchError} from "rxjs/operators";
 
@@ -13,6 +11,8 @@ export interface Alert {
   start: Date;
   end: Date;
   link: string | undefined;
+  acknowledgedBy: string | undefined;
+  acknowledgedTime: Date | undefined;
 }
 
 export interface Room {
@@ -47,7 +47,10 @@ export interface Issue {
   events: IssueEvent[] | undefined;
   maintenanceStart: Date | undefined;
   maintenanceEnd: Date | undefined;
-  isOnMaintenance : boolean; 
+  isOnMaintenance : boolean;
+  acknowledgedBy: string | undefined;
+  acknowledgedTime: Date | undefined;
+  status: string | undefined;
 }
 
 export interface MaintenanceInfo {
@@ -113,6 +116,7 @@ export class ApiService {
             issues[i].incidents = new Map(Object.entries(issue.incidents));
           }
           issues[i].isOnMaintenance = this.inMaintenance(issues[i]); //assings value to isOnMaintenance
+          issues[i].acknowledgedTime = issue.acknowledgedTime;
         }
         return issues;
       }),
@@ -178,7 +182,15 @@ export class ApiService {
       tap(data => console.log("closing issue", data)),
       catchError(this.handleError<Issue>("closeIssue", undefined)),
     );
-  }                                                                                                       
+  }      
+  
+  acknowledgeIssue(issue : Issue): Observable<Issue> {
+    return this.http.put<Issue>(`/api/v1/issues/${issue.id}/acknowledgeIssue`, undefined, {
+    }).pipe(
+      tap(data => console.log("acknowledging issue", data)),
+      catchError(this.handleError<Issue>("acknowledgeIssue", undefined)),
+    );
+  }
 
   createIncidentFromIssue(issueID: string, shortDescription: string): Observable<Issue> {
     return this.http.put<Issue>(`/api/v1/issues/${issueID}/createIncident`, undefined, {
@@ -231,6 +243,16 @@ export class ApiService {
         }
         return info;
       })
+    )
+  }
+
+  setIssueStatus(issueID: string, status: string): Observable<Issue> {
+    return this.http.put<Issue>(`/api/v1/issues/${issueID}/setStatus`, undefined, {
+      params: new HttpParams().set('status', status)
+    }).pipe(
+      tap(data => console.log("set status", data)),
+      catchError(this.handleError<Issue>("setIssueStatus", undefined)),
+      
     )
   }
 

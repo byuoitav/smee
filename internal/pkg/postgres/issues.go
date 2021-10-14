@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strconv"
 	"time"
@@ -11,10 +12,13 @@ import (
 )
 
 type issue struct {
-	ID          int
-	CouchRoomID string
-	StartTime   time.Time
-	EndTime     *time.Time
+	ID               int
+	CouchRoomID      string
+	StartTime        time.Time
+	EndTime          *time.Time
+	AcknowledgedBy   sql.NullString
+	AcknowledgedTime *time.Time
+	StatusMsg        sql.NullString
 }
 
 func (c *Client) activeIssueID(ctx context.Context, tx pgx.Tx, roomID string) (int, error) {
@@ -79,12 +83,53 @@ func (c *Client) closeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
 	return nil
 }
 
+func (c *Client) acknowledgeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET acknowledge_time = $1 WHERE id = $2",
+		time.Now(), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec: %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+
+	return nil
+}
+
+func (c *Client) unacknowledgeIssue(ctx context.Context, tx pgx.Tx, issueID int) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET acknowledge_time = $1 WHERE id = $2",
+		new(time.Time), issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+
+	return nil
+}
+
+func (c *Client) setIssueStatus(ctx context.Context, tx pgx.Tx, issueID int, status string) error {
+	res, err := tx.Exec(ctx,
+		"UPDATE issues SET status_msg = $1 WHERE id = $2",
+		status, issueID)
+	switch {
+	case err != nil:
+		return fmt.Errorf("unable to exec %w", err)
+	case res.RowsAffected() == 0:
+		return fmt.Errorf("invalid issueID")
+	}
+	return nil
+}
+
 func (c *Client) issue(ctx context.Context, tx pgx.Tx, id int) (issue, error) {
 	var iss issue
 
 	err := tx.QueryRow(ctx,
 		"SELECT * FROM issues WHERE id = $1",
-		id).Scan(&iss.ID, &iss.CouchRoomID, &iss.StartTime, &iss.EndTime)
+		id).Scan(&iss.ID, &iss.CouchRoomID, &iss.StartTime, &iss.EndTime, &iss.AcknowledgedBy, &iss.AcknowledgedTime, &iss.StatusMsg)
 	if err != nil {
 		return issue{}, fmt.Errorf("unable to get query/scan: %w", err)
 	}
@@ -159,6 +204,18 @@ func buildIssue(iss issue, alerts []alert, incs []incidentMapping, events []issu
 		}
 
 		smeeIss.Events = append(smeeIss.Events, smeeEvent)
+	}
+
+	if iss.AcknowledgedBy.Valid {
+		smeeIss.Acknowledged_By = iss.AcknowledgedBy.String
+	}
+
+	if iss.AcknowledgedTime != nil {
+		smeeIss.Acknowledged_Time = *iss.AcknowledgedTime
+	}
+
+	if iss.StatusMsg.Valid {
+		smeeIss.Status = iss.StatusMsg.String
 	}
 
 	return smeeIss, nil

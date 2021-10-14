@@ -94,6 +94,89 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	return issue, nil
 }
 
+func (c *Cache) AcknowledgeIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		iss, err := c.IssueStore.AcknowledgeIssue(ctx, issueID)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to acknowledge issue on substore: %w", err)
+		}
+
+		if iss.Active() {
+			c.issues[iss.ID] = iss
+		} else {
+			delete(c.issues, iss.ID)
+		}
+
+		return iss, nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+
+	return issue, nil
+}
+
+//==================================================/
+
+func (c *Cache) UnacknowledgeIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		iss, err := c.IssueStore.UnacknowledgeIssue(ctx, issueID)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to unacknowledge issue: %w", err)
+		}
+
+		if iss.Active() {
+			c.issues[iss.ID] = iss
+		} else {
+			delete(c.issues, iss.ID)
+		}
+
+		return iss, nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+	return issue, nil
+}
+
+//==================================================/
+
+func (c *Cache) SetIssueStatus(ctx context.Context, issueID string, status string) (smee.Issue, error) {
+	c.issuesMu.Lock()
+	defer c.issuesMu.Unlock()
+
+	if c.IssueStore != nil {
+		iss, err := c.IssueStore.SetIssueStatus(ctx, issueID, status)
+		if err != nil {
+			return smee.Issue{}, fmt.Errorf("unable to set issue status on substore: %w", err)
+		}
+
+		if iss.Active() {
+			c.issues[iss.ID] = iss
+		} else {
+			delete(c.issues, iss.ID)
+		}
+
+		return iss, nil
+	}
+
+	issue, ok := c.issues[issueID]
+	if !ok {
+		return smee.Issue{}, errors.New("issue does not exist")
+	}
+	return issue, nil
+}
+
 func (c *Cache) CloseAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
 	c.issuesMu.Lock()
 	defer c.issuesMu.Unlock()

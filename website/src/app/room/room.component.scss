@@ -90,12 +90,9 @@ $columnPadding: 1%;
 	}
 }
 
-.info {
-	.maintenance-button {
-		border-radius: 2em;
-		border-style: solid;
-		border-color: blanchedalmond;
-		border-width: 2px;
-	}
+.note{
+	font-family: monospace;
+	padding-left: $columnPadding/2;
+	padding-right: $columnPadding/2;
 }
 

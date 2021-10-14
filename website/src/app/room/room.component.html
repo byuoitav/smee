@@ -92,20 +92,32 @@
 					<div class="maintenance">
 						<button class="maintenance-button" mat-button (click)="editMaintenance()">Edit Maintenance</button>
 					</div>
+					<div>
+						<button class="status-button" mat-button (click)="editStatus()">Edit Status</button>
+					</div>
+				</mat-card-content>
+			</mat-card>
+			<br *ngIf="issue?.status">
+			<mat-card *ngIf="issue?.status">
+				<mat-card-header>
+					<mat-card-title>Issue Status</mat-card-title>
+				</mat-card-header>
+				<mat-card-content>
+					<div class="note">{{issue?.status}}</div>
 				</mat-card-content>
 			</mat-card>
 			<br *ngIf="maintenance?.note">
-			<mat-card class="note" *ngIf="maintenance?.note">
+			<mat-card *ngIf="maintenance?.note">
 				<mat-card-header>
 					<mat-card-title>Maintenance Note</mat-card-title>
 				</mat-card-header>
 				<mat-card-content>
-					<div>{{maintenance?.note}}</div>
+					<div class="note">{{maintenance?.note}}</div>
 				</mat-card-content>
 			</mat-card>
 			<br>
 			<mat-card class="close">
-				<button class="close-button" mat-button (click)="closeIssue()">Close Issue</button>
+				<button class="close-button" mat-button (click)="closeIssue()" color="warn">Close Issue</button>
 			</mat-card>
 		</div>
 	</div>

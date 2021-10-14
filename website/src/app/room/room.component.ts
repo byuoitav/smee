@@ -12,6 +12,12 @@ interface DialogData {
   maintenance: MaintenanceInfo;
 }
 
+interface StatusDialogData {
+  issue: Issue;
+  roomID: string;
+  status: string;
+}
+
 interface CloseDialogData {
   issue: Issue;
 }
@@ -33,6 +39,7 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
   alertsDataSource: MatTableDataSource<Alert> = new MatTableDataSource(undefined);
   roomID: string = "";
   roomName: string = "";
+  status:string | undefined;
   issue: Issue | undefined;
   maintenance: MaintenanceInfo | undefined;
   issueType : IssueTypeMap | undefined;
@@ -174,6 +181,24 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     })
   }
+
+  editStatus(): void {
+    const ref = this.dialog.open(StatusDialog, {
+      disableClose: true,
+      data: {
+        issue: this.issue,
+        roomID: this.roomID,
+        status: this.status,
+      }
+    });
+    
+    ref.afterClosed().subscribe( saved => {
+      if (saved) {
+        this.update();
+      }
+    })
+
+  }
   
 }
 
@@ -238,7 +263,6 @@ export class CloseIssueDialog {
       })
   }
 }
-
 @Component({
   selector: 'app-maintenance-dialog',
   templateUrl: 'maintenance-dialog.html',
@@ -308,4 +332,50 @@ export class MaintenanceDialog {
       console.log("unable to disable maintenance", err);
     })
   }
+}
+
+@Component({
+  selector: 'app-status-dialog',
+  templateUrl: 'status-dialog.html',
+  styles: [
+    `
+    .content {
+      display: flex;
+      flex-direction: column;
+    }
+    `
+  ],
+})
+export class StatusDialog {
+  issue: Issue;
+  roomID: string;
+
+  constructor(private dialogRef: MatDialogRef<StatusDialog, Issue>,
+    private api: ApiService,
+    @Inject(MAT_DIALOG_DATA) public data: StatusDialogData) {
+      this.issue = data.issue
+      this.roomID = data.roomID
+    }
+    setStatus(): void {
+      console.log("IssStatus = ", this.issue.status)
+      this.api.setIssueStatus(this.issue.id, this.issue.status ?  this.issue.status : "").subscribe(info => {
+        this.dialogRef.close(info);
+      }, err => {
+        const roomName = this.roomID
+        alert("Unable to set Issue Status for " + roomName);
+      });
+    }
+
+    clear(): void {
+      this.issue.status = undefined;
+      console.log("IssStatus = ", this.issue.status)
+      this.api.setIssueStatus(this.issue.id, "").subscribe(info => {
+        this.dialogRef.close(info);
+      }, err => {
+        const roomName = this.roomID
+        alert("Unable to clear Issue Status for " + roomName);
+      });
+
+    }
+
 }
