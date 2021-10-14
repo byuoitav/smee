@@ -308,7 +308,6 @@ export class MaintenanceDialog {
   }
 
   save(): void {
-    console.log("data = ", this.data);
     if (!this.canSave()) {
       return;
     }
@@ -362,9 +361,8 @@ export class StatusDialog {
       this.api.setIssueStatus(this.issue.id, this.issue.status ?  this.issue.status : "").subscribe(info => {
         this.dialogRef.close(info);
       }, err => {
-        console.log("unable to set issue status", err);
         const roomName = this.roomID
-        alert("Unable to set Issue Status for " + roomName);
+        alert("Unable to set Issue Status for " + roomName + " " + err);
       });
     }
 
@@ -374,10 +372,8 @@ export class StatusDialog {
       this.api.setIssueStatus(this.issue.id, "").subscribe(info => {
         this.dialogRef.close(info);
       }, err => {
-        console.log("unable to clear issue status", err);
         const roomName = this.roomID
-        alert("Unable to clear Issue Status for " + roomName);
-
+        alert("Unable to clear Issue Status for " + roomName + " " + err);
       });
 
     }

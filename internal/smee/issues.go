@@ -19,7 +19,7 @@ type IssueStore interface {
 	ActiveIssue(ctx context.Context, roomID string) (Issue, error)
 	ActiveIssues(context.Context) ([]Issue, error)
 	CloseAlertsForIssue(ctx context.Context, issueID string) (Issue, error)
-	AcknowledgeAlertsForIssue(ctx context.Context, issueID string) (Issue, error)
+	AcknowledgeIssue(ctx context.Context, issueID string) (Issue, error)
 	SetIssueStatus(ctx context.Context, issueID string, status string) (Issue, error)
 	UnacknowledgeIssue(ctx context.Context, issueID string) (Issue, error)
 

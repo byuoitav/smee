@@ -1,8 +1,5 @@
 import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
-import { Icu } from "@angular/compiler/src/i18n/i18n_ast";
-import { stringify } from "@angular/compiler/src/util";
 import {Injectable} from '@angular/core';
-import { MatPaginator } from "@angular/material/paginator";
 import {Observable, of, throwError} from "rxjs";
 import {tap, map, catchError} from "rxjs/operators";
 
@@ -192,15 +189,6 @@ export class ApiService {
     }).pipe(
       tap(data => console.log("acknowledging issue", data)),
       catchError(this.handleError<Issue>("acknowledgeIssue", undefined)),
-    );
-  }
-
-  unacknowledgeIssue(issue: Issue): Observable<Issue> {
-    return this.http.put<Issue>(`/api/v1/issues/${issue.id}/unacknowledgeIssue`, undefined, {
-
-    }).pipe(
-      tap(data => console.log("unacknowledging issue", data)),
-      catchError(this.handleError<Issue>("acknowledge issue", undefined)),
     );
   }
 

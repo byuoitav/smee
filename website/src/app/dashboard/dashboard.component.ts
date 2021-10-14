@@ -186,9 +186,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   acknowledgeIssue(issue: Issue): void {
-    console.log("clicked");
     this.api.acknowledgeIssue(issue).subscribe(issue => {
-      console.log(issue);
     }, err => {
       console.log("unable to link issue", err);
     });

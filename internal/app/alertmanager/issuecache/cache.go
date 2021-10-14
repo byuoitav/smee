@@ -94,12 +94,12 @@ func (c *Cache) CreateAlert(ctx context.Context, alert smee.Alert) (smee.Issue, 
 	return issue, nil
 }
 
-func (c *Cache) AcknowledgeAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+func (c *Cache) AcknowledgeIssue(ctx context.Context, issueID string) (smee.Issue, error) {
 	c.issuesMu.Lock()
 	defer c.issuesMu.Unlock()
 
 	if c.IssueStore != nil {
-		iss, err := c.IssueStore.AcknowledgeAlertsForIssue(ctx, issueID)
+		iss, err := c.IssueStore.AcknowledgeIssue(ctx, issueID)
 		if err != nil {
 			return smee.Issue{}, fmt.Errorf("unable to acknowledge issue on substore: %w", err)
 		}
@@ -132,6 +132,13 @@ func (c *Cache) UnacknowledgeIssue(ctx context.Context, issueID string) (smee.Is
 		if err != nil {
 			return smee.Issue{}, fmt.Errorf("unable to unacknowledge issue: %w", err)
 		}
+
+		if iss.Active() {
+			c.issues[iss.ID] = iss
+		} else {
+			delete(c.issues, iss.ID)
+		}
+
 		return iss, nil
 	}
 

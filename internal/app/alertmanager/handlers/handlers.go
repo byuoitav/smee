@@ -36,14 +36,14 @@ type issue struct {
 }
 
 type alert struct {
-	ID                string      `json:"id"`
-	IssueID           string      `json:"issueID"`
-	Device            smee.Device `json:"device"`
-	Type              string      `json:"type"`
-	Start             time.Time   `json:"start"`
-	End               *time.Time  `json:"end"`
-	Acknowledged_By   string      `json:"acknowledged_by"`
-	Acknowledged_Time *time.Time  `json:"acknowledge_time"`
+	ID               string      `json:"id"`
+	IssueID          string      `json:"issueID"`
+	Device           smee.Device `json:"device"`
+	Type             string      `json:"type"`
+	Start            time.Time   `json:"start"`
+	End              *time.Time  `json:"end"`
+	AcknowledgedBy   string      `json:"acknowledged_by"`
+	AcknowledgedTime *time.Time  `json:"acknowledge_time"`
 }
 
 type issueEvent struct {
@@ -167,7 +167,7 @@ func (h *Handlers) AcknowledgeIssue(c *gin.Context) {
 	defer cancel()
 
 	issueID := c.Param("issueID")
-	iss, err := h.IssueStore.AcknowledgeAlertsForIssue(ctx, issueID)
+	iss, err := h.IssueStore.AcknowledgeIssue(ctx, issueID)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "unable to acknowledge issue: %s", err)
 		return
@@ -267,12 +267,12 @@ func convertIssue(iss smee.Issue) issue {
 
 	for i := range iss.Alerts {
 		alert := alert{
-			ID:              iss.Alerts[i].ID,
-			IssueID:         iss.Alerts[i].IssueID,
-			Device:          iss.Alerts[i].Device,
-			Type:            iss.Alerts[i].Type,
-			Start:           iss.Alerts[i].Start,
-			Acknowledged_By: iss.Alerts[i].Acknowledged_By,
+			ID:             iss.Alerts[i].ID,
+			IssueID:        iss.Alerts[i].IssueID,
+			Device:         iss.Alerts[i].Device,
+			Type:           iss.Alerts[i].Type,
+			Start:          iss.Alerts[i].Start,
+			AcknowledgedBy: iss.Alerts[i].Acknowledged_By,
 		}
 
 		if !iss.Alerts[i].End.IsZero() {
@@ -282,7 +282,7 @@ func convertIssue(iss smee.Issue) issue {
 
 		if !iss.Alerts[i].Acknowledged_Time.IsZero() {
 			tempAkwd := iss.Alerts[i].Acknowledged_Time
-			alert.Acknowledged_Time = &tempAkwd
+			alert.AcknowledgedTime = &tempAkwd
 		}
 
 		issue.Alerts[alert.ID] = alert

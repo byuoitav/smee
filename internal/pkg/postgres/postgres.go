@@ -99,7 +99,7 @@ func (c *Client) CreateAlert(ctx context.Context, smeeAlert smee.Alert) (smee.Is
 	return smeeIss, nil
 }
 
-func (c *Client) AcknowledgeAlertsForIssue(ctx context.Context, issueID string) (smee.Issue, error) {
+func (c *Client) AcknowledgeIssue(ctx context.Context, issueID string) (smee.Issue, error) {
 	issID, err := strconv.Atoi(issueID)
 	if err != nil {
 		return smee.Issue{}, fmt.Errorf("unable to parse issueID: %w", err)
