@@ -1,3 +1,5 @@
+@use 'sass:math';
+
 $leftWidth: 78%;
 $columnPadding: 1%;
 
@@ -28,14 +30,14 @@ $columnPadding: 1%;
 
 	.left {
 		width: $leftWidth;
-		padding-left: $columnPadding/2;
-		padding-right: $columnPadding/2;
+		padding-left: math.div($columnPadding, 2);
+		padding-right: math.div($columnPadding, 2);
 	}
 
 	.right {
 		width: 100% - $leftWidth - ($columnPadding*2);
-		padding-left: $columnPadding/2;
-		padding-right: $columnPadding/2;
+		padding-left: math.div($columnPadding, 2);
+		padding-right: math.div($columnPadding, 2);
 	}
 }
 
@@ -92,7 +94,7 @@ $columnPadding: 1%;
 
 .note{
 	font-family: monospace;
-	padding-left: $columnPadding/2;
-	padding-right: $columnPadding/2;
+	padding-left: math.div($columnPadding, 2);
+	padding-right: math.div($columnPadding, 2);
 }
 
