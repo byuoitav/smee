@@ -27,12 +27,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   totalAlerts: number = 0;
   totalIssues: number = 0;
 
-  @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
-  @ViewChild(MatSort) sort: MatSort | null = null;
+  @ViewChild('akwPaginator') akwPaginator: MatPaginator | null = null;
+  @ViewChild('akwTable', {read: MatSort, static: true}) akwSort: MatSort | null = null;
 
 
-  @ViewChild(MatPaginator) unakwpaginator: MatPaginator | null = null;
-  @ViewChild(MatSort) unakwsort: MatSort | null = null;
+  @ViewChild('unakwPaginator') unakwPaginator: MatPaginator | null = null;
+  @ViewChild('unakwTable', {read: MatSort, static: true}) unakwSort: MatSort | null = null;
 
 
   constructor(private api: ApiService, private dialog: MatDialog) {}
@@ -44,17 +44,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.updateIssues();
     }, 10000);
 
-    this.dataSource.filterPredicate = (data: Issue, filter: string): boolean => {
-      
-      
+    var filterPredicate = (data: Issue, filter: string): boolean => {      
       if(!this.showMaintenance){
         if(data.isOnMaintenance){
           
           return false;
         }
       }
-      //This is a workaround: The filter predicate does not run on a empty sting.
-      //This unicode replaces the empty filter value (it is not likely that the user would use a unicode chatacter in the search filter)
+      //This is a workaround: The filter predicate does not run on an empty string.
+      //This unicode replaces the empty filter value (it is not likely that the user would use a unicode character in the search filter)
       if(filter === "◬"){
         return true;
       }
@@ -85,12 +83,15 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     };
 
-    this.dataSource.sortData = (data: Issue[], akwSort: MatSort): Issue[] => {
-      if (!akwSort.active || akwSort.direction === '') {
+    this.dataSource.filterPredicate = filterPredicate;
+    this.unacknowledgedDataSource.filterPredicate = filterPredicate;
+
+    var sortConfig = (data: Issue[], matSort: MatSort): Issue[] => {
+      if (!matSort.active || matSort.direction === '') {
         return data;
       }
 
-      const isAsc = akwSort.direction === 'asc';
+      const isAsc = matSort.direction === 'asc';
 
       const cmp = (a: number | string | Date | undefined, b: number | string | Date | undefined): number => {
         // return -1 if a is less than b
@@ -107,7 +108,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       return data.sort((a, b) => {
-        switch (akwSort.active) {
+        switch (matSort.active) {
           case 'room': return cmp(a.room.name, b.room.name);
           case 'alertCount': return cmp(this.getActiveAlerts(a), this.getActiveAlerts(b));
           case 'age': return cmp(a.start, b.start);
@@ -116,46 +117,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       });
     }
 
-    this.unacknowledgedDataSource.sortData = (data: Issue[], unakwSort: MatSort): Issue[] => {
-      if (!unakwSort.active || unakwSort.direction === '') {
-        return data;
-      }
-
-      const isAsc = unakwSort.direction === 'asc';
-
-      const cmp = (a: number | string | Date | undefined, b: number | string | Date | undefined): number => {
-        // return -1 if a is less than b
-        // return 1 if b is less than a
-        if (!a && !b) {
-          return 0;
-        } else if (!b) {
-          return -1;
-        } else if (!a) {
-          return 1;
-        }
-
-        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
-      }
-
-      return data.sort((a, b) => {
-        switch (unakwSort.active) {
-          case 'room': return cmp(a.room.name, b.room.name);
-          case 'alertCount': return cmp(this.getActiveAlerts(a), this.getActiveAlerts(b));
-          case 'age': return cmp(a.start, b.start);
-          default: return 0;
-        }
-      });
-    }
-    
-
+    this.dataSource.sortData = sortConfig;
+    this.unacknowledgedDataSource.sortData = sortConfig;
   }
 
   ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.akwPaginator;
+    this.dataSource.sort = this.akwSort;
 
-    this.unacknowledgedDataSource.paginator = this.paginator;
-    this.unacknowledgedDataSource.sort = this.sort;
+    this.unacknowledgedDataSource.paginator = this.unakwPaginator;
+    this.unacknowledgedDataSource.sort = this.unakwSort;
   }
 
   ngOnDestroy(): void {
@@ -244,13 +215,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   applyFilter() {
     if(this.filterValue === ""){
       this.dataSource.filter = "◬";
+      this.unacknowledgedDataSource.filter = "◬";
     }else{
       const filterValue = this.filterValue;
       var filters = filterValue.split(" ", 10);
       for(var word of filters){
         console.log(word);
         this.dataSource.filter = word.trim().toLowerCase();
-      
+        this.unacknowledgedDataSource.filter = word.trim().toLowerCase();
       }
     }
   }
