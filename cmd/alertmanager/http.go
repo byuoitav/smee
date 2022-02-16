@@ -8,8 +8,10 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/byuoitav/auth/session/cookiestore"
 	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/gin-gonic/gin"
+	adapter "github.com/gwatts/gin-adapter"
 	"go.uber.org/zap"
 )
 
@@ -34,6 +36,17 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	r := gin.New()
 	r.Use(gin.Recovery())
 
+	sessionStore := cookiestore.NewStore()
+
+	//auth
+	if !d.disableAuth {
+		if d.opa.URL == "" {
+			d.log.Fatal("No OPA URL was set, but authz has not been disabled")
+		}
+		r.Use(adapter.Wrap(d.wso2.AuthCodeMiddleware(sessionStore, "smee")))
+		r.Use(d.opa.Authorize())
+	}
+
 	r.NoRoute(func(c *gin.Context) {
 		dir, file := path.Split(c.Request.RequestURI)
 
@@ -50,6 +63,7 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	})
 
 	api := r.Group("api/v1")
+
 	api.GET("/issues", d.handlers.ActiveIssues)
 	api.PUT("/issues/:issueID/linkIncident", d.handlers.LinkIssueToIncident)
 	api.PUT("/issues/:issueID/createIncident", d.handlers.CreateIncidentFromIssue)

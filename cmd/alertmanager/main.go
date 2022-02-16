@@ -9,6 +9,7 @@ import (
 	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/byuoitav/smee/internal/pkg/postgres"
 	"github.com/byuoitav/smee/internal/smee"
+	"github.com/byuoitav/smee/opa"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/pflag"
 	"go.uber.org/zap"
@@ -23,6 +24,9 @@ type Deps struct {
 	ClientID            string
 	ClientSecret        string
 	GatewayURL          string
+	RedirectURL         string
+	OPAURL              string
+	OPAToken            string
 	RedisURL            string
 	PostgresURL         string
 	DisableAlertManager bool
@@ -31,6 +35,8 @@ type Deps struct {
 	// created by functions
 	log              *zap.Logger
 	wso2             *wso2.Client
+	opa              *opa.Client
+	disableAuth      bool
 	postgres         *postgres.Client
 	issueStore       smee.IssueStore
 	incidentStore    smee.IncidentStore
@@ -54,6 +60,10 @@ func main() {
 	pflag.StringVar(&deps.ClientID, "client-id", "", "wso2 key")
 	pflag.StringVar(&deps.ClientSecret, "client-secret", "", "wso2 secret")
 	pflag.StringVar(&deps.GatewayURL, "gateway-url", "https://api.byu.edu", "wso2 gateway address")
+	pflag.StringVar(&deps.RedirectURL, "redirect-url", "https://localhost:8080", "wso2 redirect address")
+	pflag.StringVar(&deps.OPAURL, "opa-url", "", "the URL for the OPA server to be used for authz")
+	pflag.StringVar(&deps.OPAToken, "opa-token", "", "the token to use for calls to OPA")
+	pflag.BoolVar(&deps.disableAuth, "disable-auth", false, "disables authz/n checks")
 	pflag.StringVar(&deps.RedisURL, "redis-url", "", "redis url")
 	pflag.StringVar(&deps.PostgresURL, "postgres-url", "", "postgres url")
 	pflag.BoolVar(&deps.DisableAlertManager, "disable-alert-manager", false, "Disables the Alert Management portion of smee")

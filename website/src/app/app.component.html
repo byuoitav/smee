@@ -1,5 +1,13 @@
 <mat-toolbar>
 	<span style="margin-left: .5vw">BYU OIT AV Monitoring</span>
+	<span class="spacer"></span>
+	<button mat-button [matMenuTriggerFor]="options" style="margin-right: .5vw">{{ user.username }}</button>
+
+	<mat-menu #options>
+		<button mat-menu-item>
+		  <span class="menu-item">Logout</span>
+		</button>
+	  </mat-menu>
 </mat-toolbar>
 
 <mat-drawer-container class="drawer-container">
