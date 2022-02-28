@@ -1,4 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import {CookieService} from 'ngx-cookie-service';
+import {JwtHelperService} from '@auth0/angular-jwt';
 
 export interface User {
   username: string;
@@ -9,10 +11,19 @@ export interface User {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
+export class AppComponent implements OnInit{
   user: User;
 
-  constructor() {
+  constructor(private cookieService: CookieService) {
     this.user = {username: "netID"};
+  }
+
+  ngOnInit(): void {
+    const decoder = new JwtHelperService();
+    console.log(this.cookieService.get('smee'))
+    var token = decoder.decodeToken(this.cookieService.get("smee"))
+    if (token != null) {
+      this.user.username = token.user
+    }
   }
 }

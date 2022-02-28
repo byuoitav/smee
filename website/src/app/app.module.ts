@@ -5,6 +5,7 @@ import {FormsModule} from '@angular/forms';
 import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {CookieService} from 'ngx-cookie-service';
 // angular material
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatIconModule} from '@angular/material/icon';
@@ -26,6 +27,7 @@ import {MaintenanceDialog, RoomComponent, CloseIssueDialog, ErrorPopup, StatusDi
 import {DashboardComponent, DashboardCreateDialog, DashboardLinkDialog} from './dashboard/dashboard.component';
 import {RoomsComponent} from './rooms/rooms.component';
 import {DateAgoPipe} from "./date-ago.pipe";
+import { LogoutComponent } from './logout/logout.component';
 
 @NgModule({
   declarations: [
@@ -40,6 +42,7 @@ import {DateAgoPipe} from "./date-ago.pipe";
     CloseIssueDialog,
     ErrorPopup,
     StatusDialog,
+    LogoutComponent,
   ],
   imports: [
     BrowserModule,
@@ -64,7 +67,7 @@ import {DateAgoPipe} from "./date-ago.pipe";
     MatTableModule,
     MatMenuModule,
   ],
-  providers: [],
+  providers: [CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

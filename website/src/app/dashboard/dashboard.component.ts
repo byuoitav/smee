@@ -18,7 +18,7 @@ interface DialogData {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   displayedColumns: string[] = ["room", "maintenance","alertCount", "alertOverview", "age", "incidents", "status"];
-  acknowledgeColumns: string[] = ["room", "alertCount", "alertOverview", "age", "acknowledge"];
+  unacknowledgedColumns: string[] = ["room", "maintenance", "alertCount", "alertOverview", "age", "acknowledge"];
   issueUpdateInterval: number | undefined;
   dataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);
   unacknowledgedDataSource: MatTableDataSource<Issue> = new MatTableDataSource(undefined);

@@ -4,7 +4,7 @@
 	<button mat-button [matMenuTriggerFor]="options" style="margin-right: .5vw">{{ user.username }}</button>
 
 	<mat-menu #options>
-		<button mat-menu-item>
+		<button mat-menu-item routerLink="/logout">
 		  <span class="menu-item">Logout</span>
 		</button>
 	  </mat-menu>

@@ -30,6 +30,14 @@
 				</td>
 			</ng-container>
 
+			<!-- Maintenance Column -->
+			<ng-container matColumnDef="maintenance">
+				<th mat-header-cell *matHeaderCellDef></th>
+				<td mat-cell *matCellDef="let row">
+					<div *ngIf="row.isOnMaintenance" class="tagMaintenance">Maintenance</div>
+				</td>
+			</ng-container>
+
 			<!-- Alert Count Column -->
 			<ng-container matColumnDef="alertCount">
 				<th mat-header-cell *matHeaderCellDef mat-sort-header>Active Alerts</th>
@@ -56,9 +64,9 @@
 				</td>
 			</ng-container>
 
-			<tr mat-header-row *matHeaderRowDef="acknowledgeColumns; sticky: true"></tr>
+			<tr mat-header-row *matHeaderRowDef="unacknowledgedColumns; sticky: true"></tr>
 			
-			<tr mat-row *matRowDef="let row; columns: acknowledgeColumns"></tr>
+			<tr mat-row *matRowDef="let row; columns: unacknowledgedColumns"></tr>
 		</table>
 		<mat-paginator [pageSizeOptions]="[16, 32, 64]" #unakwPaginator></mat-paginator>
 	</div>
