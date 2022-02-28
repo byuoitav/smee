@@ -60,8 +60,10 @@ func (client *Client) Authorize() gin.HandlerFunc {
 		// Prep the request
 		oReq, err := json.Marshal(opaData)
 		if err != nil {
-			client.Log.Error(fmt.Sprintf("Error trying to create request to OPA: %s\n", err))
-			c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server"))
+			if err = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server")); err != nil {
+				client.Log.Error(fmt.Sprintf("Error trying to create request to OPA: %s\n", err))
+				return
+			}
 		}
 
 		req, _ := http.NewRequest(
@@ -75,18 +77,27 @@ func (client *Client) Authorize() gin.HandlerFunc {
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			client.Log.Error(fmt.Sprintf("Error while making request to OPA: %s", err))
-			c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server"))
+			if err = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server")); err != nil {
+				client.Log.Error(fmt.Sprintf("Abort response: %s", err))
+			}
+			return
 		}
 		if res.StatusCode != http.StatusOK {
 			client.Log.Error(fmt.Sprintf("Got back non 200 status from OPA: %d", res.StatusCode))
-			c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server"))
+			if err = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server")); err != nil {
+				client.Log.Error(fmt.Sprintf("Abort response: %s", err))
+			}
+			return
 		}
 
 		// Read the body
 		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
 			client.Log.Error(fmt.Sprintf("Unable to read body from OPA: %s", err))
-			c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server"))
+			if err = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server")); err != nil {
+				client.Log.Error(fmt.Sprintf("Abort response: %s", err))
+			}
+			return
 		}
 
 		// Unmarshal the body
@@ -94,14 +105,19 @@ func (client *Client) Authorize() gin.HandlerFunc {
 		err = json.Unmarshal(body, &oRes)
 		if err != nil {
 			client.Log.Error(fmt.Sprintf("Unable to parse body from OPA: %s", err))
-			c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server"))
+			if err = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Error while contacting authorization server")); err != nil {
+				client.Log.Error(fmt.Sprintf("Abort response: %s", err))
+			}
+			return
 		}
 
 		// If OPA approved then allow the request, else reject with a 403
 		if oRes.Result.Allow {
 			c.Next()
 		} else {
-			c.AbortWithError(http.StatusForbidden, fmt.Errorf("Unauthorized"))
+			if err = c.AbortWithError(http.StatusForbidden, fmt.Errorf("Unauthorized")); err != nil {
+				client.Log.Error(fmt.Sprintf("Abort response: %s", err))
+			}
 		}
 	}
 }
