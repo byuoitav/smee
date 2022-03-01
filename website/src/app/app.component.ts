@@ -20,7 +20,6 @@ export class AppComponent implements OnInit{
 
   ngOnInit(): void {
     const decoder = new JwtHelperService();
-    console.log(this.cookieService.get('smee'))
     var token = decoder.decodeToken(this.cookieService.get("smee"))
     if (token != null) {
       this.user.username = token.user
