@@ -1,6 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {DashboardComponent} from "./dashboard/dashboard.component";
+import { LogoutComponent } from './logout/logout.component';
 import {RoomComponent} from "./room/room.component";
 import {RoomsComponent} from "./rooms/rooms.component";
 
@@ -21,6 +22,10 @@ const routes: Routes = [
   {
     path: 'rooms/:roomID',
     component: RoomComponent
+  },
+  {
+    path: 'logout',
+    component: LogoutComponent
   }
 ];
 

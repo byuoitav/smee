@@ -17,6 +17,7 @@ import (
 	"github.com/byuoitav/smee/internal/pkg/servicenow"
 	"github.com/byuoitav/smee/internal/pkg/streamwrapper"
 	"github.com/byuoitav/smee/internal/smee"
+	"github.com/byuoitav/smee/opa"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -27,6 +28,7 @@ func (d *Deps) build() {
 
 	d.buildLog()
 	d.buildWSO2()
+	d.buildOPA()
 	d.buildIncidentMaintenanceStore(ctx)
 	d.buildIncidentStore()
 	d.buildIssueCache(ctx)
@@ -280,7 +282,15 @@ func (d *Deps) buildAlertManager() {
 }
 
 func (d *Deps) buildWSO2() {
-	d.wso2 = wso2.New(d.ClientID, d.ClientSecret, d.GatewayURL, "")
+	d.wso2 = wso2.New(d.ClientID, d.ClientSecret, d.GatewayURL, d.RedirectURL)
+}
+
+func (d *Deps) buildOPA() {
+	d.opa = &opa.Client{
+		URL:   d.OPAURL,
+		Token: d.OPAToken,
+		Log:   d.log,
+	}
 }
 
 func (d *Deps) buildLog() {
