@@ -28,6 +28,7 @@ import {DashboardComponent, DashboardCreateDialog, DashboardLinkDialog} from './
 import {RoomsComponent} from './rooms/rooms.component';
 import {DateAgoPipe} from "./date-ago.pipe";
 import { LogoutComponent } from './logout/logout.component';
+import { CommandsComponent } from './commands/commands.component';
 
 @NgModule({
   declarations: [
@@ -43,6 +44,7 @@ import { LogoutComponent } from './logout/logout.component';
     ErrorPopup,
     StatusDialog,
     LogoutComponent,
+    CommandsComponent,
   ],
   imports: [
     BrowserModule,
