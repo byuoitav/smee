@@ -25,7 +25,6 @@ export class CommandsComponent implements OnInit {
     this.actionList = [];
 
     this.registerActions();
-    
   }
 
   ngOnInit(): void {
@@ -43,9 +42,18 @@ export class CommandsComponent implements OnInit {
         action: (info: commandInfo) => {
           if (info.input[0] != "") {
             var resp = this.cS.float(info.input[0]);
-            if (resp) {} else {}
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -58,9 +66,18 @@ export class CommandsComponent implements OnInit {
         action: (info: commandInfo) => {
           if (info.input[0] != "") {
             var resp = this.cS.swab(info.input[0]);
-            if (resp) {} else {}
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -73,9 +90,18 @@ export class CommandsComponent implements OnInit {
         action: (info: commandInfo) => {
           if (info.input[0] != "") {
             var resp = this.cS.sink(info.input[0]);
-            if (resp) {} else {}
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -88,9 +114,18 @@ export class CommandsComponent implements OnInit {
         action: (info: commandInfo) => {
           if (info.input[0] != "") {
             var resp = this.cS.fixTime(info.input[0]);
-            if (resp) {} else {}
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -103,9 +138,18 @@ export class CommandsComponent implements OnInit {
         action: (info: commandInfo) => {
           if (info.input[0] != "") {
             var resp = this.cS.rmDevice(info.input[0]);
-            if (resp) {} else {}
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -118,9 +162,18 @@ export class CommandsComponent implements OnInit {
         action: (info: commandInfo) => {
           if (info.input[0] != "") {
             var resp = this.cS.closeIssue(info.input[0]);
-            if (resp) {} else {}
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -132,10 +185,19 @@ export class CommandsComponent implements OnInit {
         status: "",
         action: (info: commandInfo) => {
           if (info.input[0] != "" && info.input[1] != "") {
-            var resp = this.cS.dupeDatabase(info.input[0], info.input[1]);
-            if (resp) {} else {}
+            var resp = this.cS.dupDatabase(info.input[0], info.input[1]);
+            resp.subscribe(
+              data => {
+                if (data == undefined) {
+                  this.actionFailed(info);
+                } else {
+                  this.confirmAction(info);
+                }
+              },
+              error => {});
+          } else {
+            this.missingInput(info);
           }
-          this.missingInput(info);
         }
       },
       {
@@ -153,13 +215,23 @@ export class CommandsComponent implements OnInit {
   trackByFn(index: any, item: any) {
     return index;
   }
-  
-  missingInput(disp: commandInfo) {
-    disp.status = "Cannot complete action. Please provide proper input.";
-    this.timeoutStatus(disp);
+
+  missingInput(cmdInfo: commandInfo) {
+    cmdInfo.status = "Cannot complete action. Please provide proper input.";
+    this.timeoutStatus(cmdInfo);
+  }
+
+  confirmAction(cmdInfo: commandInfo) {
+    cmdInfo.status = cmdInfo.title + " successful";
+    this.timeoutStatus(cmdInfo);
+  }
+
+  actionFailed(cmdInfo: commandInfo) {
+    cmdInfo.status = cmdInfo.title + " failed. Please check the input to make sure it is correct."
+    this.timeoutStatus(cmdInfo);
   }
 
   timeoutStatus(info: commandInfo) {
-    setTimeout(() => {info.status = "";}, 10000);
+    setTimeout(() => {info.status = "";}, 5000);
   }
 }

@@ -79,5 +79,14 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 	api.GET("/rooms", d.handlers.Rooms)
 	api.GET("/issuetype", d.handlers.SNIssueType)
 
+	api.PUT("/commands/float/:id", d.commandClient.Float)
+	api.PUT("/commands/swab/:id", d.commandClient.Swab)
+	api.PUT("/commands/sink/:id", d.commandClient.Sink)
+	api.PUT("/commands/fixTime/:id", d.commandClient.FixTime)
+	api.PUT("/commands/removeDevice/:id", d.commandClient.RemoveDevice)
+	api.PUT("/commands/closeIssue/:id", d.commandClient.CloseIssueByRoom)
+	api.PUT("/commands/duplicateDatabase/:src/:dest", d.commandClient.DuplicateDatabase)
+	api.PUT("/commands/screenshot/:id", d.commandClient.Screenshot)
+
 	d.httpServer = r
 }

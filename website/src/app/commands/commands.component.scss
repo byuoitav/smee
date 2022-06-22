@@ -6,37 +6,34 @@
 	padding-bottom: 2vh;
 }
 
-// .command {
-// 	// width: 100%;
-	.card {
-		width: 70%;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: space-between;
-        padding: 5%;
+.card {
+	width: 70%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	padding: 5%;
 
-		.name {
-			font-size: 1.1em;
-		}
-
-		.mat-card-title {
-			text-align: left;
-			width: 100%;
-		}
-
-		.mat-card-content {
-			width: 100%;
-			display: flex;
-			justify-content: center;
-		}
-
-		.mat-form-field {
-			width: 80%;
-		}
-
-		p {
-			text-align: center;
-		}
+	.name {
+		font-size: 1.1em;
 	}
-// }
+
+	.mat-card-title {
+		text-align: left;
+		width: 100%;
+	}
+
+	.mat-card-content {
+		width: 100%;
+		display: flex;
+		justify-content: center;
+	}
+
+	.mat-form-field {
+		width: 80%;
+	}
+
+	p {
+		text-align: center;
+	}
+}
