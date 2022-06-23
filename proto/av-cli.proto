@@ -1,5 +1,5 @@
 syntax = "proto3";
-package commandcli;
+package avcli;
 
 import "google/protobuf/empty.proto";
 option go_package = "github.com/byuoitav/smee/proto";

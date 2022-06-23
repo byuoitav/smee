@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"fmt"
 
-	avcli "github.com/byuoitav/av-cli"
+	avcli "github.com/byuoitav/smee/proto"
 
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

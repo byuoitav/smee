@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	avcli "github.com/byuoitav/av-cli"
+	avcli "github.com/byuoitav/smee/proto"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
