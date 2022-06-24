@@ -21,14 +21,8 @@ func (c *Client) Float(ctx *gin.Context) {
 	}
 
 	cookie := ctx.Request.Header.Get("Cookie")
-	segments := strings.Split(cookie, ".")
-	if len(segments) < 3 {
-		c.log.Warn("no av-user specified; cancelling float...")
-		ctx.JSON(http.StatusBadRequest, "no av-user specified")
-		return
-	}
-
-	netid, err := getUserFromJWT(segments[1])
+	token := strings.TrimPrefix(cookie, "smee=")
+	netid, err := getUserFromJWT(token)
 	if err != nil || len(netid) == 0 {
 		c.log.Warn("no av-user specified; cancelling float...")
 		ctx.JSON(http.StatusBadRequest, "no av-user specified")
