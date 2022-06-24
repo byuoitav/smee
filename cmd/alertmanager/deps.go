@@ -1,5 +1,7 @@
 package main
 
+//go:generate protoc --proto_path=../../proto --go_out=../../proto --go_opt=paths=source_relative --go-grpc_out=../../proto --go-grpc_opt=paths=source_relative ../../proto/av-cli.proto
+
 import (
 	"context"
 	"fmt"
@@ -12,6 +14,7 @@ import (
 	"github.com/byuoitav/smee/internal/app/alertmanager/issuecache"
 	"github.com/byuoitav/smee/internal/app/alertmanager/maintenance"
 	"github.com/byuoitav/smee/internal/app/alertmanager/redis"
+	"github.com/byuoitav/smee/internal/app/commandcli"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
 	"github.com/byuoitav/smee/internal/pkg/postgres"
 	"github.com/byuoitav/smee/internal/pkg/servicenow"
@@ -41,6 +44,8 @@ func (d *Deps) build() {
 		d.buildDeviceStateStore(ctx)
 		d.buildAlertManager()
 	}
+
+	d.buildCommandClient(ctx)
 
 	d.buildHTTPServer(ctx)
 }
@@ -278,6 +283,14 @@ func (d *Deps) buildAlertManager() {
 			},
 		},
 		Log: d.log.Named("alert-manager"),
+	}
+}
+
+func (d *Deps) buildCommandClient(ctx context.Context) {
+	var err error
+	d.commandClient, err = commandcli.NewClient(ctx, d.CommandServerAddress, d.CommandToken, d.log)
+	if err != nil {
+		d.log.Warn("failed to build command client", zap.Error(err))
 	}
 }
 

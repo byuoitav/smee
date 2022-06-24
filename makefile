@@ -23,19 +23,20 @@ PKG_LIST := $(shell go list ${PKG}/...)
 
 all: clean build
 
-test:
+test: deps
 	@go test -v ${PKG_LIST}
 
-test-cov:
+test-cov: deps
 	@go test -coverprofile=coverage.txt -covermode=atomic ${PKG_LIST}
 
-lint:
+lint: deps
 	@golangci-lint run --tests=false
 
 # must have protoc installed
 deps:
 	@echo Generating protobuf files...
-	@go get -u github.com/golang/protobuf/protoc-gen-go
+	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 	@go generate ./...
 
 	@echo Downloading dependencies...

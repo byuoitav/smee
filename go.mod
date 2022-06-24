@@ -9,11 +9,11 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-redis/redis/v8 v8.8.0
-	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gorilla/websocket v1.4.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.4.1
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/gwatts/gin-adapter v0.0.0-20170508204228-c44433c485ad
 	github.com/jackc/pgx/v4 v4.11.0
-	github.com/labstack/echo v3.3.10+incompatible
+	github.com/labstack/echo v3.3.10+incompatible // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/matryer/is v1.4.0
 	github.com/pkg/errors v0.9.1 // indirect
@@ -22,5 +22,6 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/sync v0.0.0-20201207232520-09787c993a3a
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/grpc v1.45.0
+	google.golang.org/protobuf v1.27.1
 )

@@ -17,3 +17,5 @@ dist/
 
 .vscode/*
 
+# Generated output
+proto/*.pb.go
