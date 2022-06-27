@@ -54,13 +54,21 @@ data "aws_ssm_parameter" "hub_address" {
   name = "/env/hub-address"
 }
 
+data "aws_ssm_parameter" "command_server" {
+  name = "/env/smee/command-server"
+}
+
+data "aws_ssm_parameter" "command_token" {
+  name = "/env/smee/command-token"
+}
+
 module "smee" {
   source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
 
   // required
   name           = "smee"
   image          = "docker.pkg.github.com/byuoitav/smee/smee-dev"
-  image_version  = "5589dec"
+  image_version  = "7c84a50"
   container_port = 8080
   repo_url       = "https://github.com/byuoitav/smee"
 
@@ -78,6 +86,8 @@ module "smee" {
     "--client-secret", data.aws_ssm_parameter.client_secret.value,
     "--redis-url", data.aws_ssm_parameter.redis_url.value,
     "--postgres-url", "postgres://${data.aws_ssm_parameter.pg_username.value}:${data.aws_ssm_parameter.pg_password.value}@${data.aws_ssm_parameter.pg_hostname.value}:${data.aws_ssm_parameter.pg_port.value}/av?pool_max_conns=4",
+    "--command-server", data.aws_ssm_parameter.command_server,
+    "--command-token", data.aws_ssm_parameter.command_token,
   ]
   health_check = false
 }
