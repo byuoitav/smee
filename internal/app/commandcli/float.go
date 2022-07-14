@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	avcli "github.com/byuoitav/smee/proto"
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,13 @@ func (c *Client) Float(ctx *gin.Context) {
 	}
 
 	cookie := ctx.Request.Header.Get("Cookie")
-	token := strings.TrimPrefix(cookie, "smee=")
+	token, err := parseForCookie("smee", cookie)
+	if err != nil {
+		c.log.Warn("authorization not found; cancelling float...")
+		ctx.JSON(http.StatusBadRequest, "authorization not found")
+		return
+	}
+
 	netid, err := getUserFromJWT(token)
 	if err != nil || len(netid) == 0 {
 		c.log.Warn("no av-user specified; cancelling float...")

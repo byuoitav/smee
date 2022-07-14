@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
 	"google.golang.org/grpc"
@@ -35,15 +37,25 @@ func getTransportSecurityDialOption(pool *x509.CertPool) grpc.DialOption {
 	return grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(pool, ""))
 }
 
+func parseForCookie(id, list string) (string, error) {
+	r, _ := regexp.Compile(`(?:\S*)`)
+	cookies := r.FindAllString(list, -1)
+	for _, c := range cookies {
+		if strings.HasPrefix(c, id) {
+			return strings.TrimPrefix(c, id+"="), nil
+		}
+	}
+	return "", fmt.Errorf("cookie not found")
+}
+
 func getUserFromJWT(s string) (string, error) {
 	parser := jwt.NewParser()
 	token, _, err := parser.ParseUnverified(s, jwt.MapClaims{})
-	fmt.Printf("%+v\n", token)
 	if err != nil {
 		return "", err
 	}
+
 	claims, _ := token.Claims.(jwt.MapClaims)
-	fmt.Printf("%+v\n", claims)
 	if user, ok := claims["user"]; ok {
 		return user.(string), nil
 	}

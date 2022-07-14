@@ -54,6 +54,22 @@ data "aws_ssm_parameter" "hub_address" {
   name = "/env/hub-address"
 }
 
+data "aws_ssm_parameter" "gateway_url" {
+  name = "/env/smee/gateway-url"
+}
+
+data "aws_ssm_parameter" "redirect_url" {
+  name = "/env/smee/redirect-url"
+}
+
+data "aws_ssm_parameter" "opa_url" {
+  name = "/env/smee/opa-url"
+}
+
+data "aws_ssm_parameter" "opa_token" {
+  name = "/env/smee/opa-token"
+}
+
 data "aws_ssm_parameter" "command_server" {
   name = "/env/smee/command-server"
 }
@@ -68,7 +84,7 @@ module "smee" {
   // required
   name           = "smee"
   image          = "docker.pkg.github.com/byuoitav/smee/smee-dev"
-  image_version  = "7c84a50"
+  image_version  = "5d2e621"
   container_port = 8080
   repo_url       = "https://github.com/byuoitav/smee"
 
@@ -81,13 +97,18 @@ module "smee" {
   container_args = [
     "--port", "8080",
     "--log-level", "info",
+    "--web-root", "/website",
     "--hub-url", "ws://${data.aws_ssm_parameter.hub_address.value}",
     "--client-id", data.aws_ssm_parameter.client_id.value,
     "--client-secret", data.aws_ssm_parameter.client_secret.value,
     "--redis-url", data.aws_ssm_parameter.redis_url.value,
     "--postgres-url", "postgres://${data.aws_ssm_parameter.pg_username.value}:${data.aws_ssm_parameter.pg_password.value}@${data.aws_ssm_parameter.pg_hostname.value}:${data.aws_ssm_parameter.pg_port.value}/av?pool_max_conns=4",
-    "--command-server", data.aws_ssm_parameter.command_server,
-    "--command-token", data.aws_ssm_parameter.command_token,
+    "--gateway-url", data.aws_ssm_parameter.gateway_url.value,
+    "--redirect-url", data.aws_ssm_parameter.redirect_url.value,
+    "--opa-url", data.aws_ssm_parameter.opa_url.value,
+    "--opa-token", data.aws_ssm_parameter.opa_token.value,
+    "--command-server", data.aws_ssm_parameter.command_server.value,
+    "--command-token", data.aws_ssm_parameter.command_token.value
   ]
   health_check = false
 }
