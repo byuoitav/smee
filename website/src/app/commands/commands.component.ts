@@ -7,9 +7,8 @@ declare type actionCallback = (info: commandInfo) => void;
 interface commandInfo{
   title: string,
   description: string,
-  label: string[],
+  inputs: {label: string, value: string}[],
   actionButton: string,
-  input: string[],
   status: string,
   action: actionCallback
 }
@@ -35,13 +34,18 @@ export class CommandsComponent implements OnInit {
       {
         title: "Float",
         description: "Redeploy code to control pi",
-        label: ["Room or Device"],
+        inputs: [
+          {
+            label: "Room or Device",
+            value: ""
+          }
+        ],
         actionButton: "Float",
-        input: [""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "") {
-            var resp = this.cS.float(info.input[0]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "") {
+            var resp = this.cS.float(info.inputs[0].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -58,14 +62,19 @@ export class CommandsComponent implements OnInit {
       },
       {
         title: "Swab",
-        description: "Refresh data in the database on control pis",
-        label: ["Room or Device"],
+        description: "Refresh the local database on a control pi",
+        inputs: [
+          {
+            label: "Room or Device",
+            value: ""
+          }
+        ],
         actionButton: "Swab",
-        input: [""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "") {
-            var resp = this.cS.swab(info.input[0]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "") {
+            var resp = this.cS.swab(info.inputs[0].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -83,13 +92,18 @@ export class CommandsComponent implements OnInit {
       {
         title: "Sink",
         description: "Reboot control pis",
-        label: ["Room or Device"],
+        inputs: [
+          {
+            label: "Room or Device",
+            value: ""
+          }
+        ],
         actionButton: "Sink",
-        input: [""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "") {
-            var resp = this.cS.sink(info.input[0]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "") {
+            var resp = this.cS.sink(info.inputs[0].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -107,13 +121,18 @@ export class CommandsComponent implements OnInit {
       {
         title: "Fix Time",
         description: "Sync time on control pis with BYU's servers",
-        label: ["Room or Device"],
+        inputs: [
+          {
+            label: "Room or Device",
+            value: ""
+          }
+        ],
         actionButton: "Fix",
-        input: [""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "") {
-            var resp = this.cS.fixTime(info.input[0]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "") {
+            var resp = this.cS.fixTime(info.inputs[0].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -131,13 +150,18 @@ export class CommandsComponent implements OnInit {
       {
         title: "Remove Device",
         description: "Remove a device from monitoring. This does NOT remove the device from the database",
-        label: ["Device"],
+        inputs: [
+          {
+            label: "Device",
+            value: ""
+          }
+        ],
         actionButton: "Remove",
-        input: [""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "") {
-            var resp = this.cS.rmDevice(info.input[0]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "") {
+            var resp = this.cS.rmDevice(info.inputs[0].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -155,13 +179,18 @@ export class CommandsComponent implements OnInit {
       {
         title: "Close Issue",
         description: "Close an issue in monitoring",
-        label: ["Room"],
+        inputs: [
+          {
+            label: "Room",
+            value: ""
+          }
+        ],
         actionButton: "Close",
-        input: [""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "") {
-            var resp = this.cS.closeIssue(info.input[0]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "") {
+            var resp = this.cS.closeIssue(info.inputs[0].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -179,13 +208,22 @@ export class CommandsComponent implements OnInit {
       {
         title: "Duplicate Database",
         description: "Duplicate a room within the database",
-        label: ["Source Device", "Destination Device"],
+        inputs: [
+          {
+            label: "Source Device",
+            value: ""
+          },
+          {
+            label: "Destination Device",
+            value: ""
+          }
+        ],
         actionButton: "Duplicate",
-        input: ["", ""],
         status: "",
         action: (info: commandInfo) => {
-          if (info.input[0] != "" && info.input[1] != "") {
-            var resp = this.cS.dupDatabase(info.input[0], info.input[1]);
+          info.status = 'wait';
+          if (info.inputs[0].value != "" && info.inputs[1].value != "") {
+            var resp = this.cS.dupDatabase(info.inputs[0].value, info.inputs[1].value);
             resp.subscribe(
               data => {
                 if (data == undefined) {
@@ -199,15 +237,6 @@ export class CommandsComponent implements OnInit {
             this.missingInput(info);
           }
         }
-      },
-      {
-        title: "Screenshot",
-        description: "Take and display a screenshot of a control pi",
-        label: ["Device"],
-        actionButton: "Screenshot",
-        input: [""],
-        status: "",
-        action: (info: commandInfo) => {} // use service to hit endpoint, display resulting image
       }
     ]
   }
@@ -217,17 +246,17 @@ export class CommandsComponent implements OnInit {
   }
 
   missingInput(cmdInfo: commandInfo) {
-    cmdInfo.status = "Cannot complete action. Please provide proper input.";
+    cmdInfo.status = "fail";
     this.timeoutStatus(cmdInfo);
   }
 
   confirmAction(cmdInfo: commandInfo) {
-    cmdInfo.status = cmdInfo.title + " successful";
+    cmdInfo.status = "success";
     this.timeoutStatus(cmdInfo);
   }
 
   actionFailed(cmdInfo: commandInfo) {
-    cmdInfo.status = cmdInfo.title + " failed. Please check the input to make sure it is correct."
+    cmdInfo.status = "fail"
     this.timeoutStatus(cmdInfo);
   }
 

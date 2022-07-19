@@ -1,4 +1,32 @@
-<mat-grid-list class="command-list" cols="2" rowHeight="2:1">
+<div class="command-list">
+    <ng-template ngFor let-command [ngForOf]="actionList">
+        <div class="command">
+            <div class="section-1">{{command.title}}</div>
+            <div class="section-2 input-list">
+                <ng-template ngFor let-input [ngForOf]="command.inputs" let-i="index">
+                    <mat-form-field>
+                        <mat-label>{{command.inputs[i].label}}</mat-label>
+                        <input matInput [(ngModel)]="command.inputs[i].value">
+                    </mat-form-field>
+                </ng-template>
+            </div>
+            <div class="section-3">
+                <button mat-raised-button matTooltip="{{command.description}}" class="button mat-elevation-z12" (click)="command.action(command)">{{command.actionButton}}</button>
+                <div class="status">
+                    <mat-progress-bar mode="query" *ngIf="command.status == 'wait'" [color]="'accent'"></mat-progress-bar>
+                    <div *ngIf="command.status == 'success'"><mat-icon style="color: #39d353; font-style: bold;">done</mat-icon></div>
+                    <div *ngIf="command.status == 'fail'"><mat-icon style="color: red; font-style: bold;">close</mat-icon></div>
+                    <div *ngIf="command.status == ''"><mat-icon>remove</mat-icon></div>
+                </div>
+            </div>
+        </div>
+        <mat-divider></mat-divider>
+    </ng-template>
+</div>
+
+
+
+<!-- <mat-grid-list class="command-list" cols="2" rowHeight="2:1">
     <mat-grid-tile *ngFor="let command of actionList">
         <mat-card class="card">
             <mat-card-title>{{command.title}}</mat-card-title>
@@ -19,4 +47,4 @@
             </mat-card-footer>
         </mat-card>
     </mat-grid-tile>
-</mat-grid-list>
+</mat-grid-list> -->
