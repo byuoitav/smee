@@ -22,6 +22,9 @@ import {MatChipsModule} from '@angular/material/chips';
 import {MatSortModule} from "@angular/material/sort";
 import {MatCheckboxModule} from '@angular/material/checkbox'; 
 import {MatMenuModule} from '@angular/material/menu';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatTooltipModule} from '@angular/material/tooltip';
 //app elements
 import {MaintenanceDialog, RoomComponent, CloseIssueDialog, ErrorPopup, StatusDialog} from './room/room.component';
 import {DashboardComponent, DashboardCreateDialog, DashboardLinkDialog} from './dashboard/dashboard.component';
@@ -68,6 +71,9 @@ import { CommandsComponent } from './commands/commands.component';
     MatSortModule,
     MatTableModule,
     MatMenuModule,
+    MatDividerModule,
+    MatProgressBarModule,
+    MatTooltipModule,
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]
