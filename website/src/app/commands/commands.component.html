@@ -23,28 +23,3 @@
         <mat-divider></mat-divider>
     </ng-template>
 </div>
-
-
-
-<!-- <mat-grid-list class="command-list" cols="2" rowHeight="2:1">
-    <mat-grid-tile *ngFor="let command of actionList">
-        <mat-card class="card">
-            <mat-card-title>{{command.title}}</mat-card-title>
-            <mat-card-content>
-                <p>{{command.description}}</p>
-            </mat-card-content>
-            <mat-card-content *ngFor="let input of command.input; index as i; trackBy: trackByFn">
-                <mat-form-field>
-                    <mat-label>{{command.label[i]}}</mat-label>
-                    <input matInput [(ngModel)]="command.input[i]">
-                </mat-form-field>
-            </mat-card-content>
-            <mat-card-content>
-                <button mat-raised-button class="button mat-elevation-z12" (click)="command.action(command)">{{command.actionButton}}</button>
-            </mat-card-content>
-            <mat-card-footer>
-                <p>{{ command.status }}</p>
-            </mat-card-footer>
-        </mat-card>
-    </mat-grid-tile>
-</mat-grid-list> -->
