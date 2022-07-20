@@ -253,20 +253,6 @@ func (d *Deps) buildAlertManager() {
 					},
 				},
 			*/
-			"mic-battery": {
-				Create: smee.AlertTransition{
-					Event: &smee.AlertTransitionEvent{
-						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
-						ValueMatches: regexp.MustCompile("^0*(([1-8][0-9])|([0-9])|90)$"),
-					},
-				},
-				Close: smee.AlertTransition{
-					Event: &smee.AlertTransitionEvent{
-						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
-						ValueMatches: regexp.MustCompile("^0*(([9][1-9])|[1-9][0-9]{2,})$"),
-					},
-				},
-			},
 			"receiver": {
 				Create: smee.AlertTransition{
 					Event: &smee.AlertTransitionEvent{
@@ -278,6 +264,85 @@ func (d *Deps) buildAlertManager() {
 					Event: &smee.AlertTransitionEvent{
 						KeyMatches:   regexp.MustCompile("mic-alerting"),
 						ValueMatches: regexp.MustCompile("Okay"),
+					},
+				},
+			},
+			"help-request": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("help-request"),
+						ValueMatches: regexp.MustCompile("confirm"),
+					},
+				},
+				Close: smee.AlertTransition{},
+			},
+			"mic-battery 180 min": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*(1[2-7][1-9]|1[3-8]0)$"),
+					},
+				},
+				Close: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([1-9][0-9]{3,}|[2-9][0-9]{2,}|1[8-9][1-9]|190|1[0-1][0-9]|120|[0-9]{1,2})$"),
+					},
+				},
+			},
+			"mic-battery 120 min": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*(9[1-9]|1[0-1][0-9]|120)$"),
+					},
+				},
+				Close: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([1-9][0-9]{3,}|[2-9][0-9]{2,}|1[2-9][1-9]|1[3-9]0|[0-9]|[1-8][0-9]|90)$"),
+					},
+				},
+			},
+			"mic-battery 90 min": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([6-8][1-9]|[7-9]0)$"),
+					},
+				},
+				Close: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([1-9][0-9]{2,}|9[1-9]|[0-9]|[1-5][0-9]|60)$"),
+					},
+				},
+			},
+			"mic-battery 60 min": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([3-5][1-9]|[4-6]0)$"),
+					},
+				},
+				Close: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([1-9][0-9]{2,}|[6-9][1-9]|[7-9]0|[0-9]|[1-2][0-9]|30)$"),
+					},
+				},
+			},
+			"mic-battery 30 min": {
+				Create: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([0-2][0-9]|[0-9]|30)$"),
+					},
+				},
+				Close: smee.AlertTransition{
+					Event: &smee.AlertTransitionEvent{
+						KeyMatches:   regexp.MustCompile("battery-charge-minutes"),
+						ValueMatches: regexp.MustCompile("^0*([1-9][0-9]{2,}|[4-9]0|[3-9][1-9])$"),
 					},
 				},
 			},
