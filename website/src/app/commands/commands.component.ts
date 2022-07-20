@@ -210,11 +210,11 @@ export class CommandsComponent implements OnInit {
         description: "Duplicate a room within the database",
         inputs: [
           {
-            label: "Source Device",
+            label: "Source Room",
             value: ""
           },
           {
-            label: "Destination Device",
+            label: "Destination Room",
             value: ""
           }
         ],
