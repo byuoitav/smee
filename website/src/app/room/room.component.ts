@@ -197,7 +197,14 @@ export class RoomComponent implements OnInit, OnDestroy, AfterViewInit {
         this.update();
       }
     })
+  }
 
+  controlUI(): void {
+    window.open("http://" + this.roomID + "-cp1.byu.edu:8888", '_blank')?.focus();
+  }
+
+  zPattern(): void {
+    window.open("http://" + this.roomID + "-cp1.byu.edu:10000/dashboard", '_blank')?.focus();
   }
   
 }
@@ -266,14 +273,7 @@ export class CloseIssueDialog {
 @Component({
   selector: 'app-maintenance-dialog',
   templateUrl: 'maintenance-dialog.html',
-  styles: [
-    `
-    .content {
-      display: flex;
-      flex-direction: column;
-    }
-    `
-  ],
+  styleUrls: ['./dialog.scss'],
 })
 export class MaintenanceDialog {
   info: MaintenanceInfo;
@@ -337,14 +337,7 @@ export class MaintenanceDialog {
 @Component({
   selector: 'app-status-dialog',
   templateUrl: 'status-dialog.html',
-  styles: [
-    `
-    .content {
-      display: flex;
-      flex-direction: column;
-    }
-    `
-  ],
+  styleUrls: ['./dialog.scss'],
 })
 export class StatusDialog {
   issue: Issue;

@@ -15,6 +15,7 @@ import (
 	"github.com/byuoitav/smee/internal/app/alertmanager/maintenance"
 	"github.com/byuoitav/smee/internal/app/alertmanager/redis"
 	"github.com/byuoitav/smee/internal/app/commandcli"
+	"github.com/byuoitav/smee/internal/pkg/couch"
 	"github.com/byuoitav/smee/internal/pkg/messenger"
 	"github.com/byuoitav/smee/internal/pkg/postgres"
 	"github.com/byuoitav/smee/internal/pkg/servicenow"
@@ -46,6 +47,7 @@ func (d *Deps) build() {
 	}
 
 	d.buildCommandClient(ctx)
+	d.buildCouchManager()
 
 	d.buildHTTPServer(ctx)
 }
@@ -356,6 +358,14 @@ func (d *Deps) buildCommandClient(ctx context.Context) {
 	d.commandClient, err = commandcli.NewClient(ctx, d.CommandServerAddress, d.CommandToken, d.log)
 	if err != nil {
 		d.log.Warn("failed to build command client", zap.Error(err))
+	}
+}
+
+func (d *Deps) buildCouchManager() {
+	var err error
+	d.couchManager, err = couch.New(d.CouchURL, d.CouchUsername, d.CouchPassword)
+	if err != nil {
+		d.log.Warn("failed to build couch db manager", zap.Error(err))
 	}
 }
 

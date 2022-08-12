@@ -11,7 +11,6 @@ import (
 
 type roomOverview struct {
 	ID            string `json:"id"`
-	Name          string `json:"name"`
 	InMaintenance bool   `json:"inMaintenance"`
 }
 
@@ -19,32 +18,14 @@ func (h *Handlers) Rooms(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	// TODO get real rooms
-	rooms := []roomOverview{
-		{
-			ID:   "ITB-1010",
-			Name: "ITB 1010",
-		},
-		{
-			ID:   "ITB-1006",
-			Name: "ITB 1006",
-		},
-		{
-			ID:   "ITB-1004",
-			Name: "ITB 1004",
-		},
-		{
-			ID:   "ITB-1106",
-			Name: "ITB 1106",
-		},
-		{
-			ID:   "JRCB-296",
-			Name: "JRCB 296",
-		},
+	rooms, err := h.CouchManager.GetRooms()
+	if err != nil {
+		c.String(http.StatusInternalServerError, "unable to get rooms in maintenance: %s", err)
+		return
 	}
 
 	sort.Slice(rooms, func(i, j int) bool {
-		return rooms[i].Name < rooms[j].Name
+		return rooms[i] < rooms[j]
 	})
 
 	// merge with maintenance
@@ -54,12 +35,19 @@ func (h *Handlers) Rooms(c *gin.Context) {
 		return
 	}
 
+	roomList := []roomOverview{}
+
 	for i := range rooms {
-		info, ok := maint[rooms[i].ID]
+		roomList = append(roomList, roomOverview{
+			ID:            rooms[i],
+			InMaintenance: false,
+		})
+
+		info, ok := maint[rooms[i]]
 		if ok && info.Enabled() {
-			rooms[i].InMaintenance = true
+			roomList[i].InMaintenance = true
 		}
 	}
 
-	c.JSON(http.StatusOK, rooms)
+	c.JSON(http.StatusOK, roomList)
 }

@@ -62,7 +62,6 @@ export interface MaintenanceInfo {
 
 export interface RoomOverview {
   id: string;
-  name: string;
   inMaintenance: boolean;
 }
 

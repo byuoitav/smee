@@ -1,7 +1,7 @@
 {
-  "/api": {
-    "target": "https://newsmee.av.byu.edu",
-    "secure": true,
-    "changeOrigin": true
-  }
+  "/api/*": {
+		"target": "http://localhost:8090",
+		"secure": false,
+		"logLevel": "debug"
+	}
 }

@@ -8,15 +8,14 @@
 		<span class="spacer"></span>
 
 		<mat-chip-list>
-			<mat-chip color="warn" [selected]="onlyMaintenance" (click)="onlyMaintenance=!onlyMaintenance">Only
-				Maintenance</mat-chip>
+			<mat-chip color="warn" [selected]="onlyMaintenance" (click)="onlyMaintenance=!onlyMaintenance">Maintenance Only</mat-chip>
 		</mat-chip-list>
 	</div>
 
-	<mat-grid-list class="rooms" cols="2" rowHeight="3:1">
+	<!-- <mat-grid-list class="rooms" cols="2" rowHeight="3:1">
 		<mat-grid-tile *ngFor="let room of filtered">
 			<mat-card class="card" [routerLink]="['/rooms/'+room.id]">
-				<span class="name">{{room?.name}}</span>
+				<span class="name">{{room?.id}}</span>
 				<span class="spacer"></span>
 
 				<mat-chip-list>
@@ -24,5 +23,18 @@
 				</mat-chip-list>
 			</mat-card>
 		</mat-grid-tile>
-	</mat-grid-list>
+	</mat-grid-list> -->
+
+	<div class="room-list">
+		<ng-container *ngFor="let room of filtered">
+			<mat-card class="room-card" [routerLink]="['/rooms/'+room.id]">
+				<span class="name">{{room?.id}}</span>
+				<span class="spacer"></span>
+
+				<mat-chip-list>
+					<mat-chip *ngIf="room?.inMaintenance" color="warn" selected>Maintenance</mat-chip>
+				</mat-chip-list>
+			</mat-card>
+		</ng-container>
+	</div>
 </div>

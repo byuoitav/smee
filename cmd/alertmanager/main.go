@@ -8,6 +8,7 @@ import (
 	"github.com/byuoitav/auth/wso2"
 	"github.com/byuoitav/smee/internal/app/alertmanager/handlers"
 	"github.com/byuoitav/smee/internal/app/commandcli"
+	"github.com/byuoitav/smee/internal/pkg/couch"
 	"github.com/byuoitav/smee/internal/pkg/postgres"
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/byuoitav/smee/opa"
@@ -33,6 +34,9 @@ type Deps struct {
 	DisableAlertManager  bool
 	CommandServerAddress string
 	CommandToken         string
+	CouchURL             string
+	CouchUsername        string
+	CouchPassword        string
 	WebRoot              string
 
 	// created by functions
@@ -49,6 +53,7 @@ type Deps struct {
 	eventStreamer    smee.EventStreamer
 	deviceStateStore smee.DeviceStateStore
 	commandClient    *commandcli.Client
+	couchManager     *couch.CouchManager
 
 	httpServer   *gin.Engine
 	handlers     *handlers.Handlers
@@ -73,6 +78,9 @@ func main() {
 	pflag.BoolVar(&deps.DisableAlertManager, "disable-alert-manager", false, "Disables the Alert Management portion of smee")
 	pflag.StringVar(&deps.CommandServerAddress, "command-server", "", "url for the av-cli command server")
 	pflag.StringVar(&deps.CommandToken, "command-token", "", "the token to use for calls to the av-cli command server")
+	pflag.StringVar(&deps.CouchURL, "couch-address", "", "")
+	pflag.StringVar(&deps.CouchUsername, "couch-username", "", "")
+	pflag.StringVar(&deps.CouchPassword, "couch-password", "", "")
 	pflag.StringVar(&deps.WebRoot, "web-root", "/website", "The location on the filesystem of the root of the website files")
 	pflag.Parse()
 

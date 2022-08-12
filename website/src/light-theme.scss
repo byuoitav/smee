@@ -1,0 +1,22 @@
+@use '../node_modules/@angular/material/core/theming/all-theme';
+@use '../node_modules/@angular/material/core/core';
+@use '../node_modules/@angular/material/core/theming/palette';
+@use '../node_modules/@angular/material/core/theming/theming';
+
+
+// Include non-theme styles for core.
+@include core.core();
+
+// Define a theme.
+$primary: theming.define-palette(palette.$indigo-palette);
+$accent:  theming.define-palette(palette.$green-palette, 300, 500, 800);
+
+$theme: theming.define-light-theme((
+  color: (
+    primary: $primary,
+    accent: $accent,
+  )
+));
+
+// Include all theme styles for the components.
+@include all-theme.all-component-themes($theme);
