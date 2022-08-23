@@ -5,11 +5,8 @@
 <div mat-dialog-content class="content">
 	<mat-form-field>
 		<mat-label>Start</mat-label>
-		<!-- <input matInput [matDatepicker]="picker" [ngModel]="info?.start | date:'yyyy-MM-ddTHH:mm'" (ngModelChange)="info.start = parseDate($event)">
-		<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-		<mat-datepicker #picker></mat-datepicker> -->
-		<input matInput type="datetime-local" [ngModel]="info?.start | date:'yyyy-MM-ddTHH:mm'"
-			(ngModelChange)="info.start = parseDate($event)"> 
+			<input matInput type="datetime-local" [ngModel]="info?.start | date:'yyyy-MM-ddTHH:mm'"
+			(ngModelChange)="info.start = parseDate($event)">
 	</mat-form-field>
 
 	<mat-form-field>

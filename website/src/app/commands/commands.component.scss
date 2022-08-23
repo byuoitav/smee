@@ -40,3 +40,10 @@
 		}
 	}
 }
+
+::ng-deep .command-status-snackbar {
+	white-space: pre-wrap;
+	justify-content: center;
+	background-color: #424242;
+	color: white;
+}

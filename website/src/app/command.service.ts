@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { Observable, of } from "rxjs";
-import { tap, catchError } from "rxjs/operators";
+import { tap, catchError, map } from "rxjs/operators";
 import { ApiService } from './api.service';
 import { User } from './user';
 import { CookieService } from 'ngx-cookie-service';
@@ -19,38 +19,23 @@ export class CommandService {
     }
 
   float(input: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/float/" + input, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("float", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/float/" + input, undefined);
   }
 
   swab(input: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/swab/" + input, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("swab", undefined))
-    );
+    return this.http.put<string[]>("/api/v1/commands/swab/" + input, undefined);
   }
 
   sink(input: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/sink/" + input, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("sink", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/sink/" + input, undefined);
   }
 
   fixTime(input: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/fixTime/" + input, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("fixTime", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/fixTime/" + input, undefined);
   }
 
   rmDevice(input: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/removeDevice/" + input, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("rmDevice", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/removeDevice/" + input, undefined);
   }
 
   closeIssue(input: string): Observable<any> {
@@ -68,24 +53,15 @@ export class CommandService {
       this.api.closeIssue(issueID); 
     }
 
-    return this.http.put<any>("/api/v1/commands/closeIssue/" + input, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("closeIssue", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/closeIssue/" + input, undefined);
   }
 
   dupDatabase(src: string, dest: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/duplicateDatabase/" + src + "/" + dest, undefined).pipe(
-      tap(data => data),
-      catchError(this.handleError<any>("dupDatapase", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/duplicateDatabase/" + src + "/" + dest, undefined);
   }
 
   screenshot(input: string): Observable<any> {
-    return this.http.put<any>("/api/v1/commands/screenshot/" + input, undefined).pipe(
-      tap(data => {}),
-      catchError(this.handleError<any>("screenshot", undefined))
-    );
+    return this.http.put<any>("/api/v1/commands/screenshot/" + input, undefined);
     // get screenshot and display... somehow
   }
 

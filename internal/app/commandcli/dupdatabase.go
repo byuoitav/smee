@@ -45,6 +45,7 @@ func (c *Client) DuplicateDatabase(ctx *gin.Context) {
 		user:  netid,
 	}
 
+	var results response
 	_, err = c.cli.CopyRoom(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	if err != nil {
 		c.log.Warn("unable to duplicate room", zap.Error(err))
@@ -52,5 +53,7 @@ func (c *Client) DuplicateDatabase(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "duplication successful")
+	results.successful(dest)
+
+	ctx.JSON(http.StatusOK, results.report())
 }

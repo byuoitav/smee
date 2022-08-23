@@ -53,6 +53,8 @@ func (c *Client) FixTime(ctx *gin.Context) {
 		return
 	}
 
+	var results response
+
 	for {
 		resp, err := stream.Recv()
 		if err == io.EOF {
@@ -64,11 +66,11 @@ func (c *Client) FixTime(ctx *gin.Context) {
 		}
 
 		if resp.GetError() != "" {
-			c.log.Warn("unable to recv from stream while syncing time", zap.Error(err))
-			ctx.JSON(http.StatusInternalServerError, "error occurred while syncing time")
-			return
+			results.failed(resp.GetId())
+		} else {
+			results.successful(resp.GetId())
 		}
 	}
 
-	ctx.JSON(http.StatusOK, "fixed time")
+	ctx.JSON(http.StatusOK, results.report())
 }

@@ -47,7 +47,7 @@ func (c *Client) Sink(ctx *gin.Context) {
 		user:  netid,
 	}
 
-	stream, err := c.cli.Sink(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth)) // Todo: add auth
+	stream, err := c.cli.Sink(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	if err != nil {
 		c.log.Warn(fmt.Sprintf("unable to sink device/room: %s", id), zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, "unable to sink")
@@ -55,20 +55,24 @@ func (c *Client) Sink(ctx *gin.Context) {
 	}
 
 	// recv on stream
+	var results response
+
 	for {
 		resp, err := stream.Recv()
 		if err == io.EOF {
 			break
 		} else if err != nil {
+			c.log.Warn("error receiving on the stream", zap.Error(err))
 			ctx.JSON(http.StatusInternalServerError, "error occurred while sinking")
 			return
 		}
 
 		if resp.GetError() != "" {
-			ctx.JSON(http.StatusInternalServerError, "error occurred while sinking")
-			return
+			results.failed(resp.GetId())
+		} else {
+			results.successful(resp.GetId())
 		}
 	}
 
-	ctx.JSON(http.StatusOK, fmt.Sprintf("very sink: %s", id))
+	ctx.JSON(http.StatusOK, results.report())
 }

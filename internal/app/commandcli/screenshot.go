@@ -43,7 +43,7 @@ func (c *Client) Screenshot(ctx *gin.Context) {
 		user:  netid,
 	}
 
-	resp, err := c.cli.Screenshot(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth)) // Todo: add auth?
+	resp, err := c.cli.Screenshot(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	switch {
 	case err != nil:
 		if s, ok := status.FromError(err); ok {

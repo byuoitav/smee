@@ -45,6 +45,7 @@ func (c *Client) RemoveDevice(ctx *gin.Context) {
 		user:  netid,
 	}
 
+	var results response
 	_, err = c.cli.RemoveDeviceFromMonitoring(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	if err != nil {
 		c.log.Warn(fmt.Sprintf("unable to remove device: %s from monitoring", id), zap.Error(err))
@@ -52,5 +53,7 @@ func (c *Client) RemoveDevice(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, fmt.Sprintf("removed device: %s", id))
+	results.successful(id)
+
+	ctx.JSON(http.StatusOK, results.report())
 }

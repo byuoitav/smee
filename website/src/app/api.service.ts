@@ -1,6 +1,6 @@
-import {HttpClient, HttpErrorResponse, HttpParams} from "@angular/common/http";
+import {HttpClient, HttpParams} from "@angular/common/http";
 import {Injectable} from '@angular/core';
-import {Observable, of, throwError} from "rxjs";
+import {Observable, of} from "rxjs";
 import {tap, map, catchError} from "rxjs/operators";
 
 export interface Alert {
@@ -114,7 +114,7 @@ export class ApiService {
           if (issue?.incidents) {
             issues[i].incidents = new Map(Object.entries(issue.incidents));
           }
-          issues[i].isOnMaintenance = this.inMaintenance(issues[i]); //assings value to isOnMaintenance
+          issues[i].isOnMaintenance = this.inMaintenance(issues[i]);
           issues[i].acknowledgedTime = issue.acknowledgedTime;
         }
         return issues;
@@ -122,7 +122,7 @@ export class ApiService {
     )
   }
 
-  inMaintenance(issue : Issue):  boolean{ // funciton that dtermines if an issue is on Maintenance or not
+  inMaintenance(issue : Issue):  boolean{
     if (!issue.maintenanceStart || !issue.maintenanceEnd){
       return false;
     }else{

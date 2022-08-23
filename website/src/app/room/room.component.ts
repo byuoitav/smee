@@ -273,7 +273,7 @@ export class CloseIssueDialog {
 @Component({
   selector: 'app-maintenance-dialog',
   templateUrl: 'maintenance-dialog.html',
-  styleUrls: ['./dialog.scss'],
+  styleUrls: ['../dialog.scss'],
 })
 export class MaintenanceDialog {
   info: MaintenanceInfo;
@@ -337,7 +337,7 @@ export class MaintenanceDialog {
 @Component({
   selector: 'app-status-dialog',
   templateUrl: 'status-dialog.html',
-  styleUrls: ['./dialog.scss'],
+  styleUrls: ['../dialog.scss'],
 })
 export class StatusDialog {
   issue: Issue;

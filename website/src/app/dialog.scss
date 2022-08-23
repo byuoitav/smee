@@ -16,3 +16,11 @@
 ::ng-deep .mat-dialog-actions {
     float: right;
 }
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    padding: 7px;
+    font-size: 1.5em;
+    background-color: white;
+    border-radius: 25%;
+    cursor: pointer;
+}
