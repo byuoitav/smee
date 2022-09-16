@@ -19,20 +19,20 @@ func (c *Client) Swab(ctx *gin.Context) {
 		return
 	}
 
-	// cookie := ctx.Request.Header.Get("Cookie")
-	// token, err := parseForCookie("smee", cookie)
-	// if err != nil {
-	// 	c.log.Warn("authorization not found; cancelling swab...")
-	// 	ctx.JSON(http.StatusBadRequest, "authorization not found")
-	// 	return
-	// }
+	cookie := ctx.Request.Header.Get("Cookie")
+	token, err := parseForCookie("smee", cookie)
+	if err != nil {
+		c.log.Warn("authorization not found; cancelling swab...")
+		ctx.JSON(http.StatusBadRequest, "authorization not found")
+		return
+	}
 
-	// netid, err := getUserFromJWT(token)
-	// if err != nil || len(netid) == 0 {
-	// 	c.log.Warn("no av-user specified; cancelling swab...")
-	// 	ctx.JSON(http.StatusBadRequest, "no av-user specified")
-	// 	return
-	// }
+	netid, err := getUserFromJWT(token)
+	if err != nil || len(netid) == 0 {
+		c.log.Warn("no av-user specified; cancelling swab...")
+		ctx.JSON(http.StatusBadRequest, "no av-user specified")
+		return
+	}
 
 	c.log.Debug(fmt.Sprintf("swabbing device/room with id: %s", id))
 
@@ -44,7 +44,7 @@ func (c *Client) Swab(ctx *gin.Context) {
 
 	auth := auth{
 		token: c.cliToken,
-		user:  "jpeter63",
+		user:  netid,
 	}
 
 	stream, err := c.cli.Swab(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))

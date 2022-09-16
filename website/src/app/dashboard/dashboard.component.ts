@@ -144,7 +144,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         let minimumReached = false;
         issues[index].alerts?.forEach(a => {
           let start = new Date(a.start);
-          if (now.getTime() - start.getTime() > time) {
+          if ((now.getTime() - start.getTime()) > time) {
             minimumReached = true;
           }
         });
@@ -157,7 +157,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           }
         }
       }
-
       
       this.dataSource.data = acknowledgedIssues;
       this.unacknowledgedDataSource.data = unacknowledgedIssues;
