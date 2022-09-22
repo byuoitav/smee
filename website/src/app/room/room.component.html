@@ -1,19 +1,19 @@
 <div>
 	<!-- room -->
-	<div class="room">
-		<span *ngIf="!inMaintenance()">{{roomName}}</span>
+	<mat-card class="room">
+		<span *ngIf="!inMaintenance()" class="room-name">{{roomName}}</span>
 		<ng-container *ngIf="inMaintenance()">
-			<span>{{roomName}}</span>
+			<span class="room-name">{{roomName}}</span>
 			<span class="maintenance">In maintenance until {{maintenance?.end | date:'medium'}}</span>
 		</ng-container>
-	</div>
+	</mat-card>
 
 	<div class="content">
 		<div class="left">
 			<!-- active issues alerts -->
 			<ng-container *ngIf="issue">
-				<div class="alerts mat-elevation-z8">
-					<span class="header">Active Issue</span>
+				<div class="alerts">
+					<!-- <span class="header">Active Issue</span> -->
 
 					<table mat-table class="table" [dataSource]="alertsDataSource" matSort matSortActive="start" matSortDirection="desc">
 						<!-- Room Column -->
@@ -73,51 +73,50 @@
 
 			<ng-container *ngIf="!issue">
 				<mat-card>
-					<mat-card-header>
-						<mat-card-title>No active issue in this room</mat-card-title>
-					</mat-card-header>
+					<mat-card-content>
+						<h2>There is no active issue in this room</h2>
+					</mat-card-content>
 				</mat-card>
 			</ng-container>
 		</div>
 
 		<div class="right">
 			<mat-card class="info">
-				<mat-card-header>
-					<mat-card-title>Room Information</mat-card-title>
-				</mat-card-header>
-
 				<mat-card-content>
-					<a href="https://www.google.com" mat-button>Shipyard Information --></a>
+					<h2 class="title">Room Information</h2>
+				</mat-card-content>
 
-					<div class="maintenance">
-						<button class="maintenance-button" mat-button (click)="editMaintenance()">Edit Maintenance</button>
+				<mat-card-content class="container">
+					<div class="button-wrapper">
+						<button class="mat-elevation-z8" mat-raised-button (click)="editMaintenance()">Maintenance</button>
 					</div>
-					<div>
-						<button class="status-button" mat-button (click)="editStatus()">Edit Status</button>
+					<div class="button-wrapper">
+						<button class="mat-elevation-z8" mat-raised-button (click)="editStatus()">Status</button>
+					</div>
+					<div class="button-wrapper">
+						<button class="mat-elevation-z8" mat-raised-button (click)="controlUI()">Control UI</button>
+					</div>
+					<div class="button-wrapper">
+						<button class="mat-elevation-z8" mat-raised-button (click)="zPattern()">Z-Pattern</button>
 					</div>
 				</mat-card-content>
 			</mat-card>
 			<br *ngIf="issue?.status">
 			<mat-card *ngIf="issue?.status">
-				<mat-card-header>
-					<mat-card-title>Issue Status</mat-card-title>
-				</mat-card-header>
+				<mat-card-content>
+					<h2 class="title">Issue Status</h2>
+				</mat-card-content>
 				<mat-card-content>
 					<div class="note">{{issue?.status}}</div>
 				</mat-card-content>
 			</mat-card>
-			<br *ngIf="maintenance?.note">
-			<mat-card *ngIf="maintenance?.note">
-				<mat-card-header>
-					<mat-card-title>Maintenance Note</mat-card-title>
-				</mat-card-header>
-				<mat-card-content>
-					<div class="note">{{maintenance?.note}}</div>
-				</mat-card-content>
-			</mat-card>
 			<br>
-			<mat-card class="close">
-				<button class="close-button" mat-button (click)="closeIssue()" color="warn">Close Issue</button>
+			<mat-card>
+				<mat-card-content class="container">
+					<div class="button-wrapper">
+						<button class="mat-elevation-z8" mat-button (click)="closeIssue()" color="warn">Close Issue</button>
+					</div>
+				</mat-card-content>
 			</mat-card>
 		</div>
 	</div>

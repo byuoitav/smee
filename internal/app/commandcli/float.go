@@ -48,7 +48,7 @@ func (c *Client) Float(ctx *gin.Context) {
 	}
 
 	// call float on cli
-	stream, err := c.cli.Float(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth)) // Todo: add auth
+	stream, err := c.cli.Float(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	if err != nil {
 		c.log.Warn(fmt.Sprintf("unable to float device/room: %s", id), zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, "unable to float")
@@ -56,20 +56,24 @@ func (c *Client) Float(ctx *gin.Context) {
 	}
 
 	// recv on stream
+	var results response
+
 	for {
 		resp, err := stream.Recv()
 		if err == io.EOF {
 			break
 		} else if err != nil {
+			c.log.Warn("error receiving on the stream", zap.Error(err))
 			ctx.JSON(http.StatusInternalServerError, "error occurred while floating")
 			return
 		}
 
 		if resp.GetError() != "" {
-			ctx.JSON(http.StatusInternalServerError, "error occurred while floating")
-			return
+			results.failed(resp.GetId())
+		} else {
+			results.successful(resp.GetId())
 		}
 	}
 
-	ctx.JSON(http.StatusOK, fmt.Sprintf("goaty floaty: %s", id))
+	ctx.JSON(http.StatusOK, results.report())
 }

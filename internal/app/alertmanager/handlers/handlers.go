@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/byuoitav/smee/internal/pkg/couch"
 	"github.com/byuoitav/smee/internal/smee"
 	"github.com/gin-gonic/gin"
 )
@@ -18,6 +19,7 @@ type Handlers struct {
 	IncidentStore    smee.IncidentStore
 	MaintenanceStore smee.MaintenanceStore
 	IssueTypeStore   smee.IssueTypeStore
+	CouchManager     couch.CouchManager
 }
 
 type issue struct {

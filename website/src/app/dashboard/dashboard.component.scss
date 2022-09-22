@@ -1,3 +1,5 @@
+// @import '../../light-theme.scss';
+
 .totals{
 	padding-top: 1%;
 	padding-left: 2.5%;
@@ -72,6 +74,11 @@
 	.table {
 		width: 100%;
 
+		a {
+			// color: map-get($map: $accent, $key: 800);
+			color: accent;
+		}
+
 		.mat-column-room {
 			padding-left: 10px;
 			text-align: left;
@@ -104,6 +111,11 @@
 
 	.table {
 		width: 100%;
+
+		a {
+			// color: map-get($map: $accent, $key: 800);
+			color: accent;
+		}
 
 		.hidden {
 			display: none;
@@ -152,6 +164,14 @@
 	background-color: #006d32;
 	color: #39d353;
 }
+
+
+
+// ::ng-deep .acknowledge-button.mat-button.mat-accent{
+// 	border: 1px solid map-get($map: $accent, $key: darker);
+// 	background-color: map-get($map: $accent, $key: 300);
+// 	color: map-get($map: $accent, $key: darker);
+// }
 
 #unacknowledged{
 	padding-top: 1%;

@@ -34,7 +34,7 @@ func (c *Client) Swab(ctx *gin.Context) {
 		return
 	}
 
-	c.log.Debug(fmt.Sprintf("swabing device/room with id: %s", id))
+	c.log.Debug(fmt.Sprintf("swabbing device/room with id: %s", id))
 
 	// create args
 	args := &avcli.ID{
@@ -47,30 +47,32 @@ func (c *Client) Swab(ctx *gin.Context) {
 		user:  netid,
 	}
 
-	stream, err := c.cli.Swab(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth)) // Todo: add auth
+	stream, err := c.cli.Swab(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	if err != nil {
 		c.log.Warn(fmt.Sprintf("unable to swab device/room: %s", id), zap.Error(err))
-		ctx.JSON(http.StatusInternalServerError, "unable to swab")
+		ctx.JSON(http.StatusInternalServerError, fmt.Sprintf("unable to swab: %s", id))
 		return
 	}
 
 	// recv on stream
+	var results response
+
 	for {
 		resp, err := stream.Recv()
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			c.log.Warn("error receiving on the stream", zap.Error(err))
-			ctx.JSON(http.StatusInternalServerError, "error occurred while swabing")
+			ctx.JSON(http.StatusInternalServerError, fmt.Sprintf("failed to swab: %s", id))
 			return
 		}
 
 		if resp.GetError() != "" {
-			c.log.Warn("error 2 receiving on the stream", zap.Error(err))
-			ctx.JSON(http.StatusInternalServerError, "error occurred while swabing")
-			return
+			results.failed(resp.GetId())
+		} else {
+			results.successful(resp.GetId())
 		}
 	}
 
-	ctx.JSON(http.StatusOK, fmt.Sprintf("much swab: %s", id))
+	ctx.JSON(http.StatusOK, results.report())
 }

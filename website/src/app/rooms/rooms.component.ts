@@ -29,10 +29,6 @@ export class RoomsComponent implements OnInit {
         return false;
       }
 
-      if (room.name.toLowerCase().includes(this.filter.toLowerCase())) {
-        return true;
-      }
-
       if (room.id.toLowerCase().includes(this.filter.toLowerCase())) {
         return true;
       }

@@ -45,6 +45,7 @@ func (c *Client) CloseIssueByRoom(ctx *gin.Context) {
 		user:  netid,
 	}
 
+	var results response
 	_, err = c.cli.CloseMonitoringIssue(ctx.Request.Context(), args, grpc.PerRPCCredentials(auth))
 	if err != nil {
 		c.log.Warn("unable to close issue", zap.Error(err))
@@ -52,5 +53,7 @@ func (c *Client) CloseIssueByRoom(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, fmt.Sprintf("closed issue for room: %s", id))
+	results.successful(id)
+
+	ctx.JSON(http.StatusOK, results.report())
 }

@@ -1,0 +1,26 @@
+.content {
+    display: flex;
+    flex-direction: column;
+}
+
+::ng-deep .mat-dialog-container {
+    width: 50vw;
+}
+
+.mat-form-field {
+    width: 80%;
+    margin: auto;
+    padding: 2vh 0 2vh 0;
+}
+
+::ng-deep .mat-dialog-actions {
+    float: right;
+}
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    padding: 7px;
+    font-size: 1.5em;
+    background-color: white;
+    border-radius: 25%;
+    cursor: pointer;
+}

@@ -13,6 +13,7 @@
 	display: flex;
 	flex-direction: row;
 	align-items: center;
+	padding: 2vh;
 
 	.search {
 		width: 40%;
@@ -33,6 +34,29 @@
 			font-size: 1.1em;
 		}
 	}
+}
+
+$card-width: 200px;
+.room-list {
+	width: 80%;
+
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	margin-left: 3vw;
+	margin-right: 3vw;
+}
+
+.room-card {
+	min-width: $card-width;
+	width: $card-width;
+	margin: 1vh;
+	padding: 3vh 3.5vh 3.5vh 3.5vh;
+}
+
+.name {
+	padding-top: 15%;
+	font-size: 1.4em;
 }
 
 .spacer {

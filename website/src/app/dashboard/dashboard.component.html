@@ -18,7 +18,7 @@
 		<h2 id="unacknowledged">Unacknowledged Issues</h2>
 	</div>
 
-	<div class="acknowledge mat-elevation-z8">  
+	<div class="acknowledge mat-elevation-z8">
 		<table mat-table #unakwTable class="table" [dataSource]="unacknowledgedDataSource" matSort matSortActive="age" matSortDirection="desc">
 			<!-- Room Column -->
 			<ng-container matColumnDef="room">
@@ -34,7 +34,7 @@
 			<ng-container matColumnDef="maintenance">
 				<th mat-header-cell *matHeaderCellDef></th>
 				<td mat-cell *matCellDef="let row">
-					<div *ngIf="row.isOnMaintenance" class="tagMaintenance">Maintenance</div>
+					<div *ngIf="row.isOnMaintenance" class="tagMaintenance">{{row.maintenanceEnd | date:'MMM dd, h:mm a'}}</div>
 				</td>
 			</ng-container>
 
@@ -93,7 +93,7 @@
 			<ng-container matColumnDef="maintenance">
 				<th mat-header-cell *matHeaderCellDef></th>
 				<td mat-cell *matCellDef="let row">
-					<div *ngIf="row.isOnMaintenance" class="tagMaintenance">Maintenance</div>
+					<div *ngIf="row.isOnMaintenance" class="tagMaintenance">{{row.maintenanceEnd | date:'MMM dd, h:mm a'}}</div>
 				</td>
 			</ng-container>
 			<!-- Alert Count Column -->
@@ -125,8 +125,8 @@
 				<th mat-header-cell *matHeaderCellDef>Incident</th>
 				<td mat-cell *matCellDef="let row">
 					<ng-container *ngIf="row.incidents?.size == 0">
-						<button color="accent" (click)="createIncident(row)" mat-button>Create</button>
-						<button color="accent" (click)="linkIncident(row)" mat-button>Link</button>
+						<a color="accent" (click)="createIncident(row)" mat-button>Create</a>
+						<a color="accent" (click)="linkIncident(row)" mat-button>Link</a>
 					</ng-container>
 
 					<a *ngIf="row.incidents?.size > 0" [href]="incidentLink(row.incidents.values().next().value)" target="_blank" rel="noreferrer noopener"
@@ -140,11 +140,6 @@
 			
 			<tr class="mat-row" *matNoDataRow>
 				<td class="mat-cell" colspan="4">No issues found matching the filter</td>
-				<!-- TODO
-				<td *ngIf="filterInput?.length > 0" class="mat-cell" colspan="4">
-					No issues! Yay!
-				</td>
-				-->
 			</tr>
 		</table>
 

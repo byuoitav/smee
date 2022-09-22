@@ -30,6 +30,7 @@ func (d *Deps) buildHTTPServer(ctx context.Context) {
 		MaintenanceStore: d.maintenanceStore,
 		IncidentStore:    d.incidentStore,
 		IssueTypeStore:   d.issuetypeStore,
+		CouchManager:     *d.couchManager,
 	}
 
 	// build engine

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommandService } from 'app/command.service';
 
 
@@ -20,7 +21,8 @@ interface commandInfo{
 export class CommandsComponent implements OnInit {
   actionList: commandInfo[];
 
-  constructor(private cS: CommandService) {
+  constructor(private cS: CommandService,
+    private _snackBar: MatSnackBar) {
     this.actionList = [];
 
     this.registerActions();
@@ -52,9 +54,13 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -81,9 +87,14 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                console.log("errooooor");
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -110,9 +121,13 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -139,9 +154,13 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -168,9 +187,13 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -197,9 +220,13 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -230,9 +257,13 @@ export class CommandsComponent implements OnInit {
                   this.actionFailed(info);
                 } else {
                   this.confirmAction(info);
+                  this.displayActionResults(data);
                 }
               },
-              error => {});
+              error => {
+                this.actionFailed(info);
+                this.displayActionResults(error.error);
+              });
           } else {
             this.missingInput(info);
           }
@@ -262,5 +293,14 @@ export class CommandsComponent implements OnInit {
 
   timeoutStatus(info: commandInfo) {
     setTimeout(() => {info.status = "";}, 5000);
+  }
+
+  displayActionResults(results: string) {
+    this._snackBar.open(results, '', {
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      duration: 5000,
+      panelClass: ['command-status-snackbar'],
+    });
   }
 }

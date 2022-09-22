@@ -3,9 +3,7 @@ import {MatDialog, MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import { UrlHandlingStrategy } from '@angular/router';
-import { filter } from 'rxjs/operators';
-import {ApiService, Issue, Alert, Incident, IssueEvent, MaintenanceInfo} from "../api.service";
+import {ApiService, Issue, Incident} from "../api.service";
 
 interface DialogData {
   issue: Issue;
@@ -138,14 +136,28 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private updateIssues(): void {
     var unacknowledgedIssues : Issue[] = [];
     var acknowledgedIssues : Issue[] = [];
+
+    const now = new Date();
+    const time = 2 * 60 * 1000; // 2 min in milliseconds
     this.api.getIssues().subscribe(issues => {
       for (let index = 0; index < issues.length; index++) {
-        if(issues[index].acknowledgedTime != undefined){
-          acknowledgedIssues.push(issues[index]);
-        }else{
-          unacknowledgedIssues.push(issues[index]);
+        let minimumReached = false;
+        issues[index].alerts?.forEach(a => {
+          let start = new Date(a.start);
+          if ((now.getTime() - start.getTime()) > time) {
+            minimumReached = true;
+          }
+        });
+
+        if (minimumReached) { // suppress alerts younger than 2 min
+          if(issues[index].acknowledgedTime != undefined){
+            acknowledgedIssues.push(issues[index]);
+          }else{
+            unacknowledgedIssues.push(issues[index]);
+          }
         }
       }
+      
       this.dataSource.data = acknowledgedIssues;
       this.unacknowledgedDataSource.data = unacknowledgedIssues;
       this.totalIssues = issues.length;
@@ -282,6 +294,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 @Component({
   selector: 'app-dashboard-create-dialog',
   templateUrl: 'create-dialog.html',
+  styleUrls: ['../dialog.scss'],
 })
 export class DashboardCreateDialog {
   shortDesc: string | undefined = undefined;
@@ -308,6 +321,7 @@ export class DashboardCreateDialog {
 @Component({
   selector: 'app-dashboard-link-dialog',
   templateUrl: 'link-dialog.html',
+  styleUrls: ['../dialog.scss'],
 })
 export class DashboardLinkDialog {
   incidentName: string | undefined = undefined;

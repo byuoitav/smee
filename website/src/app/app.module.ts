@@ -25,6 +25,7 @@ import {MatMenuModule} from '@angular/material/menu';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {MatSnackBarModule} from '@angular/material/snack-bar';
 //app elements
 import {MaintenanceDialog, RoomComponent, CloseIssueDialog, ErrorPopup, StatusDialog} from './room/room.component';
 import {DashboardComponent, DashboardCreateDialog, DashboardLinkDialog} from './dashboard/dashboard.component';
@@ -74,6 +75,7 @@ import { CommandsComponent } from './commands/commands.component';
     MatDividerModule,
     MatProgressBarModule,
     MatTooltipModule,
+    MatSnackBarModule,
   ],
   providers: [CookieService],
   bootstrap: [AppComponent]
