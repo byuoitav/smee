@@ -84,13 +84,13 @@ module "smee" {
   // required
   name           = "smee"
   image          = "docker.pkg.github.com/byuoitav/smee/smee-dev"
-  image_version  = "5d2e621"
+  image_version  = "b3e809d"
   container_port = 8080
   repo_url       = "https://github.com/byuoitav/smee"
 
   // optional
   image_pull_secret = "github-docker-registry"
-  public_urls       = ["newsmee.av.byu.edu"]
+  public_urls       = ["monitoring.av.byu.edu"]
   container_env = {
     "GIN_MODE" = "release"
   }
