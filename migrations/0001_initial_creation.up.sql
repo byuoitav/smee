@@ -29,7 +29,7 @@ CREATE TABLE alerts (
 );
 
 CREATE TABLE sn_incident_mappings (
-	issue_id integer REFERENCES issues (id) ON DELETE CASCADE IS NOT NULl,
+	issue_id integer REFERENCES issues (id) ON DELETE CASCADE IS NOT NULL,
 	sn_sys_id text IS NOT NULL, -- ticket ID
 	sn_ticket_number text IS NOT NULL, -- ticket number (INCXXXXXX)
 	PRIMARY KEY (issue_id, sn_sys_id)
