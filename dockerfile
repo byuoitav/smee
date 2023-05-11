@@ -1,5 +1,5 @@
-FROM gcr.io/distroless/static
-MAINTAINER Daniel Randall <danny_randall@byu.edu>
+FROM alpine:latest
+LABEL maintainer="OIT AV Services <oitav@byu.edu>"
 
 ARG NAME
 
