@@ -1,11 +1,11 @@
 terraform {
   backend "s3" {
-    bucket         = "terraform-state-storage-586877430255"
-    dynamodb_table = "terraform-state-lock-586877430255"
+    bucket         = "terraform-state-storage-887007127029"
+    dynamodb_table = "terraform-state-lock-887007127029"
     region         = "us-west-2"
 
     // THIS MUST BE UNIQUE
-    key = "smee.tfstate"
+    key = "smee-dev.tfstate"
   }
 }
 
@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 data "aws_ssm_parameter" "eks_cluster_endpoint" {
-  name = "/eks/av-cluster-endpoint"
+  name = "/eks/av-dev-cluster-endpoint"
 }
 
 provider "kubernetes" {
@@ -23,31 +23,31 @@ provider "kubernetes" {
 }
 
 data "aws_ssm_parameter" "pg_username" {
-  name = "/rds/av-main/smee_username"
+  name = "/rds/av-dev/smee_username"
 }
 
 data "aws_ssm_parameter" "pg_password" {
-  name = "/rds/av-main/smee_password"
+  name = "/rds/av-dev/smee_password"
 }
 
 data "aws_ssm_parameter" "pg_hostname" {
-  name = "/rds/av-main/hostname"
+  name = "/rds/av-dev/hostname"
 }
 
 data "aws_ssm_parameter" "pg_port" {
-  name = "/rds/av-main/port"
+  name = "/rds/av-dev/port"
 }
 
 data "aws_ssm_parameter" "client_id" {
-  name = "/env/smee/client-id"
+  name = "/env/smee-dev/client-id"
 }
 
 data "aws_ssm_parameter" "client_secret" {
-  name = "/env/smee/client-secret"
+  name = "/env/smee-dev/client-secret"
 }
 
 data "aws_ssm_parameter" "redis_url" {
-  name = "/env/smee/redis-url"
+  name = "/env/smee-dev/redis-url"
 }
 
 data "aws_ssm_parameter" "hub_address" {
@@ -55,27 +55,27 @@ data "aws_ssm_parameter" "hub_address" {
 }
 
 data "aws_ssm_parameter" "gateway_url" {
-  name = "/env/smee/gateway-url"
+  name = "/env/smee-dev/gateway-url"
 }
 
 data "aws_ssm_parameter" "redirect_url" {
-  name = "/env/smee/redirect-url"
+  name = "/env/smee-dev/redirect-url"
 }
 
 data "aws_ssm_parameter" "opa_url" {
-  name = "/env/smee/opa-url"
+  name = "/env/smee-dev/opa-url"
 }
 
 data "aws_ssm_parameter" "opa_token" {
-  name = "/env/smee/opa-token"
+  name = "/env/smee-dev/opa-token"
 }
 
 data "aws_ssm_parameter" "command_server" {
-  name = "/env/smee/command-server"
+  name = "/env/smee-dev/command-server"
 }
 
 data "aws_ssm_parameter" "command_token" {
-  name = "/env/smee/command-token"
+  name = "/env/smee-dev/command-token"
 }
 
 data "aws_ssm_parameter" "couch_address" {
@@ -102,7 +102,7 @@ module "smee" {
 
   // optional
   image_pull_secret = "github-docker-registry"
-  public_urls       = ["monitoring.av.byu.edu"]
+  public_urls       = ["monitoring.avdev.byu.edu"]
   container_env = {
     "GIN_MODE" = "release"
   }
