@@ -96,7 +96,7 @@ module "smee" {
   // required
   name           = "smee"
   image          = "docker.pkg.github.com/byuoitav/smee/smee-dev"
-  image_version  = "b3e809d"
+  image_version  = "fe470f9"
   container_port = 8080
   repo_url       = "https://github.com/byuoitav/smee"
 
