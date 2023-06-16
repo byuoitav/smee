@@ -91,7 +91,8 @@ data "aws_ssm_parameter" "couch_password" {
 }
 
 module "smee" {
-  source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
+  //source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
+  source = "github.com/byuoitav/terraform-pod-deployment//modules/kubernetes-deployment"
 
   // required
   name           = "smee"
