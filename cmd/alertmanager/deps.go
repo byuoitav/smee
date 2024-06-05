@@ -27,7 +27,7 @@ import (
 )
 
 func (d *Deps) build() {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	d.buildLog()
