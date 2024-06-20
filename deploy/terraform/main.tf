@@ -78,6 +78,18 @@ data "aws_ssm_parameter" "command_token" {
   name = "/env/smee/command-token"
 }
 
+data "aws_ssm_parameter" "couch_address" {
+  name = "/env/couch-address"
+}
+
+data "aws_ssm_parameter" "couch_username" {
+  name = "/env/couch-username"
+}
+
+data "aws_ssm_parameter" "couch_password" {
+  name = "/env/couch-password"
+}
+
 module "smee" {
   source = "github.com/byuoitav/terraform//modules/kubernetes-deployment"
 
@@ -108,7 +120,10 @@ module "smee" {
     "--opa-url", data.aws_ssm_parameter.opa_url.value,
     "--opa-token", data.aws_ssm_parameter.opa_token.value,
     "--command-server", data.aws_ssm_parameter.command_server.value,
-    "--command-token", data.aws_ssm_parameter.command_token.value
+    "--command-token", data.aws_ssm_parameter.command_token.value,
+    "--couch-address", data.aws_ssm_parameter.couch_address.value,
+    "--couch-username", data.aws_ssm_parameter.couch_username.value,
+    "--couch-password", data.aws_ssm_parameter.couch_password.value
   ]
   health_check = false
 }
